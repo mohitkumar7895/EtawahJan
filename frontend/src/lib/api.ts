@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://etawah-jan-3og3.vercel.app/';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 export interface ContactFormData {
   name: string;
@@ -15,7 +15,7 @@ export interface ContactUsData {
 }
 
 export async function submitServiceApplication(formData: ContactFormData) {
-  const response = await fetch(`${API_BASE_URL}/apply-service`, {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/apply-service`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -31,7 +31,7 @@ export async function submitServiceApplication(formData: ContactFormData) {
 }
 
 export async function submitContactForm(formData: ContactUsData) {
-  const response = await fetch(`${API_BASE_URL}/contact`, {
+  const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/contact`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
