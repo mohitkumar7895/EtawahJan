@@ -1,4 +1,5 @@
-const API_BASE_URL = 'https://etawah-jan-a6ol.vercel.app';
+const API_BASE_URL = import.meta.env.VITE_BACKEND_URL;
+
 
 export interface ContactFormData {
   name: string;
@@ -15,7 +16,7 @@ export interface ContactUsData {
 }
 
 export async function submitServiceApplication(formData: ContactFormData) {
-  const response = await fetch(`${API_BASE_URL}/apply-service`, {
+  const response = await fetch(`${API_BASE_URL}/api/apply-service`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -31,7 +32,7 @@ export async function submitServiceApplication(formData: ContactFormData) {
 }
 
 export async function submitContactForm(formData: ContactUsData) {
-  const response = await fetch(`${API_BASE_URL}/contact`, {
+  const response = await fetch(`${API_BASE_URL}/api/contact`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
