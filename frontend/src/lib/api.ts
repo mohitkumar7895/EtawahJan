@@ -16,7 +16,7 @@ export interface ContactUsData {
 }
 
 export async function submitServiceApplication(formData: ContactFormData) {
-  const response = await fetch(`${API_BASE_URL}/api/apply-service`, {
+  const response = await fetch(`${API_BASE_URL}/apply-service`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
@@ -32,7 +32,7 @@ export async function submitServiceApplication(formData: ContactFormData) {
 }
 
 export async function submitContactForm(formData: ContactUsData) {
-  const response = await fetch(`${API_BASE_URL}/api/contact`, {
+  const response = await fetch(`${API_BASE_URL}/contact`, {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',

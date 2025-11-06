@@ -24,7 +24,7 @@ console.log('✅ Server starting...');
 console.log('📧 Emails configured:', RECIPIENTS);
 
 // Service Application Form
-app.post('/api/apply-service', async (req, res) => {
+app.post('/apply-service', async (req, res) => {
   try {
     const { name, email, mobile: phone, service_type: service, address } = req.body;
 
@@ -102,7 +102,7 @@ app.post('/api/apply-service', async (req, res) => {
 });
 
 // Contact Form
-app.post('/api/contact', async (req, res) => {
+app.post('/contact', async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
