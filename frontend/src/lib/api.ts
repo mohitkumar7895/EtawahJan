@@ -1,4 +1,4 @@
-const API_BASE_URL = 'https://etawah-jan-a6ol.vercel.app/';
+const API_BASE_URL = 'https://etawah-jan-a6ol.vercel.app';
 
 export interface ContactFormData {
   name: string;
