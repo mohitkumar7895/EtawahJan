@@ -1,4 +1,4 @@
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = 'https://etawah-jan-3og3.vercel.app/';
 
 export interface ContactFormData {
   name: string;
