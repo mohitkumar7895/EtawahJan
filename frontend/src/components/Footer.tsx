@@ -175,6 +175,9 @@ export default function Footer() {
               <a href="mailto:arpitcsc1707@gmail.com" className="hover:text-blue-400 transition">
                 ✉️ Email Us
               </a>
+               <a href="/admin" className="hover:text-blue-400 transition">
+                 Admin
+              </a>
             </div>
           </div>
         </div>
