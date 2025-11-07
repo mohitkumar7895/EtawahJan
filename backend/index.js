@@ -1,8 +1,11 @@
-import express from 'express';
-import cors from 'cors';
-import { Resend } from 'resend';
-import dotenv from 'dotenv';
-import { serviceApplicationTemplate, contactFormTemplate } from './emailTemplates.js';
+import express from "express";
+import cors from "cors";
+import { Resend } from "resend";
+import dotenv from "dotenv";
+import {
+  serviceApplicationTemplate,
+  contactFormTemplate,
+} from "./emailTemplates.js";
 
 dotenv.config();
 
@@ -12,177 +15,166 @@ app.use(express.json());
 
 const resend = new Resend(process.env.RESEND_API_KEY);
 
-// DONO EMAILS YAHAN HAI - DIRECTLY HARDCODED
-const RECIPIENTS = [
-  'dhaniramsingh711@gmail.com',
-  'mohitporwal596@gmail.com'
-];
+// ✅ CONFIG
+const RECIPIENTS = ["dhaniramsingh711@gmail.com", "mohitporwal596@gmail.com"];
+const FROM_ADDRESS = "Jun Seva Kendra <onboarding@resend.dev>";
+const PORT = process.env.PORT || 5000;
 
-const FROM_ADDRESS = 'Jun Seva Kendra <onboarding@resend.dev>';
+console.log("✅ Server starting...");
+console.log("📧 Recipients:", RECIPIENTS.join(", "));
 
-console.log('✅ Server starting...');
-console.log('📧 Emails configured:', RECIPIENTS);
-
-// Service Application Form
-app.post('/apply-service', async (req, res) => {
+/**
+ * ✅ Helper function to send email safely
+ */
+async function sendEmailSafe({ to, subject, html }) {
   try {
-    const { name, email, mobile: phone, service_type: service, address } = req.body;
+    console.log(`📤 Attempting to send to: ${to}`);
 
-    if (!name || !phone || !service || !address) {
-      return res.status(400).json({ error: 'Missing required fields' });
-    }
-
-    console.log('\n🔥 NEW SERVICE APPLICATION 🔥');
-    console.log('From:', name, phone);
-    console.log('Service:', service);
-
-    // PEHLE EMAIL - DHANI KO
-    let dhaniResult = { success: false, error: null };
-    try {
-      console.log('📤 Sending to dhaniramsingh711@gmail.com...');
-      const result1 = await resend.emails.send({
-        from: FROM_ADDRESS,
-        to: 'dhaniramsingh711@gmail.com',
-        subject: `🔔 New Service Application - ${service}`,
-        html: serviceApplicationTemplate({ name, email, phone, service, address }),
-      });
-      console.log('✅ DHANI - Email sent!', result1.id);
-      dhaniResult.success = true;
-      dhaniResult.id = result1.id;
-    } catch (err) {
-      console.error('❌ DHANI - Failed:', err.message);
-      dhaniResult.error = err.message;
-    }
-
-    // Wait 1 second between emails
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // DOOSRA EMAIL - MOHIT KO
-    let mohitResult = { success: false, error: null };
-    try {
-      console.log('📤 Sending to mohitporwal596@gmail.com...');
-      const result2 = await resend.emails.send({
-        from: FROM_ADDRESS,
-        to: 'mohitporwal596@gmail.com',
-        subject: `🔔 New Service Application - ${service}`,
-        html: serviceApplicationTemplate({ name, email, phone, service, address }),
-      });
-      console.log('✅ MOHIT - Email sent!', result2.id);
-      mohitResult.success = true;
-      mohitResult.id = result2.id;
-    } catch (err) {
-      console.error('❌ MOHIT - Failed:', err.message);
-      mohitResult.error = err.message;
-    }
-
-    console.log('\n📊 FINAL RESULTS:');
-    console.log('Dhani:', dhaniResult.success ? '✅ SUCCESS' : '❌ FAILED -', dhaniResult.error);
-    console.log('Mohit:', mohitResult.success ? '✅ SUCCESS' : '❌ FAILED -', mohitResult.error);
-
-    // At least one success = form submission successful
-    if (dhaniResult.success || mohitResult.success) {
-      return res.json({ 
-        message: 'Application submitted successfully',
-        dhani: dhaniResult,
-        mohit: mohitResult
-      });
-    }
-
-    // Both failed
-    return res.status(500).json({ 
-      error: 'Email sending failed',
-      dhani: dhaniResult,
-      mohit: mohitResult
+    const response = await resend.emails.send({
+      from: FROM_ADDRESS,
+      to,
+      subject,
+      html,
     });
 
-  } catch (error) {
-    console.error('💥 SERVER ERROR:', error);
-    res.status(500).json({ error: 'Internal server error' });
+    // 🧠 FIX: Support both response shapes
+    const messageId = response?.id || response?.data?.id;
+
+    console.log("📦 Raw response:", response);
+
+    if (!messageId) {
+      throw new Error("No response ID returned from Resend");
+    }
+
+    console.log(`✅ Email sent to ${to} (ID: ${messageId})`);
+    return { success: true, id: messageId };
+  } catch (err) {
+    console.error(`❌ Failed to send email to ${to}:`, err);
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * ✅ Helper function to validate fields
+ */
+function validateFields(obj, requiredFields) {
+  for (const field of requiredFields) {
+    if (!obj[field]) {
+      return `Missing required field: ${field}`;
+    }
+  }
+  return null;
+}
+
+/**
+ * 🧾 Service Application Form
+ */
+app.post("/apply-service", async (req, res) => {
+  try {
+    const {
+      name,
+      email,
+      mobile: phone,
+      service_type: service,
+      address,
+    } = req.body;
+
+    const errorMsg = validateFields(req.body, [
+      "name",
+      "mobile",
+      "service_type",
+      "address",
+    ]);
+    if (errorMsg) return res.status(400).json({ error: errorMsg });
+
+    console.log("\n🔥 NEW SERVICE APPLICATION 🔥");
+    console.log({ name, email, phone, service, address });
+
+    const subject = `🔔 New Service Application - ${service}`;
+    const html = serviceApplicationTemplate({
+      name,
+      email,
+      phone,
+      service,
+      address,
+    });
+
+    // Send emails sequentially
+    const results = [];
+    for (const to of RECIPIENTS) {
+      const result = await sendEmailSafe({ to, subject, html });
+      results.push({ to, ...result });
+      await new Promise((r) => setTimeout(r, 1000)); // wait 1s between sends
+    }
+
+    const successCount = results.filter((r) => r.success).length;
+
+    if (successCount > 0) {
+      return res.json({
+        message: "✅ Application submitted successfully",
+        results,
+      });
+    } else {
+      return res.status(500).json({
+        error: "❌ All email deliveries failed",
+        results,
+      });
+    }
+  } catch (err) {
+    console.error("💥 SERVER ERROR (apply-service):", err);
+    res
+      .status(500)
+      .json({ error: "Internal server error", details: err.message });
   }
 });
 
-// Contact Form
-app.post('/contact', async (req, res) => {
+/**
+ * 💬 Contact Form
+ */
+app.post("/contact", async (req, res) => {
   try {
     const { name, email, message } = req.body;
 
-    if (!name || !email || !message) {
-      return res.status(400).json({ error: 'Missing required fields' });
+    const errorMsg = validateFields(req.body, ["name", "email", "message"]);
+    if (errorMsg) return res.status(400).json({ error: errorMsg });
+
+    console.log("\n💬 NEW CONTACT MESSAGE 💬");
+    console.log({ name, email, message });
+
+    const subject = `💬 New Contact Message from ${name}`;
+    const html = contactFormTemplate({ name, email, message });
+
+    // Send to both recipients
+    const results = [];
+    for (const to of RECIPIENTS) {
+      const result = await sendEmailSafe({ to, subject, html });
+      results.push({ to, ...result });
+      await new Promise((r) => setTimeout(r, 1000));
     }
 
-    console.log('\n💬 NEW CONTACT MESSAGE 💬');
-    console.log('From:', name, email);
+    const successCount = results.filter((r) => r.success).length;
 
-    // PEHLE EMAIL - DHANI KO
-    let dhaniResult = { success: false, error: null };
-    try {
-      console.log('📤 Sending to dhaniramsingh711@gmail.com...');
-      const result1 = await resend.emails.send({
-        from: FROM_ADDRESS,
-        to: 'dhaniramsingh711@gmail.com',
-        subject: `💬 New Contact Message from ${name}`,
-        html: contactFormTemplate({ name, email, message }),
+    if (successCount > 0) {
+      return res.json({
+        message: "✅ Message sent successfully",
+        results,
       });
-      console.log('✅ DHANI - Email sent!', result1.id);
-      dhaniResult.success = true;
-      dhaniResult.id = result1.id;
-    } catch (err) {
-      console.error('❌ DHANI - Failed:', err.message);
-      dhaniResult.error = err.message;
-    }
-
-    // Wait 1 second between emails
-    await new Promise(resolve => setTimeout(resolve, 1000));
-
-    // DOOSRA EMAIL - MOHIT KO
-    let mohitResult = { success: false, error: null };
-    try {
-      console.log('📤 Sending to mohitporwal596@gmail.com...');
-      const result2 = await resend.emails.send({
-        from: FROM_ADDRESS,
-        to: 'mohitporwal596@gmail.com',
-        subject: `💬 New Contact Message from ${name}`,
-        html: contactFormTemplate({ name, email, message }),
-      });
-      console.log('✅ MOHIT - Email sent!', result2.id);
-      mohitResult.success = true;
-      mohitResult.id = result2.id;
-    } catch (err) {
-      console.error('❌ MOHIT - Failed:', err.message);
-      mohitResult.error = err.message;
-    }
-
-    console.log('\n📊 FINAL RESULTS:');
-    console.log('Dhani:', dhaniResult.success ? '✅ SUCCESS' : '❌ FAILED -', dhaniResult.error);
-    console.log('Mohit:', mohitResult.success ? '✅ SUCCESS' : '❌ FAILED -', mohitResult.error);
-
-    // At least one success = form submission successful
-    if (dhaniResult.success || mohitResult.success) {
-      return res.json({ 
-        message: 'Message sent successfully',
-        dhani: dhaniResult,
-        mohit: mohitResult
+    } else {
+      return res.status(500).json({
+        error: "❌ All email deliveries failed",
+        results,
       });
     }
-
-    // Both failed
-    return res.status(500).json({ 
-      error: 'Email sending failed',
-      dhani: dhaniResult,
-      mohit: mohitResult
-    });
-
-  } catch (error) {
-    console.error('💥 SERVER ERROR:', error);
-    res.status(500).json({ error: 'Internal server error' });
+  } catch (err) {
+    console.error("💥 SERVER ERROR (contact):", err);
+    res
+      .status(500)
+      .json({ error: "Internal server error", details: err.message });
   }
 });
 
-const PORT = process.env.PORT || 5000;
 app.listen(PORT, () => {
   console.log(`\n🚀 Server running on port ${PORT}`);
-  console.log('📧 Emails will be sent to:');
-  console.log('   1. dhaniramsingh711@gmail.com');
-  console.log('   2. mohitporwal596@gmail.com');
-  console.log('✅ Ready to receive forms!\n');
+  console.log("📧 Sending emails to:", RECIPIENTS.join(", "));
+  console.log("✅ Ready to receive form submissions!\n");
 });
