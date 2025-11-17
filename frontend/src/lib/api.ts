@@ -68,6 +68,11 @@ export interface Vacancy {
 export async function getVacancies(): Promise<Vacancy[]> {
   const response = await fetch(`${API_BASE_URL}/api/vacancies`);
   if (!response.ok) {
+    // If 503, it's a database connection issue
+    if (response.status === 503) {
+      console.warn('Database not available. Please check MongoDB connection.');
+      return []; // Return empty array instead of throwing error
+    }
     throw new Error('Failed to fetch vacancies');
   }
   const data = await response.json();
@@ -88,7 +93,9 @@ export async function createVacancy(vacancy: Omit<Vacancy, '_id' | 'id'>): Promi
   });
 
   if (!response.ok) {
-    throw new Error('Failed to create vacancy');
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage = errorData.message || errorData.error || 'Failed to create vacancy';
+    throw new Error(errorMessage);
   }
 
   const data = await response.json();

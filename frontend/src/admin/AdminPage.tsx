@@ -90,8 +90,15 @@ export default function AdminPage() {
       
       // Dispatch event for same-tab updates
       window.dispatchEvent(new CustomEvent('janseva:vacancies:updated'));
-    } catch (err) {
-      setError(editingId ? 'Failed to update vacancy' : 'Failed to create vacancy');
+    } catch (err: any) {
+      const errorMsg = err?.message || (editingId ? 'Failed to update vacancy' : 'Failed to create vacancy');
+      
+      // Check if it's a database connection error
+      if (errorMsg.includes('Database') || errorMsg.includes('MongoDB') || errorMsg.includes('connection')) {
+        setError(`Database Error: ${errorMsg}. Please check MONGODB_URI in Vercel environment variables.`);
+      } else {
+        setError(errorMsg);
+      }
       console.error('Error saving vacancy:', err);
     } finally {
       setLoading(false);
