@@ -1,4 +1,4 @@
-import { FileText, CreditCard, User, Home, Briefcase, Car, GraduationCap, Heart, Landmark, Printer, Building2, Scale, BookOpen, FileCheck, ShieldCheck } from 'lucide-react';
+import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, Building2, FileCheck, ShieldCheck, Zap, Receipt, Wallet, PiggyBank, Smartphone, GraduationCap, Shield, Users, Phone, Droplets, Flame, IndianRupee, FileEdit, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -16,58 +16,84 @@ type Vacancy = {
 const services = [
   // Documents
   { icon: FileText, name: 'Aadhaar Card', category: 'Documents', description: 'Aadhaar card enrollment, update, and correction services' },
+  { icon: FileEdit, name: 'Aadhaar Update/Correction', category: 'Documents', description: 'Aadhaar details update, correction, and biometric update' },
+  { icon: Smartphone, name: 'Mobile Number Linking', category: 'Documents', description: 'Link mobile number with Aadhaar and other documents' },
+  { icon: CreditCard, name: 'Bank Account Linking', category: 'Documents', description: 'Link bank account with Aadhaar and other services' },
   { icon: CreditCard, name: 'PAN Card', category: 'Documents', description: 'PAN card application and correction services' },
   { icon: User, name: 'Voter ID Card', category: 'Documents', description: 'Voter ID card application and update services' },
   { icon: FileText, name: 'Ration Card', category: 'Documents', description: 'Ration card application and family member addition' },
-  { icon: FileText, name: 'Driving License', category: 'Documents', description: 'Driving license application and renewal' },
+  { icon: FileEdit, name: 'Ration Card Update', category: 'Documents', description: 'Ration card update, correction, and family member modification' },
   { icon: FileText, name: 'Passport Services', category: 'Documents', description: 'Passport application and renewal services' },
+  { icon: Shield, name: 'E-Shram Card', category: 'Documents', description: 'E-Shram card registration for unorganized workers' },
+  { icon: CheckCircle, name: 'Digital Signature Certificate', category: 'Documents', description: 'Digital signature certificate application and renewal' },
   
   // Certificates
   { icon: Home, name: 'Birth Certificate', category: 'Certificates', description: 'Birth certificate application and correction' },
+  { icon: FileEdit, name: 'Birth Certificate Correction', category: 'Certificates', description: 'Birth certificate correction and update services' },
   { icon: Home, name: 'Death Certificate', category: 'Certificates', description: 'Death certificate application services' },
+  { icon: FileEdit, name: 'Death Certificate Correction', category: 'Certificates', description: 'Death certificate correction and update' },
+  { icon: Users, name: 'Marriage Certificate', category: 'Certificates', description: 'Marriage certificate application and registration' },
   { icon: FileText, name: 'Income Certificate', category: 'Certificates', description: 'Income certificate for various purposes' },
   { icon: FileText, name: 'Caste Certificate', category: 'Certificates', description: 'Caste certificate application and verification' },
   { icon: FileText, name: 'Domicile Certificate', category: 'Certificates', description: 'Domicile certificate application' },
-  { icon: FileCheck, name: 'Character Certificate', category: 'Certificates', description: 'Character certificate for employment and education' },
+  { icon: FileEdit, name: 'Name Change Services', category: 'Certificates', description: 'Name change in certificates and documents' },
+  { icon: FileEdit, name: 'Address Change Services', category: 'Certificates', description: 'Address change in certificates and documents' },
   
   // Employment
   { icon: Briefcase, name: 'Employment Registration', category: 'Employment', description: 'Job registration and employment services' },
   { icon: Briefcase, name: 'EPF Services', category: 'Employment', description: 'EPF account opening and services' },
   { icon: Briefcase, name: 'ESIC Registration', category: 'Employment', description: 'ESIC registration and card services' },
   
-  // Education
-  { icon: GraduationCap, name: 'Education Verification', category: 'Education', description: 'Educational certificate verification' },
-  { icon: BookOpen, name: 'Scholarship Application', category: 'Education', description: 'Various scholarship application assistance' },
+  // Pension
+  { icon: PiggyBank, name: 'Pension Services', category: 'Pension', description: 'Pension application, registration, and related services' },
+  { icon: PiggyBank, name: 'Old Age Pension', category: 'Pension', description: 'Old age pension application and services' },
+  { icon: PiggyBank, name: 'Widow Pension', category: 'Pension', description: 'Widow pension application and services' },
+  { icon: PiggyBank, name: 'Disability Pension', category: 'Pension', description: 'Disability pension application and services' },
+  { icon: CheckCircle, name: 'Jeevan Pramaan (Digital Life Certificate)', category: 'Pension', description: 'Digital life certificate for pensioners' },
   
   // Transport
+  { icon: Car, name: 'Driving License Services', category: 'Transport', description: 'Driving license application, renewal, and related services' },
   { icon: Car, name: 'Vehicle Registration', category: 'Transport', description: 'Vehicle registration and RC services' },
-  { icon: Car, name: 'Vehicle Insurance', category: 'Transport', description: 'Vehicle insurance application and renewal' },
-  
-  // Property
-  { icon: Landmark, name: 'Property Registration', category: 'Property', description: 'Property registration and document services' },
-  { icon: Landmark, name: 'Mutation Services', category: 'Property', description: 'Property mutation and transfer services' },
+  { icon: Car, name: 'Vehicle Number Plate Online', category: 'Transport', description: 'Online vehicle number plate application and services' },
+  { icon: FileCheck, name: 'RC Services', category: 'Transport', description: 'RC card services, duplicate, and correction' },
+  { icon: FileCheck, name: 'Vehicle Insurance', category: 'Transport', description: 'Vehicle insurance application and renewal' },
+  { icon: FileCheck, name: 'Vehicle Transfer', category: 'Transport', description: 'Vehicle ownership transfer services' },
   
   // Insurance
   { icon: Heart, name: 'Health Insurance', category: 'Insurance', description: 'Health insurance application and claim assistance' },
+  { icon: Shield, name: 'Ayushman Bharat Card', category: 'Insurance', description: 'Ayushman Bharat health insurance card application' },
+  { icon: Shield, name: 'PMJAY Card', category: 'Insurance', description: 'PM Jan Arogya Yojana card application and services' },
   { icon: Briefcase, name: 'Life Insurance', category: 'Insurance', description: 'Life insurance policies and services' },
   { icon: ShieldCheck, name: 'Crop Insurance', category: 'Insurance', description: 'Crop insurance application and claim' },
   
-  // Banking
-  { icon: CreditCard, name: 'Bank Account Opening', category: 'Banking', description: 'Bank account opening assistance' },
-  { icon: FileText, name: 'Loan Applications', category: 'Banking', description: 'Loan application assistance for various schemes' },
-  { icon: CreditCard, name: 'ATM Card Services', category: 'Banking', description: 'ATM card application and blocking' },
+  // Government Schemes
+  { icon: Home, name: 'PM Awas Yojana', category: 'Schemes', description: 'Pradhan Mantri Awas Yojana housing scheme application' },
+  { icon: Flame, name: 'Ujjwala Yojana', category: 'Schemes', description: 'Ujjwala gas connection scheme application' },
+  { icon: IndianRupee, name: 'PM Kisan Registration', category: 'Schemes', description: 'PM Kisan Samman Nidhi registration and update' },
+  { icon: CreditCard, name: 'Kisan Credit Card', category: 'Schemes', description: 'Kisan Credit Card application and services' },
+  { icon: IndianRupee, name: 'PM Mudra Loan', category: 'Schemes', description: 'PM Mudra loan application and services' },
+  { icon: GraduationCap, name: 'Scholarship Applications', category: 'Schemes', description: 'Various scholarship application assistance' },
+  
+  // Utility
+  { icon: CreditCard, name: 'Bill Payment', category: 'Utility', description: 'Electricity, water, and other bill payments' },
+  { icon: Zap, name: 'Light Connection (Jhatpat Online)', category: 'Utility', description: 'Quick electricity connection application online' },
+  { icon: Droplets, name: 'Water Connection', category: 'Utility', description: 'Water connection application and services' },
+  { icon: Phone, name: 'Mobile Recharge', category: 'Utility', description: 'Mobile recharge and top-up services' },
+  { icon: Smartphone, name: 'DTH Recharge', category: 'Utility', description: 'DTH recharge and subscription services' },
+  { icon: Flame, name: 'Gas Booking', category: 'Utility', description: 'LPG gas cylinder booking services' },
+  { icon: Receipt, name: 'Tax Deduction', category: 'Utility', description: 'Tax deduction certificate and related services' },
+  { icon: Receipt, name: 'Income Tax Filing', category: 'Utility', description: 'Income tax return filing assistance' },
+  { icon: Wallet, name: 'Withdraw/Payment Withdrawal', category: 'Utility', description: 'Payment withdrawal and transaction services' },
   
   // Business
   { icon: FileText, name: 'GST Registration', category: 'Business', description: 'GST registration and filing services' },
   { icon: Building2, name: 'Company Registration', category: 'Business', description: 'Company and firm registration' },
-  { icon: FileText, name: 'Trade License', category: 'Business', description: 'Trade license application and renewal' },
   
   // Legal
-  { icon: Scale, name: 'Legal Documentation', category: 'Legal', description: 'Legal document preparation and attestation' },
-  { icon: Scale, name: 'Affidavit Services', category: 'Legal', description: 'Affidavit preparation and attestation' },
+  { icon: FileText, name: 'Legal Documentation', category: 'Legal', description: 'Legal document preparation and attestation' },
+  { icon: FileText, name: 'Affidavit Services', category: 'Legal', description: 'Affidavit preparation and attestation' },
   
-  // Utility
-  { icon: CreditCard, name: 'Bill Payment', category: 'Utility', description: 'Electricity, water, and other bill payments' },
+  // General
   { icon: Printer, name: 'Xerox & Printing', category: 'Printing', description: 'Photocopy and printing services' },
   { icon: FileText, name: 'Form Filling Services', category: 'General', description: 'Form filling assistance for all services' },
 ];

@@ -1,4 +1,4 @@
-import { FileText, CreditCard, User, Home, Briefcase, Car, GraduationCap, Heart, Landmark, Printer } from 'lucide-react';
+import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, Zap, Receipt, Wallet, FileCheck, PiggyBank, Smartphone, Building2, GraduationCap, Shield, Users, Phone, Droplets, Flame, IndianRupee, FileEdit, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 
@@ -14,30 +14,83 @@ type Vacancy = {
 };
 
 const services = [
+  // Documents
   { icon: FileText, name: 'Aadhaar Card', category: 'Documents' },
+
+  { icon: CreditCard, name: 'Bank Account Linking', category: 'Documents' },
   { icon: CreditCard, name: 'PAN Card', category: 'Documents' },
   { icon: User, name: 'Voter ID Card', category: 'Documents' },
   { icon: FileText, name: 'Ration Card', category: 'Documents' },
-  { icon: FileText, name: 'Driving License', category: 'Documents' },
+  { icon: FileEdit, name: 'Ration Card Update', category: 'Documents' },
   { icon: FileText, name: 'Passport Services', category: 'Documents' },
+  { icon: Shield, name: 'E-Shram Card', category: 'Documents' },
+  { icon: CheckCircle, name: 'Digital Signature Certificate', category: 'Documents' },
+  
+  // Certificates
   { icon: Home, name: 'Birth Certificate', category: 'Certificates' },
+  { icon: FileEdit, name: 'Birth Certificate Correction', category: 'Certificates' },
   { icon: Home, name: 'Death Certificate', category: 'Certificates' },
+  { icon: FileEdit, name: 'Death Certificate Correction', category: 'Certificates' },
+  { icon: Users, name: 'Marriage Certificate', category: 'Certificates' },
   { icon: FileText, name: 'Income Certificate', category: 'Certificates' },
   { icon: FileText, name: 'Caste Certificate', category: 'Certificates' },
   { icon: FileText, name: 'Domicile Certificate', category: 'Certificates' },
+ 
+  
+  // Employment
   { icon: Briefcase, name: 'Employment Registration', category: 'Employment' },
-  { icon: GraduationCap, name: 'Education Verification', category: 'Education' },
+  
+  // Pension
+  { icon: PiggyBank, name: 'Pension Services', category: 'Pension' },
+  { icon: PiggyBank, name: 'Old Age Pension', category: 'Pension' },
+  { icon: PiggyBank, name: 'Widow Pension', category: 'Pension' },
+  { icon: PiggyBank, name: 'Disability Pension', category: 'Pension' },
+  { icon: CheckCircle, name: 'Jeevan Pramaan (Digital Life Certificate)', category: 'Pension' },
+  
+  // Transport
+  { icon: Car, name: 'Driving License Services', category: 'Transport' },
   { icon: Car, name: 'Vehicle Registration', category: 'Transport' },
-  { icon: Landmark, name: 'Property Registration', category: 'Property' },
+  { icon: Car, name: 'Vehicle Number Plate Online', category: 'Transport' },
+  { icon: FileCheck, name: 'RC Services', category: 'Transport' },
+  { icon: FileCheck, name: 'Vehicle Insurance', category: 'Transport' },
+  { icon: FileCheck, name: 'Vehicle Transfer', category: 'Transport' },
+  
+  // Insurance
   { icon: Heart, name: 'Health Insurance', category: 'Insurance' },
+  { icon: Shield, name: 'Ayushman Bharat Card', category: 'Insurance' },
+  { icon: Shield, name: 'PMJAY Card', category: 'Insurance' },
   { icon: Briefcase, name: 'Life Insurance', category: 'Insurance' },
-  { icon: CreditCard, name: 'Bank Account Opening', category: 'Banking' },
-  { icon: FileText, name: 'Loan Applications', category: 'Banking' },
+  
+  // Government Schemes
+  { icon: Home, name: 'PM Awas Yojana', category: 'Schemes' },
+  { icon: Flame, name: 'Ujjwala Yojana', category: 'Schemes' },
+  { icon: IndianRupee, name: 'PM Kisan Registration', category: 'Schemes' },
+  { icon: CreditCard, name: 'Kisan Credit Card', category: 'Schemes' },
+  { icon: IndianRupee, name: 'PM Mudra Loan', category: 'Schemes' },
+  { icon: GraduationCap, name: 'Scholarship Applications', category: 'Schemes' },
+  
+  // Utility
+  { icon: CreditCard, name: 'Bill Payment', category: 'Utility' },
+  { icon: Zap, name: 'Light Connection (Jhatpat Online)', category: 'Utility' },
+  { icon: Droplets, name: 'Water Connection', category: 'Utility' },
+  { icon: Phone, name: 'Mobile Recharge', category: 'Utility' },
+  { icon: Smartphone, name: 'DTH Recharge', category: 'Utility' },
+  { icon: Flame, name: 'Gas Booking', category: 'Utility' },
+  { icon: Receipt, name: 'Tax Deduction', category: 'Utility' },
+  { icon: Receipt, name: 'Income Tax Filing', category: 'Utility' },
+  { icon: Wallet, name: 'Withdraw/Payment Withdrawal', category: 'Utility' },
+  
+  // Business
+  { icon: FileText, name: 'GST Registration', category: 'Business' },
+  { icon: Building2, name: 'Company Registration', category: 'Business' },
+  
+  // Legal
+  { icon: FileText, name: 'Legal Documentation', category: 'Legal' },
+  { icon: FileText, name: 'Affidavit Services', category: 'Legal' },
+  
+  // General
   { icon: Printer, name: 'Xerox & Printing', category: 'Printing' },
   { icon: FileText, name: 'Form Filling Services', category: 'General' },
-  { icon: FileText, name: 'Legal Documentation', category: 'Legal' },
-  { icon: CreditCard, name: 'Bill Payment', category: 'Utility' },
-  { icon: FileText, name: 'GST Registration', category: 'Business' },
 ];
 
 export default function Services() {
