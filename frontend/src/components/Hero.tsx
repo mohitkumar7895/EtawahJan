@@ -104,31 +104,61 @@ export default function Hero() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4">
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 animate-fade-in">
+          {/* Backdrop with blur */}
           <div
-            className="absolute inset-0 bg-black/60 transition-opacity"
+            className="absolute inset-0 bg-black/70 backdrop-blur-md transition-opacity"
             onClick={() => setShowModal(false)}
             aria-hidden
           />
 
-          <div role="dialog" aria-modal="true" className="relative z-10 w-full max-w-md">
-            <div className="bg-white rounded-xl shadow-2xl overflow-hidden">
-              <div className="flex items-start justify-between bg-blue-600 px-6 py-4">
-                <div className="text-white">
-                  <h3 className="text-lg font-bold">Apply for Services</h3>
-                  <p className="text-sm text-blue-100 mt-1">Fill the form below</p>
+          {/* Modal Container */}
+          <div 
+            role="dialog" 
+            aria-modal="true" 
+            className="relative z-10 w-full max-w-lg animate-scale-in"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-yellow-400/20">
+              {/* Header */}
+              <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 px-5 py-4">
+                {/* Decorative elements */}
+                <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-400/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
+                
+                <div className="relative z-10 flex items-start justify-between">
+                  <div className="text-white">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                      <span className="text-xs font-semibold text-yellow-300 uppercase tracking-wide">Service Application</span>
+                    </div>
+                    <h3 className="text-xl font-extrabold mb-1">Apply for Services</h3>
+                    <p className="text-xs text-blue-100">Fill the form below to get started</p>
+                  </div>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    aria-label="Close dialog"
+                    className="text-white hover:text-yellow-300 hover:bg-white/10 transition-all p-2 rounded-lg hover:scale-110 active:scale-95"
+                  >
+                    <X className="w-6 h-6" />
+                  </button>
                 </div>
-                <button
-                  onClick={() => setShowModal(false)}
-                  aria-label="Close dialog"
-                  className="text-white hover:text-gray-200 transition"
-                >
-                  <X className="w-5 h-5" />
-                </button>
               </div>
 
-              <div className="p-6 bg-gray-50">
+              {/* Form Content */}
+              <div className="p-5 bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
                 <ContactForm embedded />
+              </div>
+
+              {/* Footer Note */}
+              <div className="px-5 py-3 bg-blue-50/50 border-t border-blue-100">
+                <div className="flex items-center justify-center gap-2 text-xs text-gray-600">
+                  <Phone className="w-3.5 h-3.5 text-blue-600" />
+                  <span>Need help? Call us at</span>
+                  <a href="tel:9193898182" className="font-bold text-blue-600 hover:text-blue-700 transition">
+                    9193898182
+                  </a>
+                </div>
               </div>
             </div>
           </div>

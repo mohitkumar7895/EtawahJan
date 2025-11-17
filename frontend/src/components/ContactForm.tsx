@@ -118,12 +118,12 @@ export default function ContactForm({ embedded }: ContactFormProps) {
 
       <form
         onSubmit={handleSubmit}
-        className={embedded ? 'bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-lg border border-blue-100 p-6' : 'bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-2xl border border-blue-100 p-8'}
+        className={embedded ? 'bg-transparent' : 'bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-2xl border border-blue-100 p-8'}
       >
-        <div className={embedded ? 'space-y-4' : 'space-y-6'}>
+        <div className={embedded ? 'space-y-3' : 'space-y-6'}>
           {/* Full Name Field */}
           <div className="relative">
-            <label htmlFor="name" className="flex items-center text-sm font-bold text-gray-800 mb-2">
+            <label htmlFor="name" className="flex items-center text-xs font-bold text-gray-800 mb-1.5">
               <User className="w-4 h-4 mr-2 text-blue-600" />
               Full Name / पूरा नाम <span className="text-red-500 ml-1">*</span>
             </label>
@@ -139,7 +139,7 @@ export default function ContactForm({ embedded }: ContactFormProps) {
                 value={formData.name}
                 onChange={handleChange}
                 autoFocus={embedded}
-                className={`w-full ${embedded ? 'pl-11 pr-4 py-2.5' : 'pl-12 pr-4 py-3'} border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition bg-white text-gray-800 placeholder-gray-400`}
+                className={`w-full ${embedded ? 'pl-10 pr-3 py-2 text-sm' : 'pl-12 pr-4 py-3'} border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 transition-all bg-white text-gray-900 placeholder-gray-400 shadow-sm hover:border-gray-400`}
                 placeholder="Enter your full name"
               />
             </div>
@@ -147,7 +147,7 @@ export default function ContactForm({ embedded }: ContactFormProps) {
 
           {/* Email Field */}
           <div className="relative">
-            <label htmlFor="email" className="flex items-center text-sm font-bold text-gray-800 mb-2">
+            <label htmlFor="email" className="flex items-center text-xs font-bold text-gray-800 mb-1.5">
               <Mail className="w-4 h-4 mr-2 text-blue-600" />
               Email / ईमेल <span className="text-gray-500 text-xs ml-1">(optional)</span>
             </label>
@@ -161,7 +161,7 @@ export default function ContactForm({ embedded }: ContactFormProps) {
                 name="email"
                 value={formData.email}
                 onChange={handleChange}
-                className={`w-full ${embedded ? 'pl-11 pr-4 py-2.5' : 'pl-12 pr-4 py-3'} border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition bg-white text-gray-800 placeholder-gray-400`}
+                className={`w-full ${embedded ? 'pl-10 pr-3 py-2 text-sm' : 'pl-12 pr-4 py-3'} border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 transition-all bg-white text-gray-900 placeholder-gray-400 shadow-sm hover:border-gray-400`}
                 placeholder="your.email@example.com"
               />
             </div>
@@ -169,7 +169,7 @@ export default function ContactForm({ embedded }: ContactFormProps) {
 
           {/* Mobile Field */}
           <div className="relative">
-            <label htmlFor="mobile" className="flex items-center text-sm font-bold text-gray-800 mb-2">
+            <label htmlFor="mobile" className="flex items-center text-xs font-bold text-gray-800 mb-1.5">
               <Phone className="w-4 h-4 mr-2 text-blue-600" />
               Mobile / मोबाइल <span className="text-red-500 ml-1">*</span>
             </label>
@@ -186,16 +186,16 @@ export default function ContactForm({ embedded }: ContactFormProps) {
                 onChange={handleChange}
                 pattern="[0-9]{10}"
                 maxLength={10}
-                className={`w-full ${embedded ? 'pl-11 pr-4 py-2.5' : 'pl-12 pr-4 py-3'} border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition bg-white text-gray-800 placeholder-gray-400`}
+                className={`w-full ${embedded ? 'pl-10 pr-3 py-2 text-sm' : 'pl-12 pr-4 py-3'} border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 transition-all bg-white text-gray-900 placeholder-gray-400 shadow-sm hover:border-gray-400`}
                 placeholder="10 digit mobile number"
               />
             </div>
-            <p className="text-xs text-gray-500 mt-1">Please enter 10 digit mobile number</p>
+            <p className="text-xs text-gray-500 mt-0.5">Please enter 10 digit mobile number</p>
           </div>
 
           {/* Service Type Field */}
           <div className="relative">
-            <label htmlFor="service_type" className="flex items-center text-sm font-bold text-gray-800 mb-2">
+            <label htmlFor="service_type" className="flex items-center text-xs font-bold text-gray-800 mb-1.5">
               <FileText className="w-4 h-4 mr-2 text-blue-600" />
               Service / सेवा <span className="text-red-500 ml-1">*</span>
             </label>
@@ -209,7 +209,7 @@ export default function ContactForm({ embedded }: ContactFormProps) {
                 required
                 value={formData.service_type}
                 onChange={handleChange}
-                className={`w-full ${embedded ? 'pl-11 pr-10 py-2.5' : 'pl-12 pr-10 py-3'} border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition bg-white text-gray-800 appearance-none cursor-pointer`}
+                className={`w-full ${embedded ? 'pl-10 pr-10 py-2 text-sm' : 'pl-12 pr-10 py-3'} border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 transition-all bg-white text-gray-900 appearance-none cursor-pointer shadow-sm hover:border-gray-400`}
               >
                 <option value="" className="text-gray-400">-- Select Service --</option>
                 {serviceOptions.map((service) => (
@@ -228,7 +228,7 @@ export default function ContactForm({ embedded }: ContactFormProps) {
 
           {/* Address Field */}
           <div className="relative">
-            <label htmlFor="address" className="flex items-center text-sm font-bold text-gray-800 mb-2">
+            <label htmlFor="address" className="flex items-center text-xs font-bold text-gray-800 mb-1.5">
               <MapPin className="w-4 h-4 mr-2 text-blue-600" />
               Address / पता <span className="text-red-500 ml-1">*</span>
             </label>
@@ -242,8 +242,8 @@ export default function ContactForm({ embedded }: ContactFormProps) {
                 required
                 value={formData.address}
                 onChange={handleChange}
-                rows={4}
-                className={`w-full ${embedded ? 'pl-11 pr-4 py-2.5' : 'pl-12 pr-4 py-3'} border-2 border-gray-200 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200 transition bg-white text-gray-800 placeholder-gray-400 resize-none`}
+                rows={3}
+                className={`w-full ${embedded ? 'pl-10 pr-3 py-2 text-sm' : 'pl-12 pr-4 py-3'} border-2 border-gray-300 rounded-lg focus:border-blue-500 focus:ring-2 focus:ring-blue-200/50 transition-all bg-white text-gray-900 placeholder-gray-400 resize-none shadow-sm hover:border-gray-400`}
                 placeholder="Enter your complete address"
               />
             </div>
@@ -254,21 +254,24 @@ export default function ContactForm({ embedded }: ContactFormProps) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white ${embedded ? 'px-6 py-3' : 'px-8 py-4'} rounded-lg font-bold ${embedded ? 'text-base' : 'text-lg'} shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-3`}
+              className={`w-full bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 text-white ${embedded ? 'px-4 py-2.5 text-sm' : 'px-8 py-4'} rounded-lg font-bold ${embedded ? 'text-sm' : 'text-lg'} shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 relative overflow-hidden group`}
             >
+              <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></span>
+              <span className="relative z-10 flex items-center space-x-2">
               {isSubmitting ? (
                 <>
-                  <Loader2 className={`${embedded ? 'w-5 h-5' : 'w-6 h-6'} animate-spin`} />
+                  <Loader2 className={`${embedded ? 'w-4 h-4' : 'w-6 h-6'} animate-spin`} />
                   <span>Submitting...</span>
                 </>
               ) : (
                 <>
-                  <Send className={embedded ? 'w-5 h-5' : 'w-6 h-6'} />
+                  <Send className={embedded ? 'w-4 h-4' : 'w-6 h-6'} />
                   <span>{embedded ? 'Submit Application' : 'Submit Application & Get Started'}</span>
                 </>
               )}
+              </span>
             </button>
-            <p className="text-xs text-center text-gray-500 mt-3">
+            <p className="text-xs text-center text-gray-500 mt-2">
               By submitting, you agree to our terms and conditions
             </p>
           </div>
