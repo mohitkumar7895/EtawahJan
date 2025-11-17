@@ -6,7 +6,7 @@ import {
   serviceApplicationTemplate,
   contactFormTemplate,
 } from "./emailTemplates.js";
-import { connectDB } from "./config/db.js";
+import { connectDB, isDBConnected } from "./config/db.js";
 import Vacancy from "./models/Vacancy.js";
 
 dotenv.config();
@@ -18,7 +18,10 @@ app.use(express.json());
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Connect to MongoDB
-connectDB().catch(console.error);
+connectDB().catch((err) => {
+  console.error('Failed to connect to MongoDB:', err);
+  // Don't exit - let the server start and handle errors gracefully
+});
 
 // ✅ CONFIG
 const RECIPIENTS = ["dhaniramsingh711@gmail.com", "mohitporwal596@gmail.com"];
@@ -179,23 +182,53 @@ app.post("/contact", async (req, res) => {
 });
 
 /**
+ * 📋 Health Check Endpoint
+ */
+app.get("/api/health", async (req, res) => {
+  const dbStatus = isDBConnected() ? 'connected' : 'disconnected';
+  res.json({
+    status: 'ok',
+    database: dbStatus,
+    timestamp: new Date().toISOString()
+  });
+});
+
+/**
  * 📋 Vacancies API Endpoints
  */
 
 // Get all vacancies
 app.get("/api/vacancies", async (req, res) => {
   try {
+    if (!isDBConnected()) {
+      // Try to reconnect
+      await connectDB();
+      if (!isDBConnected()) {
+        return res.status(503).json({ error: "Database not available. Please try again later." });
+      }
+    }
     const vacancies = await Vacancy.find().sort({ createdAt: -1 });
     res.json(vacancies);
   } catch (error) {
     console.error("Error fetching vacancies:", error);
-    res.status(500).json({ error: "Failed to fetch vacancies" });
+    res.status(500).json({ 
+      error: "Failed to fetch vacancies",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
 // Create new vacancy
 app.post("/api/vacancies", async (req, res) => {
   try {
+    if (!isDBConnected()) {
+      // Try to reconnect
+      await connectDB();
+      if (!isDBConnected()) {
+        return res.status(503).json({ error: "Database not available. Please try again later." });
+      }
+    }
+
     const { title, tag, info, date, lastDate, vacancies, link } = req.body;
     
     if (!title || !tag) {
@@ -216,13 +249,23 @@ app.post("/api/vacancies", async (req, res) => {
     res.status(201).json(savedVacancy);
   } catch (error) {
     console.error("Error creating vacancy:", error);
-    res.status(500).json({ error: "Failed to create vacancy" });
+    res.status(500).json({ 
+      error: "Failed to create vacancy",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
 // Update vacancy
 app.put("/api/vacancies/:id", async (req, res) => {
   try {
+    if (!isDBConnected()) {
+      await connectDB();
+      if (!isDBConnected()) {
+        return res.status(503).json({ error: "Database not available. Please try again later." });
+      }
+    }
+
     const { id } = req.params;
     const { title, tag, info, date, lastDate, vacancies, link } = req.body;
 
@@ -247,13 +290,23 @@ app.put("/api/vacancies/:id", async (req, res) => {
     res.json(vacancy);
   } catch (error) {
     console.error("Error updating vacancy:", error);
-    res.status(500).json({ error: "Failed to update vacancy" });
+    res.status(500).json({ 
+      error: "Failed to update vacancy",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
 // Delete vacancy
 app.delete("/api/vacancies/:id", async (req, res) => {
   try {
+    if (!isDBConnected()) {
+      await connectDB();
+      if (!isDBConnected()) {
+        return res.status(503).json({ error: "Database not available. Please try again later." });
+      }
+    }
+
     const { id } = req.params;
     const vacancy = await Vacancy.findByIdAndDelete(id);
 
@@ -264,7 +317,10 @@ app.delete("/api/vacancies/:id", async (req, res) => {
     res.json({ message: "Vacancy deleted successfully" });
   } catch (error) {
     console.error("Error deleting vacancy:", error);
-    res.status(500).json({ error: "Failed to delete vacancy" });
+    res.status(500).json({ 
+      error: "Failed to delete vacancy",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    });
   }
 });
 
