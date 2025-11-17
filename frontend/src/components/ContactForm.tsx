@@ -3,9 +3,8 @@ import { Send, CheckCircle, User, Mail, Phone, MapPin, FileText, Loader2 } from 
 import { submitServiceApplication } from '../lib/api';
 
 const serviceOptions = [
+  // Documents
   'Aadhaar Card',
-  'Aadhaar Update/Correction',
-  'Mobile Number Linking',
   'Bank Account Linking',
   'PAN Card',
   'Voter ID Card',
@@ -14,6 +13,8 @@ const serviceOptions = [
   'Passport Services',
   'E-Shram Card',
   'Digital Signature Certificate',
+  
+  // Certificates
   'Birth Certificate',
   'Birth Certificate Correction',
   'Death Certificate',
@@ -22,33 +23,40 @@ const serviceOptions = [
   'Income Certificate',
   'Caste Certificate',
   'Domicile Certificate',
-  'Name Change Services',
-  'Address Change Services',
+  
+  // Employment
   'Employment Registration',
-  'EPF Services',
-  'ESIC Registration',
+  
+  // Pension
   'Pension Services',
   'Old Age Pension',
   'Widow Pension',
   'Disability Pension',
   'Jeevan Pramaan (Digital Life Certificate)',
+  
+  // Transport
   'Driving License Services',
   'Vehicle Registration',
   'Vehicle Number Plate Online',
   'RC Services',
   'Vehicle Insurance',
   'Vehicle Transfer',
+  
+  // Insurance
   'Health Insurance',
   'Ayushman Bharat Card',
   'PMJAY Card',
   'Life Insurance',
-  'Crop Insurance',
+  
+  // Government Schemes
   'PM Awas Yojana',
   'Ujjwala Yojana',
   'PM Kisan Registration',
   'Kisan Credit Card',
   'PM Mudra Loan',
   'Scholarship Applications',
+  
+  // Utility
   'Bill Payment',
   'Light Connection (Jhatpat Online)',
   'Water Connection',
@@ -58,10 +66,16 @@ const serviceOptions = [
   'Tax Deduction',
   'Income Tax Filing',
   'Withdraw/Payment Withdrawal',
+  
+  // Business
   'GST Registration',
   'Company Registration',
+  
+  // Legal
   'Legal Documentation',
   'Affidavit Services',
+  
+  // General
   'Xerox & Printing',
   'Form Filling Services',
   'Other Services',
