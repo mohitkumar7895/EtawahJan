@@ -6,6 +6,8 @@ import {
   serviceApplicationTemplate,
   contactFormTemplate,
 } from "./emailTemplates.js";
+import { connectDB } from "./config/db.js";
+import Vacancy from "./models/Vacancy.js";
 
 dotenv.config();
 
@@ -14,6 +16,9 @@ app.use(cors());
 app.use(express.json());
 
 const resend = new Resend(process.env.RESEND_API_KEY);
+
+// Connect to MongoDB
+connectDB().catch(console.error);
 
 // ✅ CONFIG
 const RECIPIENTS = ["dhaniramsingh711@gmail.com", "mohitporwal596@gmail.com"];
@@ -170,6 +175,96 @@ app.post("/contact", async (req, res) => {
     res
       .status(500)
       .json({ error: "Internal server error", details: err.message });
+  }
+});
+
+/**
+ * 📋 Vacancies API Endpoints
+ */
+
+// Get all vacancies
+app.get("/api/vacancies", async (req, res) => {
+  try {
+    const vacancies = await Vacancy.find().sort({ createdAt: -1 });
+    res.json(vacancies);
+  } catch (error) {
+    console.error("Error fetching vacancies:", error);
+    res.status(500).json({ error: "Failed to fetch vacancies" });
+  }
+});
+
+// Create new vacancy
+app.post("/api/vacancies", async (req, res) => {
+  try {
+    const { title, tag, info, date, lastDate, vacancies, link } = req.body;
+    
+    if (!title || !tag) {
+      return res.status(400).json({ error: "Title and tag are required" });
+    }
+
+    const vacancy = new Vacancy({
+      title,
+      tag,
+      info: info || '',
+      date: date || '',
+      lastDate: lastDate || '',
+      vacancies: vacancies ? Number(vacancies) : null,
+      link: link || '',
+    });
+
+    const savedVacancy = await vacancy.save();
+    res.status(201).json(savedVacancy);
+  } catch (error) {
+    console.error("Error creating vacancy:", error);
+    res.status(500).json({ error: "Failed to create vacancy" });
+  }
+});
+
+// Update vacancy
+app.put("/api/vacancies/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { title, tag, info, date, lastDate, vacancies, link } = req.body;
+
+    const vacancy = await Vacancy.findByIdAndUpdate(
+      id,
+      {
+        title,
+        tag,
+        info: info || '',
+        date: date || '',
+        lastDate: lastDate || '',
+        vacancies: vacancies ? Number(vacancies) : null,
+        link: link || '',
+      },
+      { new: true, runValidators: true }
+    );
+
+    if (!vacancy) {
+      return res.status(404).json({ error: "Vacancy not found" });
+    }
+
+    res.json(vacancy);
+  } catch (error) {
+    console.error("Error updating vacancy:", error);
+    res.status(500).json({ error: "Failed to update vacancy" });
+  }
+});
+
+// Delete vacancy
+app.delete("/api/vacancies/:id", async (req, res) => {
+  try {
+    const { id } = req.params;
+    const vacancy = await Vacancy.findByIdAndDelete(id);
+
+    if (!vacancy) {
+      return res.status(404).json({ error: "Vacancy not found" });
+    }
+
+    res.json({ message: "Vacancy deleted successfully" });
+  } catch (error) {
+    console.error("Error deleting vacancy:", error);
+    res.status(500).json({ error: "Failed to delete vacancy" });
   }
 });
 

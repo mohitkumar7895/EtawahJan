@@ -1,42 +1,30 @@
 import React, { useEffect, useState } from 'react';
 import { Tab } from '@headlessui/react';
-
-type Vacancy = {
-  id: string;
-  title: string;
-  tag: string;
-  info: string;
-  date?: string;
-  lastDate?: string;
-  vacancies?: number;
-  link?: string;
-};
+import { getVacancies, type Vacancy } from '../lib/api';
 
 function classNames(...classes: string[]) {
   return classes.filter(Boolean).join(' ');
-}
-
-const STORAGE_KEY = 'janseva_vacancies';
-
-function loadVacancies(): Vacancy[] {
-  try {
-    const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return [];
-    return JSON.parse(raw) as Vacancy[];
-  } catch {
-    return [];
-  }
 }
 
 export default function VacanciesPage() {
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
   const [categories] = useState(['All', 'Results', 'Admit Card', 'Vacancies']);
 
+  const loadVacancies = async () => {
+    try {
+      const data = await getVacancies();
+      setVacancies(data);
+    } catch (error) {
+      console.error('Failed to load vacancies:', error);
+      setVacancies([]);
+    }
+  };
+
   useEffect(() => {
-    setVacancies(loadVacancies());
+    loadVacancies();
     
     // Listen for updates from admin panel
-    const handleUpdate = () => setVacancies(loadVacancies());
+    const handleUpdate = () => loadVacancies();
     window.addEventListener('janseva:vacancies:updated', handleUpdate);
     return () => window.removeEventListener('janseva:vacancies:updated', handleUpdate);
   }, []);
@@ -90,7 +78,7 @@ export default function VacanciesPage() {
                       <p className="text-center py-8 text-gray-500">No vacancies or results available</p>
                     ) : (
                       categorizedVacancies[category as keyof typeof categorizedVacancies].map((vacancy) => (
-                        <div key={vacancy.id} className="relative rounded-lg p-4 hover:bg-orange-50 transition-colors border">
+                        <div key={vacancy.id || vacancy._id} className="relative rounded-lg p-4 hover:bg-orange-50 transition-colors border">
                           <h3 className="text-lg font-semibold text-gray-900">{vacancy.title}</h3>
                           
                           <div className="mt-1 flex flex-wrap gap-2">

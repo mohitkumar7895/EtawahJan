@@ -1,17 +1,7 @@
 import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, Zap, Receipt, Wallet, FileCheck, PiggyBank, Smartphone, Building2, GraduationCap, Shield, Users, Phone, Droplets, Flame, IndianRupee, FileEdit, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-
-type Vacancy = {
-  id?: string;
-  title: string;
-  tag: string;
-  info?: string;
-  link?: string;
-  date?: string;
-  vacancies?: number;
-  lastDate?: string;
-};
+import { getVacancies, type Vacancy } from '../lib/api';
 
 const services = [
   // Documents
@@ -96,35 +86,25 @@ const services = [
 export default function Services() {
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
 
-  useEffect(() => {
+  const loadVacancies = async () => {
     try {
-      const raw = localStorage.getItem('janseva_vacancies');
-      if (raw) {
-        setVacancies(JSON.parse(raw));
-        return;
-      }
-    } catch {
-      // ignore parse errors
+      const data = await getVacancies();
+      setVacancies(data);
+    } catch (error) {
+      console.error('Failed to load vacancies:', error);
+      // Fallback to empty array on error
+      setVacancies([]);
     }
+  };
 
-    // fallback defaults
-    setVacancies([
-      { title: 'UPPSC Inspector 2025', tag: 'Result', info: '120 Vacancies • Declared: 02 Nov 2025' },
-      { title: 'SSC CHSL 2025', tag: 'Result', info: '340 Vacancies • Declared: 28 Oct 2025' },
-      { title: 'AIIMS Nursing 2025', tag: 'Admit Card', info: 'Vacancies: 210 • Exam: 15 Nov 2025' },
-      { title: 'Railway JE 2025', tag: 'Notification', info: 'Vacancies: 560 • Apply by: 20 Nov 2025' },
-    ]);
+  useEffect(() => {
+    loadVacancies();
   }, []);
 
-  // listen for vacancy updates from admin UI
+  // Listen for vacancy updates from admin UI
   useEffect(() => {
     const handler = () => {
-      try {
-        const raw = localStorage.getItem('janseva_vacancies');
-        if (raw) setVacancies(JSON.parse(raw));
-      } catch {
-        // ignore
-      }
+      loadVacancies();
     };
 
     window.addEventListener('janseva:vacancies:updated', handler as EventListener);
@@ -188,7 +168,7 @@ export default function Services() {
 
               <ul className="space-y-4 px-4 py-4 text-sm">
                 {vacancies.slice(0, 3).map((v, idx) => (
-                  <li key={v.id ?? idx} className="p-4 bg-white rounded-xl border border-blue-100 shadow-sm hover:shadow-md transition flex flex-col gap-2">
+                  <li key={v.id || v._id || idx} className="p-4 bg-white rounded-xl border border-blue-100 shadow-sm hover:shadow-md transition flex flex-col gap-2">
                     <div className="flex items-center justify-between gap-2">
                       <h4 className="font-semibold text-blue-900 truncate text-base">{v.title || 'Untitled vacancy'}</h4>
                       <span
