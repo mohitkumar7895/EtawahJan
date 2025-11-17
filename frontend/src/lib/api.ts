@@ -1,6 +1,6 @@
 // Use localhost for local development, otherwise use environment variable or production URL
 const API_BASE_URL = import.meta.env.DEV 
-  ? 'http://localhost:5000' 
+  ? 'https://etawah-jan-a6ol.vercel.app' 
   : (import.meta.env.VITE_BACKEND_URL || 'https://etawah-jan-a6ol.vercel.app');
 
 
