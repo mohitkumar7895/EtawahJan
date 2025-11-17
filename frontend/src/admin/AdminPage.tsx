@@ -87,6 +87,9 @@ export default function AdminPage() {
       await loadVacanciesFromAPI();
       setForm({ title: '', tag: '', info: '', date: '', lastDate: '', vacancies: '', link: '' });
       setEditingId(null);
+      
+      // Dispatch event for same-tab updates
+      window.dispatchEvent(new CustomEvent('janseva:vacancies:updated'));
     } catch (err) {
       setError(editingId ? 'Failed to update vacancy' : 'Failed to create vacancy');
       console.error('Error saving vacancy:', err);
@@ -113,6 +116,9 @@ export default function AdminPage() {
       await deleteVacancy(id);
       // Reload vacancies from API
       await loadVacanciesFromAPI();
+      
+      // Dispatch event for same-tab updates
+      window.dispatchEvent(new CustomEvent('janseva:vacancies:updated'));
     } catch (err) {
       setError('Failed to delete vacancy');
       console.error('Error deleting vacancy:', err);

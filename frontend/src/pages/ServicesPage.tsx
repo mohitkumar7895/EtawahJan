@@ -1,6 +1,7 @@
 import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, Building2, FileCheck, ShieldCheck, Zap, Receipt, Wallet, PiggyBank, Smartphone, GraduationCap, Shield, Users, Phone, Droplets, Flame, IndianRupee, FileEdit, CheckCircle } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import { getVacancies } from '../lib/api';
 
 type Vacancy = {
   id?: string;
@@ -102,35 +103,31 @@ export default function ServicesPage() {
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
 
-  useEffect(() => {
+  const loadVacancies = async () => {
     try {
-      const raw = localStorage.getItem('janseva_vacancies');
-      if (raw) {
-        setVacancies(JSON.parse(raw));
-        return;
-      }
-    } catch {
-      // ignore parse errors
+      const data = await getVacancies();
+      setVacancies(data);
+    } catch (error) {
+      console.error('Failed to load vacancies:', error);
+      setVacancies([]);
     }
+  };
 
-    // fallback defaults
-    setVacancies([
-      { title: 'UPPSC Inspector 2025', tag: 'Result', info: '120 Vacancies • Declared: 02 Nov 2025' },
-      { title: 'SSC CHSL 2025', tag: 'Result', info: '340 Vacancies • Declared: 28 Oct 2025' },
-      { title: 'AIIMS Nursing 2025', tag: 'Admit Card', info: 'Vacancies: 210 • Exam: 15 Nov 2025' },
-      { title: 'Railway JE 2025', tag: 'Notification', info: 'Vacancies: 560 • Apply by: 20 Nov 2025' },
-    ]);
+  useEffect(() => {
+    loadVacancies();
+    
+    // Poll for updates every 5 seconds (for cross-browser live updates)
+    const interval = setInterval(() => {
+      loadVacancies();
+    }, 5000); // Refresh every 5 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
-  // listen for vacancy updates from admin UI
+  // Listen for vacancy updates from admin UI (same-tab updates)
   useEffect(() => {
     const handler = () => {
-      try {
-        const raw = localStorage.getItem('janseva_vacancies');
-        if (raw) setVacancies(JSON.parse(raw));
-      } catch {
-        // ignore
-      }
+      loadVacancies();
     };
 
     window.addEventListener('janseva:vacancies:updated', handler as EventListener);

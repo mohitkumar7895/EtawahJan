@@ -23,10 +23,19 @@ export default function VacanciesPage() {
   useEffect(() => {
     loadVacancies();
     
-    // Listen for updates from admin panel
+    // Poll for updates every 5 seconds (for cross-browser live updates)
+    const interval = setInterval(() => {
+      loadVacancies();
+    }, 5000); // Refresh every 5 seconds
+    
+    // Listen for updates from admin panel (same-tab updates)
     const handleUpdate = () => loadVacancies();
     window.addEventListener('janseva:vacancies:updated', handleUpdate);
-    return () => window.removeEventListener('janseva:vacancies:updated', handleUpdate);
+    
+    return () => {
+      clearInterval(interval);
+      window.removeEventListener('janseva:vacancies:updated', handleUpdate);
+    };
   }, []);
 
   const categorizedVacancies = {

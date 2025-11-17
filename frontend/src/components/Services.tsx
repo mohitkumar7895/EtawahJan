@@ -99,9 +99,16 @@ export default function Services() {
 
   useEffect(() => {
     loadVacancies();
+    
+    // Poll for updates every 5 seconds (for cross-browser live updates)
+    const interval = setInterval(() => {
+      loadVacancies();
+    }, 5000); // Refresh every 5 seconds
+
+    return () => clearInterval(interval);
   }, []);
 
-  // Listen for vacancy updates from admin UI
+  // Listen for vacancy updates from admin UI (same-tab updates)
   useEffect(() => {
     const handler = () => {
       loadVacancies();
