@@ -30,7 +30,7 @@ function loadVacancies(): Vacancy[] {
 
 export default function VacanciesPage() {
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
-  const [categories] = useState(['All', 'Results', 'Vacancies']);
+  const [categories] = useState(['All', 'Results', 'Admit Card', 'Vacancies']);
 
   useEffect(() => {
     setVacancies(loadVacancies());
@@ -44,7 +44,8 @@ export default function VacanciesPage() {
   const categorizedVacancies = {
     'All': vacancies,
     'Results': vacancies.filter(v => v.tag.toLowerCase().includes('result')),
-    'Vacancies': vacancies.filter(v => !v.tag.toLowerCase().includes('result'))
+    'Admit Card': vacancies.filter(v => v.tag.toLowerCase().includes('admit')),
+    'Vacancies': vacancies.filter(v => !v.tag.toLowerCase().includes('result') && !v.tag.toLowerCase().includes('admit'))
   };
 
   return (
