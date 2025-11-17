@@ -15,6 +15,14 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
+// Log environment info (for debugging)
+app.use((req, res, next) => {
+  if (req.path === '/api/health' || req.path.startsWith('/api/vacancies')) {
+    console.log(`[${new Date().toISOString()}] ${req.method} ${req.path}`);
+  }
+  next();
+});
+
 const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Connect to MongoDB
@@ -221,11 +229,24 @@ app.get("/api/vacancies", async (req, res) => {
 // Create new vacancy
 app.post("/api/vacancies", async (req, res) => {
   try {
+    // Check database connection
     if (!isDBConnected()) {
-      // Try to reconnect
-      await connectDB();
+      console.log("⚠️ DB not connected, attempting to reconnect...");
+      try {
+        await connectDB();
+      } catch (connError) {
+        console.error("❌ Reconnection failed:", connError);
+        return res.status(503).json({ 
+          error: "Database connection failed",
+          message: "Please check MongoDB connection string in environment variables"
+        });
+      }
+      
       if (!isDBConnected()) {
-        return res.status(503).json({ error: "Database not available. Please try again later." });
+        return res.status(503).json({ 
+          error: "Database not available",
+          message: "MongoDB connection could not be established. Please check MONGODB_URI environment variable."
+        });
       }
     }
 
@@ -235,23 +256,47 @@ app.post("/api/vacancies", async (req, res) => {
       return res.status(400).json({ error: "Title and tag are required" });
     }
 
+    console.log("📝 Creating vacancy:", { title, tag });
+
     const vacancy = new Vacancy({
-      title,
-      tag,
-      info: info || '',
-      date: date || '',
-      lastDate: lastDate || '',
+      title: title.trim(),
+      tag: tag.trim(),
+      info: info ? info.trim() : '',
+      date: date ? date.trim() : '',
+      lastDate: lastDate ? lastDate.trim() : '',
       vacancies: vacancies ? Number(vacancies) : null,
-      link: link || '',
+      link: link ? link.trim() : '',
     });
 
     const savedVacancy = await vacancy.save();
-    res.status(201).json(savedVacancy);
+    console.log("✅ Vacancy created successfully:", savedVacancy._id);
+    
+    res.status(201).json({
+      ...savedVacancy.toObject(),
+      id: savedVacancy._id.toString()
+    });
   } catch (error) {
-    console.error("Error creating vacancy:", error);
+    console.error("❌ Error creating vacancy:", error);
+    console.error("Error stack:", error.stack);
+    console.error("Error name:", error.name);
+    
+    // More detailed error response
+    let errorMessage = "Failed to create vacancy";
+    let errorDetails = null;
+
+    if (error.name === 'ValidationError') {
+      errorMessage = "Validation error";
+      errorDetails = Object.values(error.errors).map(e => e.message).join(', ');
+    } else if (error.name === 'MongoServerError') {
+      errorMessage = "Database error";
+      errorDetails = error.message;
+    } else if (error.message) {
+      errorDetails = error.message;
+    }
+
     res.status(500).json({ 
-      error: "Failed to create vacancy",
-      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      error: errorMessage,
+      details: errorDetails || (process.env.NODE_ENV === 'development' ? error.stack : undefined)
     });
   }
 });
