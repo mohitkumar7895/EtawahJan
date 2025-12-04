@@ -37,10 +37,20 @@ if (process.env.MONGODB_URI) {
 
 const app = express();
 
-// CORS configuration - allow localhost only
+// CORS configuration - allow both localhost and production domain
 app.use(cors({
-  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174', 'http://localhost:5175'],
-  credentials: true
+  origin: [
+    'http://localhost:5173', 
+    'http://localhost:3000', 
+    'http://localhost:5174', 
+    'http://localhost:5175',
+    'https://www.jan-seva.site',
+    'https://jan-seva.site',
+    'https://etawah-jan-a6ol.vercel.app'
+  ],
+  credentials: true,
+  methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+  allowedHeaders: ['Content-Type', 'Authorization']
 }));
 
 app.use(express.json());
@@ -571,10 +581,16 @@ app.delete("/api/vacancies/:id", async (req, res) => {
   }
 });
 
-// Start server
-app.listen(PORT, () => {
-  console.log(`\n🚀 Server running on port ${PORT}`);
-  console.log(`📍 API URL: http://localhost:${PORT}`);
-  console.log("📧 Sending emails to:", RECIPIENTS.join(", "));
-  console.log("✅ Ready to receive form submissions!\n");
-});
+// Start server (for local development)
+// For Vercel, the app is exported as a serverless function
+if (process.env.NODE_ENV !== 'production' || !process.env.VERCEL) {
+  app.listen(PORT, () => {
+    console.log(`\n🚀 Server running on port ${PORT}`);
+    console.log(`📍 API URL: http://localhost:${PORT}`);
+    console.log("📧 Sending emails to:", RECIPIENTS.join(", "));
+    console.log("✅ Ready to receive form submissions!\n");
+  });
+}
+
+// Export for Vercel serverless functions (for production deployment)
+export default app;

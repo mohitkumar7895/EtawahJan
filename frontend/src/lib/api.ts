@@ -1,5 +1,7 @@
-// Use localhost for backend API
-const API_BASE_URL = 'http://localhost:5000';
+// Use production backend URL for live site, localhost for development
+const API_BASE_URL = import.meta.env.DEV 
+  ? 'http://localhost:5000' 
+  : 'https://etawah-jan-a6ol.vercel.app';
 export interface ContactFormData {
   name: string;
   email: string;
