@@ -95,7 +95,7 @@ export default function AdminPage() {
       
       // Check if it's a database connection error
       if (errorMsg.includes('Database') || errorMsg.includes('MongoDB') || errorMsg.includes('connection')) {
-        setError(`Database Error: ${errorMsg}. Please check MONGODB_URI in Vercel environment variables.`);
+        setError(`Database Error: ${errorMsg}. Please check MONGODB_URI in your .env file.`);
       } else {
         setError(errorMsg);
       }

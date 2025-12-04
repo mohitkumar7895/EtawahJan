@@ -2,6 +2,8 @@ import express from "express";
 import cors from "cors";
 import { Resend } from "resend";
 import dotenv from "dotenv";
+import { fileURLToPath } from "url";
+import { dirname, join } from "path";
 import {
   serviceApplicationTemplate,
   contactFormTemplate,
@@ -9,10 +11,38 @@ import {
 import { connectDB, isDBConnected } from "./config/db.js";
 import Vacancy from "./models/Vacancy.js";
 
-dotenv.config();
+// Get current directory for ES modules
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = dirname(__filename);
+
+// Load .env file from backend directory
+const envPath = join(__dirname, ".env");
+const result = dotenv.config({ path: envPath });
+
+if (result.error) {
+  console.warn("⚠️ Warning: .env file not found or error loading it:", result.error.message);
+  console.log("📍 Looking for .env at:", envPath);
+} else {
+  console.log("✅ .env file loaded successfully");
+}
+
+// Debug: Check if MONGODB_URI is loaded (without showing the actual value)
+if (process.env.MONGODB_URI) {
+  const uriPreview = process.env.MONGODB_URI.substring(0, 20) + "...";
+  console.log("✅ MONGODB_URI is set:", uriPreview);
+} else {
+  console.error("❌ MONGODB_URI is NOT set in environment variables");
+  console.log("💡 Make sure your .env file contains: MONGODB_URI=your_mongodb_atlas_url");
+}
 
 const app = express();
-app.use(cors());
+
+// CORS configuration - allow localhost only
+app.use(cors({
+  origin: ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:5174', 'http://localhost:5175'],
+  credentials: true
+}));
+
 app.use(express.json());
 
 // Log environment info (for debugging)
@@ -27,7 +57,9 @@ const resend = new Resend(process.env.RESEND_API_KEY);
 
 // Connect to MongoDB
 connectDB().catch((err) => {
-  console.error('Failed to connect to MongoDB:', err);
+  console.error('❌ Failed to connect to MongoDB:', err.message);
+  console.error('⚠️ Server will start but database operations may fail.');
+  console.error('💡 Make sure MONGODB_URI is set in your environment variables.');
   // Don't exit - let the server start and handle errors gracefully
 });
 
@@ -208,19 +240,79 @@ app.get("/api/health", async (req, res) => {
 // Get all vacancies
 app.get("/api/vacancies", async (req, res) => {
   try {
+    // Check database connection
     if (!isDBConnected()) {
-      // Try to reconnect
-      await connectDB();
+      console.log("⚠️ DB not connected, attempting to reconnect...");
+      try {
+        await connectDB();
+      } catch (connError) {
+        console.error("❌ Reconnection failed:", connError.message);
+        console.error("Connection error details:", {
+          name: connError.name,
+          code: connError.code,
+          message: connError.message
+        });
+        return res.status(503).json({ 
+          error: "Database not available",
+          message: "MongoDB connection failed. Please check MONGODB_URI environment variable.",
+          hint: "Make sure MONGODB_URI is set correctly in your .env file"
+        });
+      }
+      
+      // Double check after reconnection
       if (!isDBConnected()) {
-        return res.status(503).json({ error: "Database not available. Please try again later." });
+        return res.status(503).json({ 
+          error: "Database not available",
+          message: "MongoDB connection could not be established",
+          hint: "Check your MongoDB Atlas connection string"
+        });
       }
     }
-    const vacancies = await Vacancy.find().sort({ createdAt: -1 });
-    res.json(vacancies);
+    
+    // Try to fetch vacancies
+    try {
+      const vacancies = await Vacancy.find().sort({ createdAt: -1 });
+      console.log(`✅ Fetched ${vacancies.length} vacancies`);
+      return res.json(vacancies || []);
+    } catch (queryError) {
+      console.error("❌ Error querying vacancies:", queryError);
+      
+      // Check if it's a MongoDB connection error
+      if (queryError.name === 'MongoServerError' || 
+          queryError.name === 'MongoError' ||
+          queryError.message.includes('connection') ||
+          queryError.message.includes('timeout')) {
+        return res.status(503).json({ 
+          error: "Database connection error",
+          message: "Failed to query database. Please check MongoDB connection.",
+          hint: "Verify MONGODB_URI is correct in your .env file"
+        });
+      }
+      
+      // Other database errors
+      throw queryError;
+    }
   } catch (error) {
-    console.error("Error fetching vacancies:", error);
+    console.error("❌ Error fetching vacancies:", error);
+    console.error("Error details:", {
+      name: error.name,
+      message: error.message,
+      stack: error.stack
+    });
+    
+    // Return appropriate status code based on error type
+    if (error.name === 'MongoServerError' || error.name === 'MongoError') {
+      return res.status(503).json({ 
+        error: "Database error",
+        message: "Failed to fetch vacancies from database",
+        hint: "Check MongoDB connection and environment variables"
+      });
+    }
+    
+    // Generic error
     res.status(500).json({ 
       error: "Failed to fetch vacancies",
+      message: "An unexpected error occurred",
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
@@ -229,34 +321,41 @@ app.get("/api/vacancies", async (req, res) => {
 // Create new vacancy
 app.post("/api/vacancies", async (req, res) => {
   try {
-    // Check database connection
+    // Check database connection and reconnect if needed
     if (!isDBConnected()) {
       console.log("⚠️ DB not connected, attempting to reconnect...");
       try {
         await connectDB();
       } catch (connError) {
-        console.error("❌ Reconnection failed:", connError);
+        console.error("❌ Reconnection failed:", connError.message);
         return res.status(503).json({ 
           error: "Database connection failed",
-          message: "Please check MongoDB connection string in environment variables"
+          message: "Please check MongoDB connection string in environment variables",
+          hint: "Make sure MONGODB_URI is set correctly with your MongoDB Atlas URL"
         });
       }
       
+      // Double check after reconnection attempt
       if (!isDBConnected()) {
         return res.status(503).json({ 
           error: "Database not available",
-          message: "MongoDB connection could not be established. Please check MONGODB_URI environment variable."
+          message: "MongoDB connection could not be established. Please check MONGODB_URI environment variable.",
+          hint: "Verify your MongoDB Atlas connection string is correct"
         });
       }
     }
 
     const { title, tag, info, date, lastDate, vacancies, link } = req.body;
     
-    if (!title || !tag) {
-      return res.status(400).json({ error: "Title and tag are required" });
+    // Validate required fields
+    if (!title || !title.trim()) {
+      return res.status(400).json({ error: "Title is required" });
+    }
+    if (!tag || !tag.trim()) {
+      return res.status(400).json({ error: "Tag is required" });
     }
 
-    console.log("📝 Creating vacancy:", { title, tag });
+    console.log("📝 Creating vacancy:", { title, tag, info, date, lastDate, vacancies, link });
 
     const vacancy = new Vacancy({
       title: title.trim(),
@@ -264,12 +363,23 @@ app.post("/api/vacancies", async (req, res) => {
       info: info ? info.trim() : '',
       date: date ? date.trim() : '',
       lastDate: lastDate ? lastDate.trim() : '',
-      vacancies: vacancies ? Number(vacancies) : null,
+      vacancies: vacancies ? (Number(vacancies) || null) : null,
       link: link ? link.trim() : '',
     });
 
+    // Validate before saving
+    const validationError = vacancy.validateSync();
+    if (validationError) {
+      const errors = Object.values(validationError.errors).map(e => e.message);
+      return res.status(400).json({ 
+        error: "Validation error",
+        details: errors.join(', ')
+      });
+    }
+
     const savedVacancy = await vacancy.save();
     console.log("✅ Vacancy created successfully:", savedVacancy._id);
+    console.log("📊 Saved vacancy:", JSON.stringify(savedVacancy.toObject(), null, 2));
     
     res.status(201).json({
       ...savedVacancy.toObject(),
@@ -277,26 +387,55 @@ app.post("/api/vacancies", async (req, res) => {
     });
   } catch (error) {
     console.error("❌ Error creating vacancy:", error);
-    console.error("Error stack:", error.stack);
     console.error("Error name:", error.name);
+    console.error("Error message:", error.message);
     
-    // More detailed error response
-    let errorMessage = "Failed to create vacancy";
-    let errorDetails = null;
-
+    // Handle specific MongoDB errors
     if (error.name === 'ValidationError') {
-      errorMessage = "Validation error";
-      errorDetails = Object.values(error.errors).map(e => e.message).join(', ');
-    } else if (error.name === 'MongoServerError') {
-      errorMessage = "Database error";
-      errorDetails = error.message;
-    } else if (error.message) {
-      errorDetails = error.message;
+      const errors = Object.values(error.errors).map(e => e.message);
+      return res.status(400).json({ 
+        error: "Validation error",
+        details: errors.join(', ')
+      });
+    }
+    
+    if (error.name === 'MongoServerError' || error.name === 'MongoError') {
+      console.error("MongoDB Error Code:", error.code);
+      // Check if it's a connection error
+      if (error.message.includes('connection') || error.message.includes('timeout') || error.message.includes('ECONNREFUSED')) {
+        return res.status(503).json({ 
+          error: "Database connection error",
+          message: "Failed to connect to MongoDB. Please check MONGODB_URI in your .env file.",
+          hint: "Make sure MongoDB is running and MONGODB_URI is correct"
+        });
+      }
+      return res.status(500).json({ 
+        error: "Database error",
+        message: "Failed to save vacancy to database",
+        details: process.env.NODE_ENV === 'development' ? error.message : undefined
+      });
+    }
+    
+    // Check for connection errors
+    if (error.message && (error.message.includes('connection') || error.message.includes('ECONNREFUSED') || error.message.includes('timeout'))) {
+      return res.status(503).json({ 
+        error: "Database connection error",
+        message: "Failed to connect to MongoDB. Please check MONGODB_URI in your .env file.",
+        hint: "Make sure MongoDB is running and MONGODB_URI is correct"
+      });
+    }
+    
+    if (error.name === 'CastError') {
+      return res.status(400).json({ 
+        error: "Invalid data type",
+        details: error.message
+      });
     }
 
+    // Generic error
     res.status(500).json({ 
-      error: errorMessage,
-      details: errorDetails || (process.env.NODE_ENV === 'development' ? error.stack : undefined)
+      error: "Failed to create vacancy",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
     });
   }
 });
@@ -305,26 +444,46 @@ app.post("/api/vacancies", async (req, res) => {
 app.put("/api/vacancies/:id", async (req, res) => {
   try {
     if (!isDBConnected()) {
-      await connectDB();
+      console.log("⚠️ DB not connected, attempting to reconnect...");
+      try {
+        await connectDB();
+      } catch (connError) {
+        console.error("❌ Reconnection failed:", connError.message);
+        return res.status(503).json({ 
+          error: "Database not available",
+          message: "Please check MongoDB connection string in environment variables"
+        });
+      }
+      
       if (!isDBConnected()) {
-        return res.status(503).json({ error: "Database not available. Please try again later." });
+        return res.status(503).json({ 
+          error: "Database not available",
+          message: "MongoDB connection could not be established"
+        });
       }
     }
 
     const { id } = req.params;
     const { title, tag, info, date, lastDate, vacancies, link } = req.body;
 
+    if (!id) {
+      return res.status(400).json({ error: "Vacancy ID is required" });
+    }
+
+    const updateData = {};
+    if (title !== undefined) updateData.title = title.trim();
+    if (tag !== undefined) updateData.tag = tag.trim();
+    if (info !== undefined) updateData.info = info ? info.trim() : '';
+    if (date !== undefined) updateData.date = date ? date.trim() : '';
+    if (lastDate !== undefined) updateData.lastDate = lastDate ? lastDate.trim() : '';
+    if (vacancies !== undefined) updateData.vacancies = vacancies ? (Number(vacancies) || null) : null;
+    if (link !== undefined) updateData.link = link ? link.trim() : '';
+
+    console.log("📝 Updating vacancy:", id, updateData);
+
     const vacancy = await Vacancy.findByIdAndUpdate(
       id,
-      {
-        title,
-        tag,
-        info: info || '',
-        date: date || '',
-        lastDate: lastDate || '',
-        vacancies: vacancies ? Number(vacancies) : null,
-        link: link || '',
-      },
+      updateData,
       { new: true, runValidators: true }
     );
 
@@ -332,9 +491,25 @@ app.put("/api/vacancies/:id", async (req, res) => {
       return res.status(404).json({ error: "Vacancy not found" });
     }
 
+    console.log("✅ Vacancy updated successfully:", vacancy._id);
     res.json(vacancy);
   } catch (error) {
-    console.error("Error updating vacancy:", error);
+    console.error("❌ Error updating vacancy:", error);
+    
+    if (error.name === 'ValidationError') {
+      const errors = Object.values(error.errors).map(e => e.message);
+      return res.status(400).json({ 
+        error: "Validation error",
+        details: errors.join(', ')
+      });
+    }
+    
+    if (error.name === 'CastError') {
+      return res.status(400).json({ 
+        error: "Invalid vacancy ID format"
+      });
+    }
+    
     res.status(500).json({ 
       error: "Failed to update vacancy",
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -346,22 +521,49 @@ app.put("/api/vacancies/:id", async (req, res) => {
 app.delete("/api/vacancies/:id", async (req, res) => {
   try {
     if (!isDBConnected()) {
-      await connectDB();
+      console.log("⚠️ DB not connected, attempting to reconnect...");
+      try {
+        await connectDB();
+      } catch (connError) {
+        console.error("❌ Reconnection failed:", connError.message);
+        return res.status(503).json({ 
+          error: "Database not available",
+          message: "Please check MongoDB connection string in environment variables"
+        });
+      }
+      
       if (!isDBConnected()) {
-        return res.status(503).json({ error: "Database not available. Please try again later." });
+        return res.status(503).json({ 
+          error: "Database not available",
+          message: "MongoDB connection could not be established"
+        });
       }
     }
 
     const { id } = req.params;
+    
+    if (!id) {
+      return res.status(400).json({ error: "Vacancy ID is required" });
+    }
+
+    console.log("🗑️ Deleting vacancy:", id);
     const vacancy = await Vacancy.findByIdAndDelete(id);
 
     if (!vacancy) {
       return res.status(404).json({ error: "Vacancy not found" });
     }
 
-    res.json({ message: "Vacancy deleted successfully" });
+    console.log("✅ Vacancy deleted successfully:", id);
+    res.json({ message: "Vacancy deleted successfully", id });
   } catch (error) {
-    console.error("Error deleting vacancy:", error);
+    console.error("❌ Error deleting vacancy:", error);
+    
+    if (error.name === 'CastError') {
+      return res.status(400).json({ 
+        error: "Invalid vacancy ID format"
+      });
+    }
+    
     res.status(500).json({ 
       error: "Failed to delete vacancy",
       details: process.env.NODE_ENV === 'development' ? error.message : undefined
@@ -369,8 +571,10 @@ app.delete("/api/vacancies/:id", async (req, res) => {
   }
 });
 
+// Start server
 app.listen(PORT, () => {
   console.log(`\n🚀 Server running on port ${PORT}`);
+  console.log(`📍 API URL: http://localhost:${PORT}`);
   console.log("📧 Sending emails to:", RECIPIENTS.join(", "));
   console.log("✅ Ready to receive form submissions!\n");
 });

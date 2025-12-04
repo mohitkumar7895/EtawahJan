@@ -1,8 +1,11 @@
 import mongoose from 'mongoose';
 
-const MONGODB_URI = process.env.MONGODB_URI || 'mongodb://localhost:27017/adminjanseva';
-
 let isConnected = false;
+
+// Function to get MongoDB URI from environment variables
+function getMongoDBURI() {
+  return process.env.MONGODB_URI || process.env.MONGO_URL || process.env.MONGODB_URL;
+}
 
 export async function connectDB() {
   if (isConnected && mongoose.connection.readyState === 1) {
@@ -10,20 +13,58 @@ export async function connectDB() {
     return;
   }
 
+  // Get MongoDB URI (read from env at runtime, not module load time)
+  let MONGODB_URI = getMongoDBURI();
+
+  // Trim whitespace if present
+  if (MONGODB_URI) {
+    MONGODB_URI = MONGODB_URI.trim();
+    // Remove quotes if present
+    if ((MONGODB_URI.startsWith('"') && MONGODB_URI.endsWith('"')) || 
+        (MONGODB_URI.startsWith("'") && MONGODB_URI.endsWith("'"))) {
+      MONGODB_URI = MONGODB_URI.slice(1, -1);
+    }
+  }
+
   // Check if MONGODB_URI is set
-  if (!MONGODB_URI || MONGODB_URI.includes('localhost') && process.env.VERCEL) {
-    console.error('❌ MONGODB_URI not configured for production!');
-    console.error('⚠️ For Vercel deployment, you need MongoDB Atlas or a cloud MongoDB service.');
+  if (!MONGODB_URI || MONGODB_URI === '') {
+    console.error('❌ MONGODB_URI not configured!');
+    console.error('⚠️ Please set MONGODB_URI environment variable with your MongoDB Atlas connection string.');
+    console.error('💡 Check your .env file in the backend directory');
+    console.error('💡 Format: MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority');
+    console.error('💡 Make sure there are NO spaces around the = sign');
     throw new Error('MongoDB connection string not configured. Please set MONGODB_URI environment variable.');
+  }
+
+  // Validate URI format
+  if (!MONGODB_URI.startsWith('mongodb://') && !MONGODB_URI.startsWith('mongodb+srv://')) {
+    console.error('❌ Invalid MongoDB URI format!');
+    console.error('⚠️ URI should start with mongodb:// or mongodb+srv://');
+    throw new Error('Invalid MongoDB connection string format.');
+  }
+
+  // Note: localhost MongoDB is fine for local development
+  if (MONGODB_URI.includes('localhost')) {
+    console.log('ℹ️ Using localhost MongoDB (for local development)');
   }
 
   try {
     const options = {
-      serverSelectionTimeoutMS: 10000, // 10 seconds timeout
+      serverSelectionTimeoutMS: 30000, // 30 seconds timeout for Atlas
       socketTimeoutMS: 45000,
+      maxPoolSize: 10,
+      retryWrites: true,
+      w: 'majority'
     };
 
     console.log('🔄 Attempting to connect to MongoDB...');
+    
+    // Show connection string preview (first 30 chars + last 20 chars)
+    const uriPreview = MONGODB_URI.length > 50 
+      ? MONGODB_URI.substring(0, 30) + '...' + MONGODB_URI.substring(MONGODB_URI.length - 20)
+      : MONGODB_URI.substring(0, 20) + '...';
+    console.log('📍 Connection string:', uriPreview);
+    
     await mongoose.connect(MONGODB_URI, options);
     isConnected = true;
     
@@ -31,6 +72,7 @@ export async function connectDB() {
     const safeUri = MONGODB_URI.replace(/\/\/([^:]+):([^@]+)@/, '//***:***@');
     console.log('✅ MongoDB Connected successfully');
     console.log('📍 Connection string:', safeUri);
+    console.log('📊 Database:', mongoose.connection.db?.databaseName || 'Unknown');
     
     mongoose.connection.on('error', (err) => {
       console.error('❌ MongoDB connection error:', err);

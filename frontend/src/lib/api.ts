@@ -1,11 +1,5 @@
-// Use localhost for local development, otherwise use environment variable or production URL
-const API_BASE_URL = import.meta.env.DEV 
-  ? 'https://etawah-jan-a6ol.vercel.app' 
-  : (import.meta.env.VITE_BACKEND_URL || 'https://etawah-jan-a6ol.vercel.app');
-
-
- // const API_BASE_URL = "https://etawah-jan-a6ol.vercel.app";
-//jiii
+// Use localhost for backend API
+const API_BASE_URL = 'http://localhost:5000';
 export interface ContactFormData {
   name: string;
   email: string;
@@ -66,21 +60,49 @@ export interface Vacancy {
 }
 
 export async function getVacancies(): Promise<Vacancy[]> {
-  const response = await fetch(`${API_BASE_URL}/api/vacancies`);
-  if (!response.ok) {
-    // If 503, it's a database connection issue
-    if (response.status === 503) {
-      console.warn('Database not available. Please check MongoDB connection.');
-      return []; // Return empty array instead of throwing error
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/vacancies`);
+    
+    if (!response.ok) {
+      // Try to get error message from response
+      let errorMessage = 'Failed to fetch vacancies';
+      try {
+        const errorData = await response.json();
+        errorMessage = errorData.message || errorData.error || errorMessage;
+        console.error('API Error:', errorData);
+      } catch (e) {
+        // If response is not JSON, use status text
+        errorMessage = response.statusText || errorMessage;
+      }
+      
+      // If 503, it's a database connection issue - return empty array
+      if (response.status === 503) {
+        console.warn('Database not available:', errorMessage);
+        return []; // Return empty array instead of throwing error
+      }
+      
+      throw new Error(errorMessage);
     }
-    throw new Error('Failed to fetch vacancies');
+    
+    const data = await response.json();
+    
+    // Handle case where data might not be an array
+    if (!Array.isArray(data)) {
+      console.warn('API returned non-array data:', data);
+      return [];
+    }
+    
+    // Map _id to id for compatibility
+    return data.map((v: any) => ({
+      ...v,
+      id: v._id || v.id,
+    }));
+  } catch (error: any) {
+    console.error('Error fetching vacancies:', error);
+    // Return empty array on error instead of throwing
+    // This allows the UI to still render
+    return [];
   }
-  const data = await response.json();
-  // Map _id to id for compatibility
-  return data.map((v: any) => ({
-    ...v,
-    id: v._id || v.id,
-  }));
 }
 
 export async function createVacancy(vacancy: Omit<Vacancy, '_id' | 'id'>): Promise<Vacancy> {
