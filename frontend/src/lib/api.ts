@@ -1,7 +1,22 @@
 // Use production backend URL for live site, localhost for development
-const API_BASE_URL = import.meta.env.DEV 
-  ? 'http://localhost:5000' 
-  : 'https://etawah-jan-a6ol.vercel.app';
+// Runtime check based on current hostname
+const getApiBaseUrl = () => {
+  // Check if we're running on localhost
+  if (typeof window !== 'undefined') {
+    const hostname = window.location.hostname;
+    if (hostname === 'localhost' || hostname === '127.0.0.1' || hostname.startsWith('192.168.')) {
+      return 'http://localhost:5000';
+    }
+  }
+  // For production (www.jan-seva.site or any other domain)
+  return 'https://etawah-jan-a6ol.vercel.app';
+};
+
+const API_BASE_URL = getApiBaseUrl();
+
+// Log for debugging
+console.log('🌐 API Base URL:', API_BASE_URL);
+console.log('📍 Current hostname:', typeof window !== 'undefined' ? window.location.hostname : 'server');
 export interface ContactFormData {
   name: string;
   email: string;
