@@ -30,7 +30,16 @@ export async function connectDB() {
   if (!MONGODB_URI || MONGODB_URI === '') {
     console.error('❌ MONGODB_URI not configured!');
     console.error('⚠️ Please set MONGODB_URI environment variable with your MongoDB Atlas connection string.');
-    console.error('💡 Check your .env file in the backend directory');
+    
+    // Different messages for Vercel vs local
+    if (process.env.VERCEL) {
+      console.error('💡 For Vercel: Go to Vercel Dashboard → Settings → Environment Variables');
+      console.error('💡 Add MONGODB_URI with your MongoDB Atlas connection string');
+      console.error('💡 Then redeploy your backend');
+    } else {
+      console.error('💡 Check your .env file in the backend directory');
+    }
+    
     console.error('💡 Format: MONGODB_URI=mongodb+srv://username:password@cluster.mongodb.net/database?retryWrites=true&w=majority');
     console.error('💡 Make sure there are NO spaces around the = sign');
     throw new Error('MongoDB connection string not configured. Please set MONGODB_URI environment variable.');

@@ -338,19 +338,37 @@ app.post("/api/vacancies", async (req, res) => {
         await connectDB();
       } catch (connError) {
         console.error("❌ Reconnection failed:", connError.message);
+        console.error("Connection error details:", {
+          name: connError.name,
+          code: connError.code,
+          message: connError.message
+        });
+        
+        // Provide helpful error message
+        let hintMessage = "Make sure MONGODB_URI is set correctly with your MongoDB Atlas URL";
+        if (process.env.VERCEL) {
+          hintMessage = "For Vercel: Go to Dashboard → Settings → Environment Variables → Add MONGODB_URI → Redeploy";
+        }
+        
         return res.status(503).json({ 
           error: "Database connection failed",
-          message: "Please check MongoDB connection string in environment variables",
-          hint: "Make sure MONGODB_URI is set correctly with your MongoDB Atlas URL"
+          message: "MongoDB connection could not be established. Please check MONGODB_URI environment variable.",
+          hint: hintMessage,
+          details: process.env.NODE_ENV === 'development' ? connError.message : undefined
         });
       }
       
       // Double check after reconnection attempt
       if (!isDBConnected()) {
+        let hintMessage = "Verify your MongoDB Atlas connection string is correct";
+        if (process.env.VERCEL) {
+          hintMessage = "For Vercel: Check Environment Variables → MONGODB_URI → Redeploy";
+        }
+        
         return res.status(503).json({ 
           error: "Database not available",
           message: "MongoDB connection could not be established. Please check MONGODB_URI environment variable.",
-          hint: "Verify your MongoDB Atlas connection string is correct"
+          hint: hintMessage
         });
       }
     }
