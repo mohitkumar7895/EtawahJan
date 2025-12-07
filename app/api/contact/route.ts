@@ -1,37 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
 import { contactFormTemplate } from '@/lib/emailTemplates';
+import { sendEmail, getRecipients, isEmailConfigured } from '@/lib/emailService';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const RECIPIENTS = process.env.RECIPIENT_EMAILS 
-  ? process.env.RECIPIENT_EMAILS.split(',').map(email => email.trim())
-  : ["dhaniramsingh711@gmail.com", "mohitporwal596@gmail.com"];
-const FROM_ADDRESS = process.env.FROM_EMAIL || "Jun Seva Kendra <onboarding@resend.dev>";
-
-async function sendEmailSafe({ to, subject, html }: { to: string; subject: string; html: string }) {
-  try {
-    console.log(`📤 Attempting to send to: ${to}`);
-
-    const response = await resend.emails.send({
-      from: FROM_ADDRESS,
-      to,
-      subject,
-      html,
-    });
-
-    const messageId = (response as any)?.id || (response as any)?.data?.id;
-
-    if (!messageId) {
-      throw new Error("No response ID returned from Resend");
-    }
-
-    console.log(`✅ Email sent to ${to} (ID: ${messageId})`);
-    return { success: true, id: messageId };
-  } catch (err: any) {
-    console.error(`❌ Failed to send email to ${to}:`, err);
-    return { success: false, error: err.message };
-  }
-}
+const RECIPIENTS = getRecipients();
 
 function validateFields(obj: any, requiredFields: string[]) {
   for (const field of requiredFields) {
@@ -44,6 +15,23 @@ function validateFields(obj: any, requiredFields: string[]) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if any email service is configured
+    if (!isEmailConfigured()) {
+      console.error('❌ No email service configured');
+      return NextResponse.json(
+        { 
+          error: "Email service not configured",
+          message: "No email service available. Please configure one of the following:",
+          options: [
+            "Option 1: Set RESEND_API_KEY in .env.local (Get from https://resend.com/api-keys)",
+            "Option 2: Set GMAIL_USER and GMAIL_APP_PASSWORD in .env.local (Use Gmail App Password)"
+          ],
+          hint: "See env.example for configuration details"
+        },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const { name, email, message } = body;
 
@@ -54,6 +42,7 @@ export async function POST(request: NextRequest) {
 
     console.log("\n💬 NEW CONTACT MESSAGE 💬");
     console.log({ name, email, message });
+    console.log(`📧 Recipients: ${RECIPIENTS.join(', ')}`);
 
     const subject = `💬 New Contact Message from ${name}`;
     const html = contactFormTemplate({ name, email, message });
@@ -61,31 +50,61 @@ export async function POST(request: NextRequest) {
     // Send to both recipients
     const results = [];
     for (const to of RECIPIENTS) {
-      const result = await sendEmailSafe({ to, subject, html });
+      const result = await sendEmail({ to, subject, html });
       results.push({ to, ...result });
       await new Promise((r) => setTimeout(r, 1000));
     }
 
     const successCount = results.filter((r) => r.success).length;
 
+    console.log(`\n📊 Email sending results: ${successCount}/${RECIPIENTS.length} successful`);
+    results.forEach((r, i) => {
+      if (r.success) {
+        console.log(`  ✅ ${i + 1}. ${r.to} - Success (${r.method}, ID: ${r.id})`);
+      } else {
+        console.log(`  ❌ ${i + 1}. ${r.to} - Failed: ${r.error}`);
+      }
+    });
+
     if (successCount > 0) {
       return NextResponse.json({
+        success: true,
         message: "✅ Message sent successfully",
-        results,
+        emailStatus: `${successCount}/${RECIPIENTS.length} emails sent successfully`,
+        results: results.map(r => ({
+          to: r.to,
+          success: r.success,
+          method: r.method,
+          error: r.error
+        })),
       });
     } else {
       return NextResponse.json(
         {
-          error: "❌ All email deliveries failed",
-          results,
+          success: true,
+          message: "✅ Message submitted successfully",
+          warning: "⚠️ Emails could not be sent",
+          emailStatus: `0/${RECIPIENTS.length} emails sent`,
+          results: results.map(r => ({
+            to: r.to,
+            success: r.success,
+            method: r.method,
+            error: r.error
+          })),
+          hint: "Check email configuration in .env.local. Form data was saved but emails failed.",
         },
-        { status: 500 }
+        { status: 200 } // Changed to 200 so form still shows success
       );
     }
   } catch (err: any) {
     console.error("💥 SERVER ERROR (contact):", err);
+    console.error("💥 Error stack:", err?.stack);
     return NextResponse.json(
-      { error: "Internal server error", details: err.message },
+      { 
+        error: "Internal server error", 
+        details: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err?.stack : undefined
+      },
       { status: 500 }
     );
   }

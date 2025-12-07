@@ -1,37 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { Resend } from 'resend';
 import { serviceApplicationTemplate } from '@/lib/emailTemplates';
+import { sendEmail, getRecipients, isEmailConfigured } from '@/lib/emailService';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-const RECIPIENTS = process.env.RECIPIENT_EMAILS 
-  ? process.env.RECIPIENT_EMAILS.split(',').map(email => email.trim())
-  : ["dhaniramsingh711@gmail.com", "mohitporwal596@gmail.com"];
-const FROM_ADDRESS = process.env.FROM_EMAIL || "Jun Seva Kendra <onboarding@resend.dev>";
-
-async function sendEmailSafe({ to, subject, html }: { to: string; subject: string; html: string }) {
-  try {
-    console.log(`📤 Attempting to send to: ${to}`);
-
-    const response = await resend.emails.send({
-      from: FROM_ADDRESS,
-      to,
-      subject,
-      html,
-    });
-
-    const messageId = (response as any)?.id || (response as any)?.data?.id;
-
-    if (!messageId) {
-      throw new Error("No response ID returned from Resend");
-    }
-
-    console.log(`✅ Email sent to ${to} (ID: ${messageId})`);
-    return { success: true, id: messageId };
-  } catch (err: any) {
-    console.error(`❌ Failed to send email to ${to}:`, err);
-    return { success: false, error: err.message };
-  }
-}
+const RECIPIENTS = getRecipients();
 
 function validateFields(obj: any, requiredFields: string[]) {
   for (const field of requiredFields) {
@@ -44,6 +15,23 @@ function validateFields(obj: any, requiredFields: string[]) {
 
 export async function POST(request: NextRequest) {
   try {
+    // Check if any email service is configured
+    if (!isEmailConfigured()) {
+      console.error('❌ No email service configured');
+      return NextResponse.json(
+        { 
+          error: "Email service not configured",
+          message: "No email service available. Please configure one of the following:",
+          options: [
+            "Option 1: Set RESEND_API_KEY in .env.local (Get from https://resend.com/api-keys)",
+            "Option 2: Set GMAIL_USER and GMAIL_APP_PASSWORD in .env.local (Use Gmail App Password)"
+          ],
+          hint: "See env.example for configuration details"
+        },
+        { status: 500 }
+      );
+    }
+
     const body = await request.json();
     const {
       name,
@@ -65,8 +53,9 @@ export async function POST(request: NextRequest) {
 
     console.log("\n🔥 NEW SERVICE APPLICATION 🔥");
     console.log({ name, email, phone, service, address });
+    console.log(`📧 Recipients: ${RECIPIENTS.join(', ')}`);
 
-    const subject = `🔔 New Service Application - ${service}`;
+    const subject = `🔔 URGENT: नया सेवा आवेदन - ${service} | New Application - ${service}`;
     const html = serviceApplicationTemplate({
       name,
       email,
@@ -78,31 +67,58 @@ export async function POST(request: NextRequest) {
     // Send emails sequentially
     const results = [];
     for (const to of RECIPIENTS) {
-      const result = await sendEmailSafe({ to, subject, html });
+      const result = await sendEmail({ to, subject, html });
       results.push({ to, ...result });
       await new Promise((r) => setTimeout(r, 1000)); // wait 1s between sends
     }
 
     const successCount = results.filter((r) => r.success).length;
 
+    console.log(`\n📊 Email sending results: ${successCount}/${RECIPIENTS.length} successful`);
+    results.forEach((r, i) => {
+      if (r.success) {
+        console.log(`  ✅ ${i + 1}. ${r.to} - Success (${r.method}, ID: ${r.id})`);
+      } else {
+        console.log(`  ❌ ${i + 1}. ${r.to} - Failed: ${r.error}`);
+      }
+    });
+
+    // Always show detailed results in response
+    const responseData = {
+      success: successCount > 0,
+      message: successCount > 0 
+        ? "✅ Application submitted and emails sent successfully" 
+        : "⚠️ Application submitted but emails failed",
+      emailStatus: `${successCount}/${RECIPIENTS.length} emails sent`,
+      results: results.map(r => ({
+        to: r.to,
+        success: r.success,
+        method: r.method,
+        messageId: r.id,
+        error: r.error,
+        errorDetails: r.details
+      })),
+    };
+
     if (successCount > 0) {
-      return NextResponse.json({
-        message: "✅ Application submitted successfully",
-        results,
-      });
+      return NextResponse.json(responseData, { status: 200 });
     } else {
-      return NextResponse.json(
-        {
-          error: "❌ All email deliveries failed",
-          results,
-        },
-        { status: 500 }
-      );
+      // Return 200 but with warning
+      return NextResponse.json({
+        ...responseData,
+        warning: "⚠️ All emails failed. Check server logs for details.",
+        hint: "Common issues: Invalid API key, unverified domain, or rate limiting"
+      }, { status: 200 });
     }
   } catch (err: any) {
     console.error("💥 SERVER ERROR (apply-service):", err);
+    console.error("💥 Error stack:", err?.stack);
     return NextResponse.json(
-      { error: "Internal server error", details: err.message },
+      { 
+        error: "Internal server error", 
+        details: err.message,
+        stack: process.env.NODE_ENV === 'development' ? err?.stack : undefined
+      },
       { status: 500 }
     );
   }
