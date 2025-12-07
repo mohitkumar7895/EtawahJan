@@ -1,18 +1,38 @@
 import mongoose from 'mongoose';
 
-let isConnected = false;
+// Global connection cache for serverless (Vercel/Netlify)
+let cachedConnection: typeof mongoose | null = null;
+let isConnecting = false;
 
 // Function to get MongoDB URI from environment variables
 function getMongoDBURI() {
   return process.env.MONGODB_URI || process.env.MONGO_URL || process.env.MONGODB_URL;
 }
 
-// Track if we've already tried to connect and failed (to avoid spam)
-let connectionAttempted = false;
-
 export async function connectDB() {
-  if (isConnected && mongoose.connection.readyState === 1) {
-    return;
+  // Return cached connection if available and connected
+  if (cachedConnection && mongoose.connection.readyState === 1) {
+    return cachedConnection;
+  }
+
+  // If already connecting, wait for it
+  if (isConnecting) {
+    return new Promise((resolve, reject) => {
+      const checkConnection = setInterval(() => {
+        if (mongoose.connection.readyState === 1) {
+          clearInterval(checkConnection);
+          resolve(cachedConnection);
+        } else if (!isConnecting) {
+          clearInterval(checkConnection);
+          reject(new Error('Connection failed'));
+        }
+      }, 100);
+      
+      setTimeout(() => {
+        clearInterval(checkConnection);
+        reject(new Error('Connection timeout'));
+      }, 3000);
+    });
   }
 
   // Get MongoDB URI (read from env at runtime, not module load time)
@@ -30,13 +50,9 @@ export async function connectDB() {
 
   // Check if MONGODB_URI is set
   if (!MONGODB_URI || MONGODB_URI === '') {
-    // Only log error once to avoid spam
-    if (!connectionAttempted) {
-      console.error('❌ MONGODB_URI not configured!');
-      console.error('⚠️ Please set MONGODB_URI environment variable in .env.local file.');
-      console.error('💡 Create .env.local file in root directory with: MONGODB_URI=your_connection_string');
-      connectionAttempted = true;
-    }
+    console.error('❌ MONGODB_URI not configured!');
+    console.error('⚠️ Please set MONGODB_URI environment variable in .env.local file.');
+    console.error('💡 Create .env.local file in root directory with: MONGODB_URI=your_connection_string');
     throw new Error('MongoDB connection string not configured. Please set MONGODB_URI environment variable.');
   }
 
@@ -47,50 +63,66 @@ export async function connectDB() {
     throw new Error('Invalid MongoDB connection string format.');
   }
 
+  isConnecting = true;
+
   try {
-    // Optimized for serverless (Netlify/Vercel) - faster timeouts
+    // Ultra-optimized for serverless (Vercel) - very fast timeouts
     const options: mongoose.ConnectOptions = {
-      serverSelectionTimeoutMS: 5000, // Reduced from 30s to 5s for serverless
-      socketTimeoutMS: 10000, // Reduced from 45s to 10s
-      connectTimeoutMS: 5000, // Add connection timeout
-      maxPoolSize: 1, // Reduced for serverless (single connection)
+      serverSelectionTimeoutMS: 3000, // 3 seconds max
+      socketTimeoutMS: 5000, // 5 seconds
+      connectTimeoutMS: 3000, // 3 seconds connection timeout
+      maxPoolSize: 1, // Single connection for serverless
       minPoolSize: 0,
       retryWrites: true,
       w: 'majority' as const,
-      // Optimize for serverless cold starts
-      bufferCommands: false
+      // Optimize for serverless
+      bufferCommands: false,
+      // Fast connection options
+      directConnection: false,
+      // Reduce DNS lookup time
+      family: 4 // Force IPv4
     };
 
-    console.log('🔄 Attempting to connect to MongoDB...');
+    console.log('🔄 Attempting fast MongoDB connection...');
     
-    await mongoose.connect(MONGODB_URI, options);
-    isConnected = true;
-    connectionAttempted = false; // Reset on successful connection
+    // Add connection string optimizations
+    let optimizedUri = MONGODB_URI;
+    // Ensure retryWrites is in URI if not present
+    if (!optimizedUri.includes('retryWrites')) {
+      optimizedUri += (optimizedUri.includes('?') ? '&' : '?') + 'retryWrites=true&w=majority';
+    }
+    
+    await mongoose.connect(optimizedUri, options);
+    cachedConnection = mongoose;
+    isConnecting = false;
     
     console.log('✅ MongoDB Connected successfully');
     
     mongoose.connection.on('error', (err) => {
       console.error('❌ MongoDB connection error:', err);
-      isConnected = false;
+      cachedConnection = null;
     });
 
     mongoose.connection.on('disconnected', () => {
       console.warn('⚠️ MongoDB disconnected');
-      isConnected = false;
+      cachedConnection = null;
     });
 
     mongoose.connection.on('reconnected', () => {
       console.log('✅ MongoDB reconnected');
-      isConnected = true;
+      cachedConnection = mongoose;
     });
+
+    return cachedConnection;
   } catch (error: any) {
+    isConnecting = false;
+    cachedConnection = null;
     console.error('❌ MongoDB Connection Error:', error.message);
-    isConnected = false;
     throw error;
   }
 }
 
 export function isDBConnected() {
-  return mongoose.connection.readyState === 1;
+  return mongoose.connection.readyState === 1 && cachedConnection !== null;
 }
 

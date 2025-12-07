@@ -63,9 +63,9 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
-  // Set timeout for Netlify (9 seconds max)
+  // Set timeout for Vercel (8 seconds max - Vercel has 10s limit)
   const timeoutPromise = new Promise<NextResponse>((_, reject) => {
-    setTimeout(() => reject(new Error('Request timeout')), 9000);
+    setTimeout(() => reject(new Error('Request timeout')), 8000);
   });
 
   try {
@@ -87,10 +87,10 @@ export async function POST(request: NextRequest) {
           }
           
           try {
-            // Fast connection with timeout (4 seconds)
+            // Ultra-fast connection with timeout (2.5 seconds for Vercel)
             await Promise.race([
               connectDB(),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 4000))
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 2500))
             ]);
           } catch (connError: any) {
             console.error("❌ Connection failed:", connError.message);
@@ -150,10 +150,10 @@ export async function POST(request: NextRequest) {
           );
         }
 
-        // Fast save with timeout (3 seconds)
+        // Fast save with timeout (2 seconds)
         const savedVacancy = await Promise.race([
           vacancy.save(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Save timeout')), 3000))
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Save timeout')), 2000))
         ]) as any;
         
         console.log("✅ Vacancy created successfully:", savedVacancy._id);
