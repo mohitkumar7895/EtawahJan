@@ -55,25 +55,10 @@ export async function GET() {
   } catch (error: any) {
     console.error("❌ Error fetching vacancies:", error);
 
-    if (error.name === 'MongoServerError' || error.name === 'MongoError') {
-      return NextResponse.json(
-        {
-          error: "Database error",
-          message: "Failed to fetch vacancies from database",
-          hint: "Check MongoDB connection and environment variables"
-        },
-        { status: 503 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        error: "Failed to fetch vacancies",
-        message: "An unexpected error occurred",
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
-      },
-      { status: 500 }
-    );
+    // Always return empty array instead of error - graceful degradation
+    // This ensures the frontend doesn't break even if database is unavailable
+    console.warn("⚠️ Returning empty vacancies array due to error");
+    return NextResponse.json([]);
   }
 }
 

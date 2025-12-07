@@ -62,24 +62,39 @@ export interface Vacancy {
 
 export async function getVacancies(): Promise<Vacancy[]> {
   try {
-    const response = await fetch(`${API_BASE_URL}/api/vacancies`);
+    // Add timeout and better error handling
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000); // 10 second timeout
+    
+    const response = await fetch(`${API_BASE_URL}/api/vacancies`, {
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store', // Don't cache in production
+    });
+    
+    clearTimeout(timeoutId);
     
     if (!response.ok) {
       let errorMessage = 'Failed to fetch vacancies';
       try {
         const errorData = await response.json();
         errorMessage = errorData.message || errorData.error || errorMessage;
-        console.error('API Error:', errorData);
+        console.warn('API Error (non-critical):', errorData);
       } catch (e) {
-        errorMessage = response.statusText || errorMessage;
+        console.warn('API Error (non-critical):', response.statusText);
       }
       
-      if (response.status === 503) {
-        console.warn('Database not available:', errorMessage);
+      // Always return empty array instead of throwing - graceful degradation
+      if (response.status === 503 || response.status === 500) {
+        console.warn('Database/Server not available - returning empty list');
         return [];
       }
       
-      throw new Error(errorMessage);
+      // For other errors, also return empty array
+      console.warn('API returned error status - returning empty list');
+      return [];
     }
     
     const data = await response.json();
@@ -94,7 +109,13 @@ export async function getVacancies(): Promise<Vacancy[]> {
       id: v._id || v.id,
     }));
   } catch (error: any) {
-    console.error('Error fetching vacancies:', error);
+    // Handle network errors, timeouts, etc. gracefully
+    if (error.name === 'AbortError') {
+      console.warn('Request timeout - returning empty list');
+    } else {
+      console.warn('Error fetching vacancies (non-critical):', error.message || error);
+    }
+    // Always return empty array instead of throwing
     return [];
   }
 }

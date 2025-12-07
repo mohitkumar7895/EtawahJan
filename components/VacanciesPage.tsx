@@ -15,9 +15,10 @@ export default function VacanciesPage() {
   const loadVacancies = async () => {
     try {
       const data = await getVacancies();
-      setVacancies(data);
+      setVacancies(data || []); // Ensure it's always an array
     } catch (error) {
-      console.error('Failed to load vacancies:', error);
+      // Silently handle errors - getVacancies already returns empty array
+      console.warn('Vacancies load warning (non-critical):', error);
       setVacancies([]);
     }
   };
