@@ -121,22 +121,44 @@ export async function getVacancies(): Promise<Vacancy[]> {
 }
 
 export async function createVacancy(vacancy: Omit<Vacancy, '_id' | 'id'>): Promise<Vacancy> {
-  const response = await fetch(`${API_BASE_URL}/api/vacancies`, {
-    method: 'POST',
-    headers: {
-      'Content-Type': 'application/json',
-    },
-    body: JSON.stringify(vacancy),
-  });
+  // Add timeout for fetch request (8 seconds)
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
 
-  if (!response.ok) {
-    const errorData = await response.json().catch(() => ({}));
-    const errorMessage = errorData.message || errorData.error || 'Failed to create vacancy';
-    throw new Error(errorMessage);
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/vacancies`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(vacancy),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.message || errorData.error || 'Failed to create vacancy';
+      
+      // Handle timeout errors gracefully
+      if (response.status === 504 || errorMessage.includes('timeout')) {
+        throw new Error('Request timeout. Please try again.');
+      }
+      
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    return { ...data, id: data._id || data.id };
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout. Please try again.');
+    }
+    throw error;
   }
-
-  const data = await response.json();
-  return { ...data, id: data._id || data.id };
 }
 
 export async function updateVacancy(id: string, vacancy: Omit<Vacancy, '_id' | 'id'>): Promise<Vacancy> {

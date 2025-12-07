@@ -63,90 +63,124 @@ export async function GET() {
 }
 
 export async function POST(request: NextRequest) {
+  // Set timeout for Netlify (9 seconds max)
+  const timeoutPromise = new Promise<NextResponse>((_, reject) => {
+    setTimeout(() => reject(new Error('Request timeout')), 9000);
+  });
+
   try {
-    // Check database connection
-    if (!isDBConnected()) {
-      const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URL || process.env.MONGODB_URL;
-      if (!mongoUri || mongoUri.trim() === '') {
-        return NextResponse.json(
-          {
-            error: "Database not configured",
-            message: "MONGODB_URI environment variable is not set. Please configure it in .env.local file.",
-            hint: "Create .env.local file in root directory with: MONGODB_URI=your_connection_string"
-          },
-          { status: 503 }
-        );
-      }
-      
-      try {
-        await connectDB();
-      } catch (connError: any) {
-        console.error("❌ Connection failed:", connError.message);
-        return NextResponse.json(
-          {
-            error: "Database connection failed",
-            message: "MongoDB connection could not be established. Please check MONGODB_URI environment variable.",
-            hint: "Make sure MONGODB_URI is set correctly with your MongoDB Atlas URL"
-          },
-          { status: 503 }
-        );
-      }
+    // Race between actual work and timeout
+    const result = await Promise.race([
+      (async () => {
+        // Check database connection with timeout
+        if (!isDBConnected()) {
+          const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URL || process.env.MONGODB_URL;
+          if (!mongoUri || mongoUri.trim() === '') {
+            return NextResponse.json(
+              {
+                error: "Database not configured",
+                message: "MONGODB_URI is not set.",
+                hint: "Set MONGODB_URI environment variable"
+              },
+              { status: 503 }
+            );
+          }
+          
+          try {
+            // Fast connection with timeout (4 seconds)
+            await Promise.race([
+              connectDB(),
+              new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 4000))
+            ]);
+          } catch (connError: any) {
+            console.error("❌ Connection failed:", connError.message);
+            return NextResponse.json(
+              {
+                error: "Database connection timeout",
+                message: "MongoDB connection is taking too long. Please try again.",
+                hint: "This may be a temporary issue. Please try again in a moment."
+              },
+              { status: 503 }
+            );
+          }
 
-      if (!isDBConnected()) {
-        return NextResponse.json(
-          {
-            error: "Database not available",
-            message: "MongoDB connection could not be established. Please check MONGODB_URI environment variable.",
-            hint: "Verify your MongoDB Atlas connection string is correct"
-          },
-          { status: 503 }
-        );
-      }
-    }
+          if (!isDBConnected()) {
+            return NextResponse.json(
+              {
+                error: "Database not available",
+                message: "MongoDB connection could not be established.",
+                hint: "Please try again in a moment"
+              },
+              { status: 503 }
+            );
+          }
+        }
 
-    const body = await request.json();
-    const { title, tag, info, date, lastDate, vacancies, link } = body;
+        const body = await request.json();
+        const { title, tag, info, date, lastDate, vacancies, link } = body;
 
-    if (!title || !title.trim()) {
-      return NextResponse.json({ error: "Title is required" }, { status: 400 });
-    }
-    if (!tag || !tag.trim()) {
-      return NextResponse.json({ error: "Tag is required" }, { status: 400 });
-    }
+        if (!title || !title.trim()) {
+          return NextResponse.json({ error: "Title is required" }, { status: 400 });
+        }
+        if (!tag || !tag.trim()) {
+          return NextResponse.json({ error: "Tag is required" }, { status: 400 });
+        }
 
-    console.log("📝 Creating vacancy:", { title, tag, info, date, lastDate, vacancies, link });
+        console.log("📝 Creating vacancy:", { title, tag });
 
-    const vacancy = new Vacancy({
-      title: title.trim(),
-      tag: tag.trim(),
-      info: info ? info.trim() : '',
-      date: date ? date.trim() : '',
-      lastDate: lastDate ? lastDate.trim() : '',
-      vacancies: vacancies ? (Number(vacancies) || null) : null,
-      link: link ? link.trim() : '',
-    });
+        const vacancy = new Vacancy({
+          title: title.trim(),
+          tag: tag.trim(),
+          info: info ? info.trim() : '',
+          date: date ? date.trim() : '',
+          lastDate: lastDate ? lastDate.trim() : '',
+          vacancies: vacancies ? (Number(vacancies) || null) : null,
+          link: link ? link.trim() : '',
+        });
 
-    const validationError = vacancy.validateSync();
-    if (validationError) {
-      const errors = Object.values(validationError.errors).map((e: any) => e.message);
-      return NextResponse.json(
-        {
-          error: "Validation error",
-          details: errors.join(', ')
-        },
-        { status: 400 }
-      );
-    }
+        const validationError = vacancy.validateSync();
+        if (validationError) {
+          const errors = Object.values(validationError.errors).map((e: any) => e.message);
+          return NextResponse.json(
+            {
+              error: "Validation error",
+              details: errors.join(', ')
+            },
+            { status: 400 }
+          );
+        }
 
-    const savedVacancy = await vacancy.save();
-    console.log("✅ Vacancy created successfully:", savedVacancy._id);
+        // Fast save with timeout (3 seconds)
+        const savedVacancy = await Promise.race([
+          vacancy.save(),
+          new Promise((_, reject) => setTimeout(() => reject(new Error('Save timeout')), 3000))
+        ]) as any;
+        
+        console.log("✅ Vacancy created successfully:", savedVacancy._id);
 
-    return NextResponse.json({
-      ...savedVacancy.toObject(),
-      id: savedVacancy._id.toString()
-    }, { status: 201 });
+        return NextResponse.json({
+          ...savedVacancy.toObject(),
+          id: savedVacancy._id.toString()
+        }, { status: 201 });
+      })(),
+      timeoutPromise
+    ]);
+
+    return result;
   } catch (error: any) {
     console.error("❌ Error creating vacancy:", error);
+
+    // Handle timeout errors
+    if (error.message === 'Request timeout' || error.message.includes('timeout')) {
+      return NextResponse.json(
+        {
+          error: "Request timeout",
+          message: "The request took too long to complete. Please try again.",
+          hint: "This may be due to database connection delay. Try again in a moment."
+        },
+        { status: 504 }
+      );
+    }
 
     if (error.name === 'ValidationError') {
       const errors = Object.values(error.errors).map((e: any) => e.message);
@@ -164,8 +198,8 @@ export async function POST(request: NextRequest) {
         return NextResponse.json(
           {
             error: "Database connection error",
-            message: "Failed to connect to MongoDB. Please check MONGODB_URI in your .env file.",
-            hint: "Make sure MongoDB is running and MONGODB_URI is correct"
+            message: "Failed to connect to MongoDB. Please try again.",
+            hint: "Database connection is taking too long. This may be a temporary issue."
           },
           { status: 503 }
         );
@@ -184,8 +218,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json(
         {
           error: "Database connection error",
-          message: "Failed to connect to MongoDB. Please check MONGODB_URI in your .env file.",
-          hint: "Make sure MongoDB is running and MONGODB_URI is correct"
+          message: "Database connection timeout. Please try again.",
+          hint: "This may be a temporary issue. Please try again in a moment."
         },
         { status: 503 }
       );
@@ -204,6 +238,7 @@ export async function POST(request: NextRequest) {
     return NextResponse.json(
       {
         error: "Failed to create vacancy",
+        message: error.message || "An unexpected error occurred",
         details: process.env.NODE_ENV === 'development' ? error.message : undefined
       },
       { status: 500 }

@@ -48,12 +48,17 @@ export async function connectDB() {
   }
 
   try {
+    // Optimized for serverless (Netlify/Vercel) - faster timeouts
     const options: mongoose.ConnectOptions = {
-      serverSelectionTimeoutMS: 30000,
-      socketTimeoutMS: 45000,
-      maxPoolSize: 10,
+      serverSelectionTimeoutMS: 5000, // Reduced from 30s to 5s for serverless
+      socketTimeoutMS: 10000, // Reduced from 45s to 10s
+      connectTimeoutMS: 5000, // Add connection timeout
+      maxPoolSize: 1, // Reduced for serverless (single connection)
+      minPoolSize: 0,
       retryWrites: true,
-      w: 'majority' as const
+      w: 'majority' as const,
+      // Optimize for serverless cold starts
+      bufferCommands: false
     };
 
     console.log('🔄 Attempting to connect to MongoDB...');
