@@ -111,7 +111,7 @@ export default function ContactPage() {
                 <div className="bg-white rounded-lg shadow-xl p-8">
                   <h2 className="text-2xl font-bold text-gray-900 mb-4">Apply for Services</h2>
                   <p className="text-gray-600 mb-6">
-                    Fill out the form below and we'll get back to you shortly. आप फॉर्म भरें और हम जल्द ही आपसे संपर्क करेंगे।
+                    Fill out the form below and we&apos;ll get back to you shortly. आप फॉर्म भरें और हम जल्द ही आपसे संपर्क करेंगे।
                   </p>
                   <ContactForm embedded />
                 </div>

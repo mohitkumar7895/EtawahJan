@@ -147,7 +147,7 @@ export default function ContactForm({ embedded }: ContactFormProps) {
           <CheckCircle className="w-6 h-6 flex-shrink-0" />
           <div>
             <p className="font-bold text-lg">Form Submitted Successfully! 🎉</p>
-            <p className="text-sm text-green-100 mt-1">हम जल्द ही आपसे संपर्क करेंगे। We'll contact you soon.</p>
+            <p className="text-sm text-green-100 mt-1">हम जल्द ही आपसे संपर्क करेंगे। We&apos;ll contact you soon.</p>
           </div>
         </div>
       )}
@@ -349,4 +349,5 @@ export default function ContactForm({ embedded }: ContactFormProps) {
     </section>
   );
 }
+
 

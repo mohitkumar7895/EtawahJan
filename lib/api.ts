@@ -145,3 +145,4 @@ export async function deleteVacancy(id: string): Promise<void> {
   }
 }
 
+

@@ -35,3 +35,4 @@ const vacancySchema = new mongoose.Schema({
 
 export default mongoose.models.Vacancy || mongoose.model('Vacancy', vacancySchema);
 
+
