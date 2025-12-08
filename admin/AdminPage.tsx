@@ -218,32 +218,7 @@ export default function AdminPage() {
           </div>
         ) : (
           <div>
-            {/* Tabs */}
-            <div className="mb-6 flex space-x-4 border-b">
-              <button
-                onClick={() => setActiveTab('vacancies')}
-                className={`px-4 py-2 font-semibold ${
-                  activeTab === 'vacancies'
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Vacancies
-              </button>
-              <button
-                onClick={() => setActiveTab('admins')}
-                className={`px-4 py-2 font-semibold ${
-                  activeTab === 'admins'
-                    ? 'border-b-2 border-blue-600 text-blue-600'
-                    : 'text-gray-600 hover:text-gray-900'
-                }`}
-              >
-                Admins
-              </button>
-            </div>
-
-            {activeTab === 'vacancies' ? (
-              <div className="grid md:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-3 gap-6">
                 <div className="md:col-span-1">
                   <div className="bg-white rounded shadow p-4">
                     <h3 className="font-semibold mb-2">Add / Edit Vacancy</h3>
@@ -341,87 +316,6 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
-            ) : (
-              <div className="grid md:grid-cols-3 gap-6">
-                <div className="md:col-span-1">
-                  <div className="bg-white rounded shadow p-4">
-                    <h3 className="font-semibold mb-2">Add New Admin</h3>
-                    <div className="space-y-2">
-                      <input
-                        value={adminForm.username}
-                        onChange={(e) => setAdminForm({ ...adminForm, username: e.target.value })}
-                        placeholder="Username"
-                        className="w-full px-3 py-2 border rounded text-gray-900 placeholder-gray-500"
-                      />
-                      <input
-                        value={adminForm.password}
-                        onChange={(e) => setAdminForm({ ...adminForm, password: e.target.value })}
-                        placeholder="Password"
-                        type="password"
-                        className="w-full px-3 py-2 border rounded text-gray-900 placeholder-gray-500"
-                      />
-                      <button
-                        onClick={handleAddAdmin}
-                        disabled={loading}
-                        className="inline-flex items-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded disabled:opacity-50 w-full justify-center"
-                      >
-                        {loading ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
-                        ) : (
-                          <Plus className="w-4 h-4" />
-                        )}
-                        <span>Add Admin</span>
-                      </button>
-                    </div>
-                  </div>
-                </div>
-
-                <div className="md:col-span-2">
-                  <div className="bg-white rounded shadow p-4">
-                    <div className="flex items-center justify-between mb-3">
-                      <h3 className="font-semibold">Existing Admins</h3>
-                      {loading && <Loader2 className="w-4 h-4 animate-spin text-blue-600" />}
-                    </div>
-                    {error && (
-                      <div className="mb-3 p-2 bg-red-100 text-red-700 text-sm rounded">
-                        {error}
-                      </div>
-                    )}
-                    {loading && admins.length === 0 ? (
-                      <p className="text-sm text-gray-500">Loading admins...</p>
-                    ) : admins.length === 0 ? (
-                      <p className="text-sm text-gray-500">No admins yet.</p>
-                    ) : (
-                      <div className="space-y-3">
-                        {admins.map((admin) => (
-                          <div key={admin.id || admin._id} className="p-3 border rounded flex items-center justify-between hover:bg-gray-50">
-                            <div className="flex-1">
-                              <div className="font-semibold text-gray-900">{admin.username}</div>
-                              {admin.createdAt && (
-                                <div className="text-sm text-gray-600">
-                                  Created: {new Date(admin.createdAt).toLocaleDateString()}
-                                </div>
-                              )}
-                            </div>
-                            <div className="flex items-center space-x-2 ml-4">
-                              <button
-                                onClick={() => handleDeleteAdmin(admin.id || admin._id || '')}
-                                disabled={loading}
-                                className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-medium inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                                title="Delete Admin"
-                              >
-                                <Trash2 className="w-4 h-4"/> 
-                                <span>Delete</span>
-                              </button>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              </div>
-            )}
           </div>
         )}
       </main>
