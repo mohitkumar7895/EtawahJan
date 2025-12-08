@@ -2,10 +2,10 @@
 
 import { useEffect, useState } from 'react';
 import { Trash2, Edit, Plus, Loader2 } from 'lucide-react';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy } from '@/lib/api';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
-const ADMIN_PASS = 'admin123';
+const ADMIN_PASS = 'adminmohit1234';
 
 export default function AdminPage() {
   const [isAuthed, setIsAuthed] = useState<boolean>(false);
@@ -18,9 +18,14 @@ export default function AdminPage() {
   const [form, setForm] = useState({ title: '', tag: '', info: '', date: '', lastDate: '', vacancies: '', link: '' });
   const [editingId, setEditingId] = useState<string | null>(null);
 
+  const [admins, setAdmins] = useState<Admin[]>([]);
+  const [adminForm, setAdminForm] = useState({ username: '', password: '' });
+  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins'>('vacancies');
+
   useEffect(() => {
     if (isAuthed) {
       loadVacanciesFromAPI();
+      loadAdminsFromAPI();
     }
   }, [isAuthed]);
 
@@ -129,11 +134,68 @@ export default function AdminPage() {
     }
   };
 
+  const loadAdminsFromAPI = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getAdmins();
+      setAdmins(data);
+    } catch (err) {
+      setError('Failed to load admins. Please try again.');
+      console.error('Error loading admins:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAddAdmin = async () => {
+    if (!adminForm.username.trim() || !adminForm.password.trim()) {
+      alert('Username and Password are required');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await createAdmin({
+        username: adminForm.username.trim(),
+        password: adminForm.password.trim(),
+      });
+
+      await loadAdminsFromAPI();
+      setAdminForm({ username: '', password: '' });
+    } catch (err: any) {
+      const errorMsg = err?.message || 'Failed to create admin';
+      setError(errorMsg);
+      console.error('Error creating admin:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAdmin = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this admin?')) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await deleteAdmin(id);
+      await loadAdminsFromAPI();
+    } catch (err) {
+      setError('Failed to delete admin');
+      console.error('Error deleting admin:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
         <div className="container mx-auto px-4 py-4 flex items-center justify-between">
-          <h1 className="text-xl font-bold">Admin Panel — Vacancies</h1>
+          <h1 className="text-xl font-bold">Admin Panel</h1>
           {isAuthed ? (
             <div className="flex items-center space-x-3">
               <button onClick={handleLogout} className="px-3 py-2 bg-red-600 text-white rounded">Logout</button>
@@ -155,10 +217,36 @@ export default function AdminPage() {
             </div>
           </div>
         ) : (
-          <div className="grid md:grid-cols-3 gap-6">
-            <div className="md:col-span-1">
-              <div className="bg-white rounded shadow p-4">
-                <h3 className="font-semibold mb-2">Add / Edit Vacancy</h3>
+          <div>
+            {/* Tabs */}
+            <div className="mb-6 flex space-x-4 border-b">
+              <button
+                onClick={() => setActiveTab('vacancies')}
+                className={`px-4 py-2 font-semibold ${
+                  activeTab === 'vacancies'
+                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Vacancies
+              </button>
+              <button
+                onClick={() => setActiveTab('admins')}
+                className={`px-4 py-2 font-semibold ${
+                  activeTab === 'admins'
+                    ? 'border-b-2 border-blue-600 text-blue-600'
+                    : 'text-gray-600 hover:text-gray-900'
+                }`}
+              >
+                Admins
+              </button>
+            </div>
+
+            {activeTab === 'vacancies' ? (
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="md:col-span-1">
+                  <div className="bg-white rounded shadow p-4">
+                    <h3 className="font-semibold mb-2">Add / Edit Vacancy</h3>
                 <div className="space-y-2">
                   <input name="title" value={form.title} onChange={handleChange} placeholder="Title" className="w-full px-3 py-2 border rounded text-gray-900 placeholder-gray-500" />
                   <input name="tag" value={form.tag} onChange={handleChange} placeholder="Tag (Result/Notification)" className="w-full px-3 py-2 border rounded text-gray-900 placeholder-gray-500" />
@@ -253,10 +341,93 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+            ) : (
+              <div className="grid md:grid-cols-3 gap-6">
+                <div className="md:col-span-1">
+                  <div className="bg-white rounded shadow p-4">
+                    <h3 className="font-semibold mb-2">Add New Admin</h3>
+                    <div className="space-y-2">
+                      <input
+                        value={adminForm.username}
+                        onChange={(e) => setAdminForm({ ...adminForm, username: e.target.value })}
+                        placeholder="Username"
+                        className="w-full px-3 py-2 border rounded text-gray-900 placeholder-gray-500"
+                      />
+                      <input
+                        value={adminForm.password}
+                        onChange={(e) => setAdminForm({ ...adminForm, password: e.target.value })}
+                        placeholder="Password"
+                        type="password"
+                        className="w-full px-3 py-2 border rounded text-gray-900 placeholder-gray-500"
+                      />
+                      <button
+                        onClick={handleAddAdmin}
+                        disabled={loading}
+                        className="inline-flex items-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded disabled:opacity-50 w-full justify-center"
+                      >
+                        {loading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Plus className="w-4 h-4" />
+                        )}
+                        <span>Add Admin</span>
+                      </button>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="md:col-span-2">
+                  <div className="bg-white rounded shadow p-4">
+                    <div className="flex items-center justify-between mb-3">
+                      <h3 className="font-semibold">Existing Admins</h3>
+                      {loading && <Loader2 className="w-4 h-4 animate-spin text-blue-600" />}
+                    </div>
+                    {error && (
+                      <div className="mb-3 p-2 bg-red-100 text-red-700 text-sm rounded">
+                        {error}
+                      </div>
+                    )}
+                    {loading && admins.length === 0 ? (
+                      <p className="text-sm text-gray-500">Loading admins...</p>
+                    ) : admins.length === 0 ? (
+                      <p className="text-sm text-gray-500">No admins yet.</p>
+                    ) : (
+                      <div className="space-y-3">
+                        {admins.map((admin) => (
+                          <div key={admin.id || admin._id} className="p-3 border rounded flex items-center justify-between hover:bg-gray-50">
+                            <div className="flex-1">
+                              <div className="font-semibold text-gray-900">{admin.username}</div>
+                              {admin.createdAt && (
+                                <div className="text-sm text-gray-600">
+                                  Created: {new Date(admin.createdAt).toLocaleDateString()}
+                                </div>
+                              )}
+                            </div>
+                            <div className="flex items-center space-x-2 ml-4">
+                              <button
+                                onClick={() => handleDeleteAdmin(admin.id || admin._id || '')}
+                                disabled={loading}
+                                className="px-3 py-2 bg-red-600 hover:bg-red-700 text-white rounded text-sm font-medium inline-flex items-center gap-1 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                                title="Delete Admin"
+                              >
+                                <Trash2 className="w-4 h-4"/> 
+                                <span>Delete</span>
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+          </div>
         )}
       </main>
     </div>
   );
 }
+
 
 

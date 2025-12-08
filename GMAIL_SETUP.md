@@ -69,3 +69,4 @@ Agar production mein jana hai, to:
 1. Resend dashboard mein domain verify karo
 2. Domain se email bhejo (e.g., `noreply@yourdomain.com`)
 
+

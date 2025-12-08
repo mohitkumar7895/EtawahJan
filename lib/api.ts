@@ -188,4 +188,100 @@ export async function deleteVacancy(id: string): Promise<void> {
   }
 }
 
+// Admin API
+export interface Admin {
+  _id?: string;
+  id?: string;
+  username: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export async function getAdmins(): Promise<Admin[]> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    const response = await fetch(`${API_BASE_URL}/api/admins`, {
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      console.warn('API Error (non-critical):', response.statusText);
+      return [];
+    }
+    
+    const data = await response.json();
+    
+    if (!Array.isArray(data)) {
+      console.warn('API returned non-array data:', data);
+      return [];
+    }
+    
+    return data.map((a: any) => ({
+      ...a,
+      id: a._id || a.id,
+    }));
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      console.warn('Request timeout - returning empty list');
+    } else {
+      console.warn('Error fetching admins (non-critical):', error.message || error);
+    }
+    return [];
+  }
+}
+
+export async function createAdmin(admin: { username: string; password: string }): Promise<Admin> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/admins`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(admin),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.message || errorData.error || 'Failed to create admin';
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    return { ...data, id: data._id || data.id };
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout. Please try again.');
+    }
+    throw error;
+  }
+}
+
+export async function deleteAdmin(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/admins/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    const errorMessage = errorData.message || errorData.error || 'Failed to delete admin';
+    throw new Error(errorMessage);
+  }
+}
+
 
