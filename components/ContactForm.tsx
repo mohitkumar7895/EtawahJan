@@ -168,9 +168,9 @@ export default function ContactForm({ embedded }: ContactFormProps) {
 
       <form
         onSubmit={handleSubmit}
-        className={embedded ? 'bg-transparent' : 'bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-2xl border border-blue-100 p-8'}
+        className={embedded ? 'bg-transparent' : 'bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-2xl border border-blue-100 p-4 sm:p-6 md:p-8'}
       >
-        <div className={embedded ? 'space-y-3' : 'space-y-6'}>
+        <div className={embedded ? 'space-y-3' : 'space-y-4 sm:space-y-5 md:space-y-6'}>
           {/* Full Name Field */}
           <div className="relative">
             <label htmlFor="name" className="flex items-center text-xs font-bold text-gray-800 mb-1.5">
@@ -304,7 +304,7 @@ export default function ContactForm({ embedded }: ContactFormProps) {
             <button
               type="submit"
               disabled={isSubmitting}
-              className={`w-full bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 text-white ${embedded ? 'px-4 py-2.5 text-sm' : 'px-8 py-4'} rounded-lg font-bold ${embedded ? 'text-sm' : 'text-lg'} shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 relative overflow-hidden group`}
+              className={`w-full bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 hover:from-blue-700 hover:via-blue-800 hover:to-blue-900 text-white ${embedded ? 'px-4 py-2.5 text-sm' : 'px-4 sm:px-6 md:px-8 py-3 sm:py-3.5 md:py-4'} rounded-lg font-bold ${embedded ? 'text-sm' : 'text-base sm:text-lg'} shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] disabled:opacity-50 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center space-x-2 relative overflow-hidden group`}
             >
               <span className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent translate-x-[-100%] group-hover:translate-x-[100%] transition-transform duration-1000"></span>
               <span className="relative z-10 flex items-center space-x-2">

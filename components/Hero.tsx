@@ -18,37 +18,37 @@ export default function Hero() {
   }, [showModal]);
 
   return (
-    <section id="home" className="bg-gradient-to-br from-blue-400 to-blue-800 text-white py-12 md:py-15">
-      <div className="container mx-auto px-4">
+    <section id="home" className="bg-gradient-to-br from-blue-400 to-blue-800 text-white py-8 sm:py-12 md:py-16">
+      <div className="container mx-auto px-4 sm:px-6">
         <div className="max-w-5xl mx-auto">
           {/* Main Content */}
-          <div className="text-center mb-10">
-            <h1 className="text-4xl md:text-6xl font-bold mb-4">
+          <div className="text-center mb-8 sm:mb-10">
+            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 px-2">
               Welcome to Jan Seva Kendra
             </h1>
-            <p className="text-3xl md:text-4xl font-bold text-yellow-300 mb-2">
+            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-300 mb-2 px-2">
               Arpit Porwal
             </p>
           
-            <p className="text-xl text-blue-100 mb-3">
+            <p className="text-base sm:text-lg md:text-xl text-blue-100 mb-2 sm:mb-3 px-2">
               आपकी सेवा में हमेशा तत्पर
             </p>
-            <p className="text-lg text-blue-200 mb-8">
+            <p className="text-sm sm:text-base md:text-lg text-blue-200 mb-6 sm:mb-8 px-2">
               All Government & Private Services Under One Roof
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-4 justify-center mb-10">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-10 px-2">
               <button
                 onClick={() => setShowModal(true)}
-                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-8 py-3 rounded-lg font-semibold text-lg shadow-lg hover:shadow-xl transition transform hover:scale-105 flex items-center justify-center space-x-2"
+                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition transform hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto"
               >
                 <span>Apply for Services</span>
-                <ArrowRight className="w-5 h-5" />
+                <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <Link
                 href="/services"
-                className="bg-white/10 hover:bg-white/20 border-2 border-white/30 text-white px-8 py-3 rounded-lg font-semibold text-lg transition transform hover:scale-105"
+                className="bg-white/10 hover:bg-white/20 border-2 border-white/30 text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg font-semibold text-base sm:text-lg transition transform hover:scale-105 text-center w-full sm:w-auto"
               >
                 View All Services
               </Link>
@@ -56,45 +56,45 @@ export default function Hero() {
           </div>
 
           {/* Contact Info */}
-          <div className="grid md:grid-cols-3 gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/15 transition">
-              <div className="flex items-start space-x-3">
-                <div className="bg-blue-500 p-2 rounded-lg">
-                  <MapPin className="w-5 h-5 text-white" />
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 sm:p-5 md:p-6 border border-white/20 hover:bg-white/15 transition">
+              <div className="flex items-start space-x-2 sm:space-x-3">
+                <div className="bg-blue-500 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+                  <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-2">पता / Address</h3>
-                  <p className="text-blue-100 text-sm">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">पता / Address</h3>
+                  <p className="text-blue-100 text-xs sm:text-sm leading-relaxed">
                     Mandi Trihaa, Bidhuna Road<br />
                     Bharthana, Etawah, UP
                   </p>
-                  <p className="text-yellow-300 text-xs mt-2">📍 आसानी से मिल जाएगा</p>
+                  <p className="text-yellow-300 text-xs mt-1 sm:mt-2">📍 आसानी से मिल जाएगा</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/15 transition">
-              <div className="flex items-start space-x-3">
-                <div className="bg-green-500 p-2 rounded-lg">
-                  <Phone className="w-5 h-5 text-white" />
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 sm:p-5 md:p-6 border border-white/20 hover:bg-white/15 transition">
+              <div className="flex items-start space-x-2 sm:space-x-3">
+                <div className="bg-green-500 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+                  <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Phone</h3>
-                  <a href="tel:9193898182" className="text-yellow-300 hover:text-yellow-200 font-bold text-lg transition block">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Phone</h3>
+                  <a href="tel:9193898182" className="text-yellow-300 hover:text-yellow-200 font-bold text-base sm:text-lg transition block break-all">
                     9193898182
                   </a>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-6 border border-white/20 hover:bg-white/15 transition">
-              <div className="flex items-start space-x-3">
-                <div className="bg-orange-500 p-2 rounded-lg">
-                  <Mail className="w-5 h-5 text-white" />
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 sm:p-5 md:p-6 border border-white/20 hover:bg-white/15 transition sm:col-span-2 lg:col-span-1">
+              <div className="flex items-start space-x-2 sm:space-x-3">
+                <div className="bg-orange-500 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
+                  <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
-                <div>
-                  <h3 className="font-semibold mb-2">Email</h3>
-                  <a href="mailto:arpitcsc1707@gmail.com" className="text-yellow-300 hover:text-yellow-200 text-sm transition break-all block">
+                <div className="min-w-0 flex-1">
+                  <h3 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Email</h3>
+                  <a href="mailto:arpitcsc1707@gmail.com" className="text-yellow-300 hover:text-yellow-200 text-xs sm:text-sm transition break-all block">
                     arpitcsc1707@gmail.com
                   </a>
                 </div>
@@ -106,7 +106,7 @@ export default function Hero() {
 
       {/* Modal */}
       {showModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center px-4 animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center px-3 sm:px-4 animate-fade-in overflow-y-auto py-4">
           {/* Backdrop with blur */}
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-md transition-opacity"
@@ -118,12 +118,12 @@ export default function Hero() {
           <div 
             role="dialog" 
             aria-modal="true" 
-            className="relative z-10 w-full max-w-lg animate-scale-in"
+            className="relative z-10 w-full max-w-lg animate-scale-in my-auto"
             onClick={(e) => e.stopPropagation()}
           >
-            <div className="bg-white rounded-2xl shadow-2xl overflow-hidden border-2 border-yellow-400/20">
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden border-2 border-yellow-400/20">
               {/* Header */}
-              <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 px-5 py-4">
+              <div className="relative bg-gradient-to-r from-blue-600 via-blue-700 to-blue-800 px-4 sm:px-5 py-3 sm:py-4">
                 {/* Decorative elements */}
                 <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-400/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
                 <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
@@ -134,30 +134,30 @@ export default function Hero() {
                       <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
                       <span className="text-xs font-semibold text-yellow-300 uppercase tracking-wide">Service Application</span>
                     </div>
-                    <h3 className="text-xl font-extrabold mb-1">Apply for Services</h3>
+                    <h3 className="text-lg sm:text-xl font-extrabold mb-1">Apply for Services</h3>
                     <p className="text-xs text-blue-100">Fill the form below to get started</p>
                   </div>
                   <button
                     onClick={() => setShowModal(false)}
                     aria-label="Close dialog"
-                    className="text-white hover:text-yellow-300 hover:bg-white/10 transition-all p-2 rounded-lg hover:scale-110 active:scale-95"
+                    className="text-white hover:text-yellow-300 hover:bg-white/10 transition-all p-1.5 sm:p-2 rounded-lg hover:scale-110 active:scale-95 flex-shrink-0"
                   >
-                    <X className="w-6 h-6" />
+                    <X className="w-5 h-5 sm:w-6 sm:h-6" />
                   </button>
                 </div>
               </div>
 
               {/* Form Content */}
-              <div className="p-5 bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+              <div className="p-4 sm:p-5 bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
                 <ContactForm embedded />
               </div>
 
               {/* Footer Note */}
-              <div className="px-5 py-3 bg-blue-50/50 border-t border-blue-100">
-                <div className="flex items-center justify-center gap-2 text-xs text-gray-600">
-                  <Phone className="w-3.5 h-3.5 text-blue-600" />
+              <div className="px-4 sm:px-5 py-2 sm:py-3 bg-blue-50/50 border-t border-blue-100">
+                <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs text-gray-600">
+                  <Phone className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
                   <span>Need help? Call us at</span>
-                  <a href="tel:9193898182" className="font-bold text-blue-600 hover:text-blue-700 transition">
+                  <a href="tel:9193898182" className="font-bold text-blue-600 hover:text-blue-700 transition break-all">
                     9193898182
                   </a>
                 </div>
@@ -169,6 +169,9 @@ export default function Hero() {
     </section>
   );
 }
+
+
+
 
 
 

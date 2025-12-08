@@ -7,28 +7,28 @@ export default function AboutPage() {
     <>
       <Header />
       <div className="min-h-screen bg-gradient-to-br from-gray-50 to-blue-50">
-        <section className="py-20">
-          <div className="container mx-auto px-4">
+        <section className="py-12 sm:py-16 md:py-20">
+          <div className="container mx-auto px-4 sm:px-6">
             <div className="max-w-6xl mx-auto">
               {/* Hero Section */}
-              <div className="text-center mb-16">
-                <h1 className="text-5xl font-bold text-gray-900 mb-4">About Jan Seva Kendra</h1>
-                <p className="text-2xl text-gray-600">हमारे बारे में - सेवा ही धर्म है</p>
+              <div className="text-center mb-10 sm:mb-12 md:mb-16">
+                <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">About Jan Seva Kendra</h1>
+                <p className="text-lg sm:text-xl md:text-2xl text-gray-600">हमारे बारे में - सेवा ही धर्म है</p>
               </div>
 
               {/* Main About Content */}
-              <div className="bg-white rounded-lg shadow-xl p-8 mb-12">
+              <div className="bg-white rounded-lg shadow-xl p-5 sm:p-6 md:p-8 mb-8 sm:mb-10 md:mb-12">
                 <div className="prose prose-lg max-w-none">
-                  <h2 className="text-3xl font-bold text-gray-900 mb-6">Welcome to Jan Seva Kendra</h2>
-                  <p className="text-lg text-gray-700 leading-relaxed mb-6">
+                  <h2 className="text-2xl sm:text-3xl font-bold text-gray-900 mb-4 sm:mb-6">Welcome to Jan Seva Kendra</h2>
+                  <p className="text-base sm:text-lg text-gray-700 leading-relaxed mb-4 sm:mb-6">
                     जन सेवा केंद्र एक विश्वसनीय और प्रतिष्ठित सेवा केंद्र है जो सभी प्रकार की सरकारी और निजी सेवाएं एक ही छत के नीचे प्रदान करता है। 
                     हमारा मिशन है समाज के हर वर्ग को सुलभ, पारदर्शी और कुशल सेवाएं प्रदान करना।
                   </p>
-                  <p className="text-lg text-gray-700 leading-relaxed mb-6">
+                  <p className="text-base sm:text-lg text-gray-700 leading-relaxed mb-4 sm:mb-6">
                     Jan Seva Kendra is a trusted and reputable service center that provides all types of government and private services under one roof. 
                     Our mission is to provide accessible, transparent, and efficient services to every section of society.
                   </p>
-                  <p className="text-lg text-gray-700 leading-relaxed">
+                  <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
                     हम अपने ग्राहकों को तेज, सटीक और पारदर्शी सेवा देने के लिए प्रतिबद्ध हैं। हमारा लक्ष्य है कि हमारे समुदाय के हर व्यक्ति को 
                     सरकारी और निजी सेवाएं आसानी से उपलब्ध हों। We are committed to providing fast, accurate, and transparent services to our customers.
                   </p>
@@ -36,15 +36,15 @@ export default function AboutPage() {
               </div>
 
               {/* Features Grid */}
-              <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
-                <div className="bg-white rounded-lg shadow-lg p-6 hover:shadow-xl transition">
-                  <div className="flex items-start space-x-4">
-                    <div className="bg-blue-100 p-3 rounded-full flex-shrink-0">
-                      <CheckCircle className="w-6 h-6 text-blue-600" />
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-8 sm:mb-10 md:mb-12">
+                <div className="bg-white rounded-lg shadow-lg p-4 sm:p-5 md:p-6 hover:shadow-xl transition">
+                  <div className="flex items-start space-x-3 sm:space-x-4">
+                    <div className="bg-blue-100 p-2 sm:p-3 rounded-full flex-shrink-0">
+                      <CheckCircle className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                     </div>
-                    <div>
-                      <h3 className="text-xl font-semibold text-gray-900 mb-2">Quality Service</h3>
-                      <p className="text-gray-600">गुणवत्तापूर्ण सेवा और ग्राहक संतुष्टि हमारी प्राथमिकता है। Quality service and customer satisfaction is our priority.</p>
+                    <div className="min-w-0 flex-1">
+                      <h3 className="text-lg sm:text-xl font-semibold text-gray-900 mb-1 sm:mb-2">Quality Service</h3>
+                      <p className="text-sm sm:text-base text-gray-600">गुणवत्तापूर्ण सेवा और ग्राहक संतुष्टि हमारी प्राथमिकता है। Quality service and customer satisfaction is our priority.</p>
                     </div>
                   </div>
                 </div>
@@ -111,24 +111,24 @@ export default function AboutPage() {
               </div>
 
               {/* Location & Contact Info */}
-              <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg shadow-xl p-8 text-white">
-                <h2 className="text-3xl font-bold mb-6 text-center">Our Location</h2>
-                <div className="grid md:grid-cols-2 gap-6">
+              <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg shadow-xl p-5 sm:p-6 md:p-8 text-white">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-4 sm:mb-5 md:mb-6 text-center">Our Location</h2>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5 md:gap-6">
                   <div>
-                    <h3 className="text-xl font-semibold mb-3">Address</h3>
-                    <p className="text-blue-100 leading-relaxed">
+                    <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Address</h3>
+                    <p className="text-sm sm:text-base text-blue-100 leading-relaxed">
                       Mandi Trihaa, Bidhuna Road<br />
                       Bharthana, Etawah<br />
                       Uttar Pradesh, India
                     </p>
                   </div>
                   <div>
-                    <h3 className="text-xl font-semibold mb-3">Contact Information</h3>
-                    <p className="text-blue-100 mb-2">
-                      <strong>Phone:</strong> <a href="tel:9193898182" className="hover:text-white transition">9193898182</a>
+                    <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Contact Information</h3>
+                    <p className="text-sm sm:text-base text-blue-100 mb-2">
+                      <strong>Phone:</strong> <a href="tel:9193898182" className="hover:text-white transition break-all">9193898182</a>
                     </p>
-                    <p className="text-blue-100">
-                      <strong>Email:</strong> <a href="mailto:arpitcsc1707@gmail.com" className="hover:text-white transition">arpitcsc1707@gmail.com</a>
+                    <p className="text-sm sm:text-base text-blue-100">
+                      <strong>Email:</strong> <a href="mailto:arpitcsc1707@gmail.com" className="hover:text-white transition break-all">arpitcsc1707@gmail.com</a>
                     </p>
                   </div>
                 </div>

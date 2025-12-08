@@ -141,21 +141,21 @@ export default function ServicesPageComponent() {
 
   return (
     <div className="min-h-screen bg-white">
-      <section className="py-20">
-        <div className="container mx-auto px-4">
+      <section className="py-12 sm:py-16 md:py-20">
+        <div className="container mx-auto px-4 sm:px-6">
           {/* Header */}
-          <div className="text-center mb-12">
-            <h1 className="text-5xl font-bold text-gray-900 mb-4">Our Services</h1>
-            <p className="text-xl text-gray-600">हमारी सेवाएं - All Government & Private Services Under One Roof</p>
+          <div className="text-center mb-8 sm:mb-10 md:mb-12">
+            <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">Our Services</h1>
+            <p className="text-base sm:text-lg md:text-xl text-gray-600">हमारी सेवाएं - All Government & Private Services Under One Roof</p>
           </div>
 
           {/* Category Filter */}
-          <div className="mb-8 flex flex-wrap justify-center gap-3">
+          <div className="mb-6 sm:mb-8 flex flex-wrap justify-center gap-2 sm:gap-3">
             {categories.map((category) => (
               <button
                 key={category}
                 onClick={() => setSelectedCategory(category)}
-                className={`px-6 py-2 rounded-full font-semibold transition ${
+                className={`px-3 sm:px-4 md:px-6 py-1.5 sm:py-2 rounded-full font-semibold text-xs sm:text-sm md:text-base transition ${
                   selectedCategory === category
                     ? 'bg-blue-600 text-white shadow-lg'
                     : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
@@ -167,21 +167,21 @@ export default function ServicesPageComponent() {
           </div>
 
           {/* Services Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 md:gap-6 mb-12">
+          <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6 mb-8 sm:mb-10 md:mb-12">
             {filteredServices.map((service, index) => {
               const Icon = service.icon;
               return (
                 <div
                   key={index}
-                  className="bg-gradient-to-br from-blue-50 to-white p-6 rounded-lg border border-blue-100 hover:border-blue-300 hover:shadow-lg transition transform hover:scale-105"
+                  className="bg-gradient-to-br from-blue-50 to-white p-4 sm:p-5 md:p-6 rounded-lg border border-blue-100 hover:border-blue-300 hover:shadow-lg transition transform hover:scale-105"
                 >
                   <div className="flex flex-col items-center text-center">
-                    <div className="bg-blue-100 p-4 rounded-full mb-4">
-                      <Icon className="w-8 h-8 text-blue-600" />
+                    <div className="bg-blue-100 p-3 sm:p-4 rounded-full mb-3 sm:mb-4">
+                      <Icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-blue-600" />
                     </div>
-                    <h3 className="font-semibold text-gray-900 mb-2 text-lg">{service.name}</h3>
-                    <p className="text-sm text-gray-600 mb-3 min-h-[40px]">{service.description}</p>
-                    <span className="text-xs text-blue-600 bg-blue-50 px-3 py-1 rounded-full font-medium">
+                    <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base md:text-lg leading-tight">{service.name}</h3>
+                    <p className="text-xs sm:text-sm text-gray-600 mb-3 min-h-[40px]">{service.description}</p>
+                    <span className="text-xs text-blue-600 bg-blue-50 px-2 sm:px-3 py-1 rounded-full font-medium">
                       {service.category}
                     </span>
                   </div>
@@ -191,13 +191,13 @@ export default function ServicesPageComponent() {
           </div>
 
           {/* Additional Info */}
-          <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg p-8 text-white text-center">
-            <h3 className="text-3xl font-bold mb-4">और भी बहुत कुछ!</h3>
-            <p className="text-lg text-blue-100 mb-6">
+          <div className="bg-gradient-to-br from-blue-600 to-blue-800 rounded-lg p-6 sm:p-7 md:p-8 text-white text-center">
+            <h3 className="text-2xl sm:text-3xl font-bold mb-3 sm:mb-4">और भी बहुत कुछ!</h3>
+            <p className="text-sm sm:text-base md:text-lg text-blue-100 mb-4 sm:mb-6">
               किसी भी प्रकार की सरकारी या निजी सेवा के लिए हमसे संपर्क करें।
               हम आपकी पूरी सहायता करने के लिए तैयार हैं।
             </p>
-            <p className="text-lg text-blue-100">
+            <p className="text-sm sm:text-base md:text-lg text-blue-100">
               For any type of government or private service, please contact us. We are ready to assist you completely.
             </p>
           </div>
@@ -206,6 +206,9 @@ export default function ServicesPageComponent() {
     </div>
   );
 }
+
+
+
 
 
 

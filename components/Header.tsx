@@ -26,19 +26,19 @@ export default function Header() {
 
   return (
     <header className="bg-gradient-to-r from-blue-700 via-blue-800 to-blue-900 text-white shadow-xl sticky top-0 z-50 backdrop-blur-sm">
-      <div className="container mx-auto px-4 py-3">
+      <div className="container mx-auto px-3 sm:px-4 py-2.5 sm:py-3">
         <div className="flex items-center justify-between">
           {/* Logo */}
           <Link 
             href="/" 
-            className="flex items-center space-x-3 hover:opacity-90 transition group"
+            className="flex items-center space-x-2 sm:space-x-3 hover:opacity-90 transition group min-w-0 flex-1"
           >
-            <div className="bg-white/10 p-2 rounded-lg group-hover:bg-white/20 transition">
-              <FileText className="w-7 h-7 text-blue-100" />
+            <div className="bg-white/10 p-1.5 sm:p-2 rounded-lg group-hover:bg-white/20 transition flex-shrink-0">
+              <FileText className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-blue-100" />
             </div>
-            <div>
-              <h1 className="text-xl md:text-2xl font-bold tracking-tight">Jan Seva Kendra</h1>
-              <p className="text-xs md:text-sm text-blue-100">सेवा ही धर्म है</p>
+            <div className="min-w-0">
+              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight truncate">Jan Seva Kendra</h1>
+              <p className="text-xs sm:text-sm text-blue-100 hidden xs:block">सेवा ही धर्म है</p>
             </div>
           </Link>
 
@@ -127,6 +127,9 @@ export default function Header() {
     </header>
   );
 }
+
+
+
 
 
 

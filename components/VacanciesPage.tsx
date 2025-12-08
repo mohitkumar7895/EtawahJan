@@ -47,22 +47,22 @@ export default function VacanciesPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900">Latest Vacancies and Results</h1>
-          <p className="mt-2 text-lg text-gray-600">Find Government Jobs and Results</p>
+    <div className="min-h-screen bg-gray-50 py-6 sm:py-8">
+      <div className="max-w-7xl mx-auto px-3 sm:px-4 md:px-6 lg:px-8">
+        <div className="text-center mb-6 sm:mb-8">
+          <h1 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900">Latest Vacancies and Results</h1>
+          <p className="mt-2 text-base sm:text-lg text-gray-600">Find Government Jobs and Results</p>
         </div>
 
         <div className="w-full max-w-5xl mx-auto">
           <Tab.Group>
-            <Tab.List className="flex space-x-1 rounded-xl bg-orange-900/20 p-1">
+            <Tab.List className="flex space-x-1 rounded-xl bg-orange-900/20 p-1 overflow-x-auto">
               {categories.map((category) => (
                 <Tab
                   key={category}
                   className={({ selected }) =>
                     classNames(
-                      'w-full rounded-lg py-2.5 text-sm font-medium leading-5',
+                      'w-full rounded-lg py-2 sm:py-2.5 text-xs sm:text-sm font-medium leading-5 flex-shrink-0',
                       'ring-white/60 ring-offset-2 ring-offset-orange-400 focus:outline-none focus:ring-2',
                       selected
                         ? 'bg-white text-orange-700 shadow'
@@ -88,26 +88,26 @@ export default function VacanciesPage() {
                       <p className="text-center py-8 text-gray-500">No vacancies or results available</p>
                     ) : (
                       categorizedVacancies[category as keyof typeof categorizedVacancies].map((vacancy) => (
-                        <div key={vacancy.id || vacancy._id} className="relative rounded-lg p-4 hover:bg-orange-50 transition-colors border">
-                          <h3 className="text-lg font-semibold text-gray-900">{vacancy.title}</h3>
+                        <div key={vacancy.id || vacancy._id} className="relative rounded-lg p-3 sm:p-4 hover:bg-orange-50 transition-colors border">
+                          <h3 className="text-base sm:text-lg font-semibold text-gray-900 mb-2">{vacancy.title}</h3>
                           
-                          <div className="mt-1 flex flex-wrap gap-2">
-                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+                          <div className="mt-1 flex flex-wrap gap-1.5 sm:gap-2">
+                            <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
                               {vacancy.tag}
                             </span>
                             {vacancy.vacancies && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                              <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
                                 {vacancy.vacancies} Posts
                               </span>
                             )}
                             {vacancy.date && (
-                              <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
+                              <span className="inline-flex items-center px-2 sm:px-2.5 py-0.5 rounded-full text-xs font-medium bg-green-100 text-green-800">
                                 {vacancy.date}
                               </span>
                             )}
                           </div>
 
-                          <p className="mt-2 text-sm text-gray-600">{vacancy.info}</p>
+                          <p className="mt-2 text-xs sm:text-sm text-gray-600">{vacancy.info}</p>
 
                           {vacancy.link && (
                             <div className="mt-3">
@@ -115,7 +115,7 @@ export default function VacanciesPage() {
                                 href={vacancy.link}
                                 target="_blank"
                                 rel="noopener noreferrer"
-                                className="inline-flex items-center px-3 py-1.5 border border-orange-600 text-sm font-medium rounded-md text-orange-700 bg-white hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
+                                className="inline-flex items-center px-2.5 sm:px-3 py-1 sm:py-1.5 border border-orange-600 text-xs sm:text-sm font-medium rounded-md text-orange-700 bg-white hover:bg-orange-50 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-orange-500"
                               >
                                 View Details
                               </a>
