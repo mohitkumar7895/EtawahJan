@@ -126,8 +126,9 @@ export default function Services() {
 
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
           <div className="lg:col-span-3">
+            {/* Show only first 12 services on home page */}
             <div className="grid grid-cols-2 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-3 sm:gap-4 md:gap-6">
-              {services.map((service, index) => {
+              {services.slice(0, 12).map((service, index) => {
                 const Icon = service.icon;
                 return (
                   <div
@@ -148,18 +149,25 @@ export default function Services() {
               })}
             </div>
 
+            {/* View All Button - Prominently displayed */}
+            <div className="mt-6 sm:mt-8 text-center">
+              <Link 
+                href="/services" 
+                className="inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-lg font-bold text-base sm:text-lg shadow-lg hover:shadow-xl transition transform hover:scale-105"
+              >
+                <span>View All Services</span>
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+                </svg>
+              </Link>
+            </div>
+
             <div className="mt-8 sm:mt-10 md:mt-12 bg-blue-50 rounded-lg p-6 sm:p-7 md:p-8 text-center">
               <h3 className="text-xl sm:text-2xl font-bold text-gray-900 mb-3 sm:mb-4">और भी बहुत कुछ!</h3>
               <p className="text-sm sm:text-base text-gray-700 mb-4">
                 किसी भी प्रकार की सरकारी या निजी सेवा के लिए हमसे संपर्क करें।
                 हम आपकी पूरी सहायता करने के लिए तैयार हैं।
               </p>
-              <Link 
-                href="/services" 
-                className="inline-block bg-blue-600 hover:bg-blue-700 text-white px-5 sm:px-6 py-2.5 sm:py-3 rounded-lg font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition transform hover:scale-105"
-              >
-                View All Services →
-              </Link>
             </div>
           </div>
 

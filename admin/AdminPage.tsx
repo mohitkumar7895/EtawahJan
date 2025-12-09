@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Trash2, Edit, Plus, Loader2 } from 'lucide-react';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin } from '@/lib/api';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'adminmohit1234';
@@ -20,12 +20,18 @@ export default function AdminPage() {
 
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [adminForm, setAdminForm] = useState({ username: '', password: '' });
-  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins'>('vacancies');
+  
+  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
+  const [announcementForm, setAnnouncementForm] = useState({ title: '', description: '', isActive: true });
+  const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
+  
+  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins' | 'announcements'>('vacancies');
 
   useEffect(() => {
     if (isAuthed) {
       loadVacanciesFromAPI();
       loadAdminsFromAPI();
+      loadAnnouncementsFromAPI();
     }
   }, [isAuthed]);
 
@@ -191,6 +197,98 @@ export default function AdminPage() {
     }
   };
 
+  // Announcements handlers
+  const loadAnnouncementsFromAPI = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const data = await getAnnouncements();
+      setAnnouncements(data);
+    } catch (err) {
+      setError('Failed to load announcements. Please try again.');
+      console.error('Error loading announcements:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleAnnouncementChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value, type } = e.target;
+    setAnnouncementForm({
+      ...announcementForm,
+      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
+    });
+  };
+
+  const handleAddAnnouncement = async () => {
+    if (!announcementForm.title.trim() || !announcementForm.description.trim()) {
+      alert('Title and Description are required');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const announcementData = {
+        title: announcementForm.title.trim(),
+        description: announcementForm.description.trim(),
+        isActive: announcementForm.isActive,
+      };
+
+      if (editingAnnouncementId) {
+        await updateAnnouncement(editingAnnouncementId, announcementData);
+      } else {
+        await createAnnouncement(announcementData);
+      }
+
+      await loadAnnouncementsFromAPI();
+      setAnnouncementForm({ title: '', description: '', isActive: true });
+      setEditingAnnouncementId(null);
+      
+      // Dispatch event to refresh home page announcements
+      window.dispatchEvent(new CustomEvent('janseva:announcements:updated'));
+    } catch (err: any) {
+      const errorMsg = err?.message || (editingAnnouncementId ? 'Failed to update announcement' : 'Failed to create announcement');
+      setError(errorMsg);
+      console.error('Error saving announcement:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditAnnouncement = (id: string) => {
+    const a = announcements.find((x) => (x.id || x._id) === id);
+    if (!a) return;
+    setEditingAnnouncementId(id);
+    setAnnouncementForm({ 
+      title: a.title || '', 
+      description: a.description || '', 
+      isActive: a.isActive !== undefined ? a.isActive : true 
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+  };
+
+  const handleDeleteAnnouncement = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this announcement?')) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await deleteAnnouncement(id);
+      await loadAnnouncementsFromAPI();
+      
+      // Dispatch event to refresh home page announcements
+      window.dispatchEvent(new CustomEvent('janseva:announcements:updated'));
+    } catch (err) {
+      setError('Failed to delete announcement');
+      console.error('Error deleting announcement:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
@@ -218,6 +316,44 @@ export default function AdminPage() {
           </div>
         ) : (
           <div>
+            {/* Tabs Navigation */}
+            <div className="mb-4 sm:mb-6 border-b border-gray-200">
+              <nav className="flex space-x-4 sm:space-x-8">
+                <button
+                  onClick={() => setActiveTab('vacancies')}
+                  className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-medium border-b-2 transition-colors ${
+                    activeTab === 'vacancies'
+                      ? 'border-blue-600 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Vacancies
+                </button>
+                <button
+                  onClick={() => setActiveTab('announcements')}
+                  className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-medium border-b-2 transition-colors ${
+                    activeTab === 'announcements'
+                      ? 'border-blue-600 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Announcements
+                </button>
+                <button
+                  onClick={() => setActiveTab('admins')}
+                  className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-medium border-b-2 transition-colors ${
+                    activeTab === 'admins'
+                      ? 'border-blue-600 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Admins
+                </button>
+              </nav>
+            </div>
+
+            {/* Vacancies Tab */}
+            {activeTab === 'vacancies' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
                 <div className="lg:col-span-1">
                   <div className="bg-white rounded shadow p-3 sm:p-4">
@@ -316,6 +452,207 @@ export default function AdminPage() {
               </div>
             </div>
           </div>
+          )}
+
+            {/* Announcements Tab */}
+            {activeTab === 'announcements' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded shadow p-3 sm:p-4">
+                  <h3 className="font-semibold mb-2 text-sm sm:text-base">Add / Edit Announcement</h3>
+                  <div className="space-y-2">
+                    <input 
+                      name="title" 
+                      value={announcementForm.title} 
+                      onChange={handleAnnouncementChange} 
+                      placeholder="Title *" 
+                      className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" 
+                    />
+                    <textarea 
+                      name="description" 
+                      value={announcementForm.description} 
+                      onChange={handleAnnouncementChange} 
+                      placeholder="Description *" 
+                      rows={4} 
+                      className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500 resize-none" 
+                    />
+                    <label className="flex items-center space-x-2 cursor-pointer">
+                      <input
+                        type="checkbox"
+                        name="isActive"
+                        checked={announcementForm.isActive}
+                        onChange={handleAnnouncementChange}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <span className="text-sm sm:text-base text-gray-700">Active (visible on home page)</span>
+                    </label>
+
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                      <button 
+                        onClick={handleAddAnnouncement} 
+                        disabled={loading}
+                        className="inline-flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded disabled:opacity-50 text-sm sm:text-base"
+                      >
+                        {loading ? (
+                          <Loader2 className="w-4 h-4 animate-spin" />
+                        ) : (
+                          <Plus className="w-4 h-4" />
+                        )}
+                        <span>{editingAnnouncementId ? 'Update' : 'Add'}</span>
+                      </button>
+
+                      {editingAnnouncementId && (
+                        <button 
+                          onClick={() => { 
+                            setEditingAnnouncementId(null); 
+                            setAnnouncementForm({ title: '', description: '', isActive: true }); 
+                          }} 
+                          disabled={loading}
+                          className="px-3 py-2 border rounded disabled:opacity-50 text-sm sm:text-base"
+                        >
+                          Cancel Edit
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-2">
+                <div className="bg-white rounded shadow p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-sm sm:text-base">Existing Announcements</h3>
+                    {loading && <Loader2 className="w-4 h-4 animate-spin text-blue-600" />}
+                  </div>
+                  {error && (
+                    <div className="mb-3 p-2 bg-red-100 text-red-700 text-xs sm:text-sm rounded">
+                      {error}
+                    </div>
+                  )}
+                  {loading && announcements.length === 0 ? (
+                    <p className="text-sm text-gray-500">Loading announcements...</p>
+                  ) : announcements.length === 0 ? (
+                    <p className="text-sm text-gray-500">No announcements yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {announcements.map((a) => (
+                        <div key={a.id || a._id} className="p-3 border rounded flex flex-col sm:flex-row items-start sm:items-start justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="flex items-center gap-2 mb-1">
+                              <div className="font-semibold text-sm sm:text-base">{a.title}</div>
+                              {a.isActive ? (
+                                <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded">Active</span>
+                              ) : (
+                                <span className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded">Inactive</span>
+                              )}
+                            </div>
+                            <div className="text-xs sm:text-sm text-gray-600 mb-1">{a.description}</div>
+                            <div className="text-xs text-gray-500">
+                              Created: {a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'N/A'}
+                            </div>
+                          </div>
+
+                          <div className="flex space-x-2 w-full sm:w-auto">
+                            <button 
+                              onClick={() => handleEditAnnouncement(a.id || a._id || '')} 
+                              disabled={loading}
+                              className="flex-1 sm:flex-none px-2 py-1 border rounded text-xs sm:text-sm inline-flex items-center justify-center disabled:opacity-50"
+                            >
+                              <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1"/> Edit
+                            </button>
+                            <button 
+                              onClick={() => handleDeleteAnnouncement(a.id || a._id || '')} 
+                              disabled={loading}
+                              className="flex-1 sm:flex-none px-2 py-1 bg-red-600 text-white rounded text-xs sm:text-sm inline-flex items-center justify-center disabled:opacity-50"
+                            >
+                              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1"/> Delete
+                            </button>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            )}
+
+            {/* Admins Tab */}
+            {activeTab === 'admins' && (
+            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+              <div className="lg:col-span-1">
+                <div className="bg-white rounded shadow p-3 sm:p-4">
+                  <h3 className="font-semibold mb-2 text-sm sm:text-base">Add Admin</h3>
+                  <div className="space-y-2">
+                    <input 
+                      value={adminForm.username} 
+                      onChange={(e) => setAdminForm({ ...adminForm, username: e.target.value })} 
+                      placeholder="Username *" 
+                      className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" 
+                    />
+                    <input 
+                      value={adminForm.password} 
+                      onChange={(e) => setAdminForm({ ...adminForm, password: e.target.value })} 
+                      placeholder="Password *" 
+                      type="password" 
+                      className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" 
+                    />
+                    <button 
+                      onClick={handleAddAdmin} 
+                      disabled={loading}
+                      className="w-full inline-flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded disabled:opacity-50 text-sm sm:text-base"
+                    >
+                      {loading ? (
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                      ) : (
+                        <Plus className="w-4 h-4" />
+                      )}
+                      <span>Add Admin</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <div className="lg:col-span-2">
+                <div className="bg-white rounded shadow p-3 sm:p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="font-semibold text-sm sm:text-base">Existing Admins</h3>
+                    {loading && <Loader2 className="w-4 h-4 animate-spin text-blue-600" />}
+                  </div>
+                  {error && (
+                    <div className="mb-3 p-2 bg-red-100 text-red-700 text-xs sm:text-sm rounded">
+                      {error}
+                    </div>
+                  )}
+                  {loading && admins.length === 0 ? (
+                    <p className="text-sm text-gray-500">Loading admins...</p>
+                  ) : admins.length === 0 ? (
+                    <p className="text-sm text-gray-500">No admins yet.</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {admins.map((a) => (
+                        <div key={a.id || a._id} className="p-3 border rounded flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                          <div className="flex-1">
+                            <div className="font-semibold text-sm sm:text-base">{a.username}</div>
+                            <div className="text-xs text-gray-500">
+                              Created: {a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'N/A'}
+                            </div>
+                          </div>
+                          <button 
+                            onClick={() => handleDeleteAdmin(a.id || a._id || '')} 
+                            disabled={loading}
+                            className="px-2 py-1 bg-red-600 text-white rounded text-xs sm:text-sm inline-flex items-center justify-center disabled:opacity-50"
+                          >
+                            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1"/> Delete
+                          </button>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+            )}
           </div>
         )}
       </main>
