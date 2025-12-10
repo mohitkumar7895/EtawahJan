@@ -74,6 +74,13 @@ export default function Announcements() {
     (announcement) => !dismissedIds.includes(announcement.id || announcement._id || '')
   );
 
+  // Ensure currentIndex is within bounds
+  useEffect(() => {
+    if (visibleAnnouncements.length > 0 && currentIndex >= visibleAnnouncements.length) {
+      setCurrentIndex(0);
+    }
+  }, [visibleAnnouncements.length, currentIndex]);
+
   if (loading) {
     return null;
   }
@@ -82,7 +89,14 @@ export default function Announcements() {
     return null;
   }
 
-  const currentAnnouncement = visibleAnnouncements[currentIndex];
+  // Safety check: ensure currentIndex is valid
+  const safeIndex = Math.min(currentIndex, visibleAnnouncements.length - 1);
+  const currentAnnouncement = visibleAnnouncements[safeIndex];
+
+  // Final safety check
+  if (!currentAnnouncement) {
+    return null;
+  }
 
   return (
     <div className="w-full bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white shadow-2xl relative overflow-hidden">
