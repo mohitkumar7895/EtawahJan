@@ -15,7 +15,7 @@ export default function Footer() {
               <img 
                 src="/jan-seva-logo-1.png" 
                 alt="Jan Seva Kendra Logo" 
-                className="w-8 h-8 sm:w-10 sm:h-10 object-contain flex-shrink-0"
+                className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 object-contain flex-shrink-0"
               />
               <h3 className="text-sm sm:text-base lg:text-lg font-bold">Jan Seva Kendra</h3>
             </div>

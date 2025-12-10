@@ -42,7 +42,7 @@ export default function Header() {
               <img 
                 src="/jan-seva-logo-1.png" 
                 alt="Jan Seva Kendra Logo" 
-                className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 object-contain"
+                className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-20 lg:h-20 object-contain"
               />
             </div>
             <div className="min-w-0">

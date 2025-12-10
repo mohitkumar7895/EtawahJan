@@ -18,44 +18,61 @@ export default function Hero() {
   }, [showModal]);
 
   return (
-    <section id="home" className="bg-gradient-to-br from-blue-400 to-blue-800 text-white py-8 sm:py-12 md:py-16">
-      <div className="container mx-auto px-4 sm:px-6">
+    <section id="home" className="bg-gradient-to-br from-blue-400 to-blue-800 text-white py-6 sm:py-8 md:py-12 lg:py-16">
+      <div className="container mx-auto px-3 sm:px-4 md:px-6">
         <div className="max-w-5xl mx-auto">
           {/* Main Content */}
-          <div className="text-center mb-8 sm:mb-10">
-            <div className="flex items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-4 px-2">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10 relative">
+            {/* Logo in corner - Desktop only */}
+            <div className="hidden lg:block absolute top-0 left-0">
               <img 
                 src="/jan-seva-logo-1.png" 
                 alt="Jan Seva Kendra Logo" 
-                className="w-30 h-30 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-36 xl:h-36 object-contain"
+                className="w-32 h-32 xl:w-40 xl:h-40 2xl:w-44 2xl:h-44 object-contain"
               />
-              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold">
+            </div>
+            
+            {/* Mobile/Tablet Layout - Logo centered */}
+            <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 md:gap-4 mb-0 px-2 lg:hidden">
+              <img 
+                src="/jan-seva-logo-1.png" 
+                alt="Jan Seva Kendra Logo" 
+                className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 object-contain"
+              />
+              <h1 className="text-base sm:text-lg md:text-xl font-bold text-center whitespace-normal sm:whitespace-nowrap px-1">
                 Welcome to Jan Seva Kendra
               </h1>
             </div>
-            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-300 mb-2 px-2">
+            
+            {/* Desktop Layout - Text only (logo in corner) */}
+            <div className="hidden lg:block">
+              <h1 className="text-2xl xl:text-3xl 2xl:text-4xl font-bold text-center whitespace-nowrap px-1">
+                Welcome to Jan Seva Kendra
+              </h1>
+            </div>
+            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-yellow-300 mb-1 px-2 -mt-2 sm:-mt-1">
               Arpit Porwal
             </p>
           
-            <p className="text-base sm:text-lg md:text-xl text-blue-100 mb-2 sm:mb-3 px-2">
+            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-blue-100 mb-2 sm:mb-3 px-2">
               आपकी सेवा में हमेशा तत्पर
             </p>
-            <p className="text-sm sm:text-base md:text-lg text-blue-200 mb-6 sm:mb-8 px-2">
+            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-blue-200 mb-4 sm:mb-6 md:mb-8 px-2">
               All Government & Private Services Under One Roof
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 justify-center mb-8 sm:mb-10 px-2">
+            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 justify-center mb-6 sm:mb-8 md:mb-10 px-2">
               <button
                 onClick={() => setShowModal(true)}
-                className="bg-yellow-400 hover:bg-yellow-500 text-gray-900 px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg font-semibold text-base sm:text-lg shadow-lg hover:shadow-xl transition transform hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto"
+                className="bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-gray-900 px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-lg font-semibold text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl active:scale-95 transition transform hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto"
               >
                 <span>Apply for Services</span>
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <Link
                 href="/services"
-                className="bg-white/10 hover:bg-white/20 border-2 border-white/30 text-white px-4 sm:px-6 md:px-8 py-2.5 sm:py-3 rounded-lg font-semibold text-base sm:text-lg transition transform hover:scale-105 text-center w-full sm:w-auto"
+                className="bg-white/10 hover:bg-white/20 active:bg-white/30 border-2 border-white/30 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-lg font-semibold text-sm sm:text-base md:text-lg transition transform hover:scale-105 active:scale-95 text-center w-full sm:w-auto"
               >
                 View All Services
               </Link>
@@ -63,45 +80,45 @@ export default function Hero() {
           </div>
 
           {/* Contact Info */}
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 sm:p-5 md:p-6 border border-white/20 hover:bg-white/15 transition">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-2.5 sm:gap-3 md:gap-4">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 md:p-5 lg:p-6 border border-white/20 hover:bg-white/15 active:bg-white/20 transition">
               <div className="flex items-start space-x-2 sm:space-x-3">
                 <div className="bg-blue-500 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
                   <MapPin className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">पता / Address</h3>
-                  <p className="text-blue-100 text-xs sm:text-sm leading-relaxed">
+                  <h3 className="font-semibold mb-1 sm:mb-2 text-xs sm:text-sm md:text-base">पता / Address</h3>
+                  <p className="text-blue-100 text-[10px] sm:text-xs md:text-sm leading-relaxed">
                     Mandi Trihaa, Bidhuna Road<br />
                     Bharthana, Etawah, UP
                   </p>
-                  <p className="text-yellow-300 text-xs mt-1 sm:mt-2">📍 आसानी से मिल जाएगा</p>
+                  <p className="text-yellow-300 text-[10px] sm:text-xs mt-1 sm:mt-2">📍 आसानी से मिल जाएगा</p>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 sm:p-5 md:p-6 border border-white/20 hover:bg-white/15 transition">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 md:p-5 lg:p-6 border border-white/20 hover:bg-white/15 active:bg-white/20 transition">
               <div className="flex items-start space-x-2 sm:space-x-3">
                 <div className="bg-green-500 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
                   <Phone className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Phone</h3>
-                  <a href="tel:9193898182" className="text-yellow-300 hover:text-yellow-200 font-bold text-base sm:text-lg transition block break-all">
+                  <h3 className="font-semibold mb-1 sm:mb-2 text-xs sm:text-sm md:text-base">Phone</h3>
+                  <a href="tel:9193898182" className="text-yellow-300 hover:text-yellow-200 active:text-yellow-100 font-bold text-sm sm:text-base md:text-lg transition block break-all">
                     9193898182
                   </a>
                 </div>
               </div>
             </div>
 
-            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-4 sm:p-5 md:p-6 border border-white/20 hover:bg-white/15 transition sm:col-span-2 lg:col-span-1">
+            <div className="bg-white/10 backdrop-blur-sm rounded-lg p-3 sm:p-4 md:p-5 lg:p-6 border border-white/20 hover:bg-white/15 active:bg-white/20 transition sm:col-span-2 lg:col-span-1">
               <div className="flex items-start space-x-2 sm:space-x-3">
                 <div className="bg-orange-500 p-1.5 sm:p-2 rounded-lg flex-shrink-0">
                   <Mail className="w-4 h-4 sm:w-5 sm:h-5 text-white" />
                 </div>
                 <div className="min-w-0 flex-1">
-                  <h3 className="font-semibold mb-1 sm:mb-2 text-sm sm:text-base">Email</h3>
-                  <a href="mailto:arpitcsc1707@gmail.com" className="text-yellow-300 hover:text-yellow-200 text-xs sm:text-sm transition break-all block">
+                  <h3 className="font-semibold mb-1 sm:mb-2 text-xs sm:text-sm md:text-base">Email</h3>
+                  <a href="mailto:arpitcsc1707@gmail.com" className="text-yellow-300 hover:text-yellow-200 active:text-yellow-100 text-[10px] sm:text-xs md:text-sm transition break-all block">
                     arpitcsc1707@gmail.com
                   </a>
                 </div>
