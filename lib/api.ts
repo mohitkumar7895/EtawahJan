@@ -3,7 +3,6 @@ const API_BASE_URL = '';
 
 export interface ContactFormData {
   name: string;
-  email: string;
   mobile: string;
   address: string;
   service_type: string;
