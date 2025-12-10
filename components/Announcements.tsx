@@ -90,10 +90,10 @@ export default function Announcements() {
   }
 
   // Safety check: ensure currentIndex is valid
-  const safeIndex = Math.min(currentIndex, visibleAnnouncements.length - 1);
+  const safeIndex = Math.min(currentIndex, Math.max(0, visibleAnnouncements.length - 1));
   const currentAnnouncement = visibleAnnouncements[safeIndex];
 
-  // Final safety check
+  // Final safety check - return null if no announcement found
   if (!currentAnnouncement) {
     return null;
   }
