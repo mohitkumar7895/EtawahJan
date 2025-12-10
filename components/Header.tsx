@@ -38,11 +38,17 @@ export default function Header() {
             href="/" 
             className="flex items-center space-x-2 sm:space-x-3 hover:opacity-90 transition group min-w-0 flex-1"
           >
-            <div className="bg-white/10 p-1.5 sm:p-2 rounded-lg group-hover:bg-white/20 transition flex-shrink-0">
-              <FileText className="w-5 h-5 sm:w-6 sm:h-6 md:w-7 md:h-7 text-blue-100" />
+            <div className="flex-shrink-0">
+              <img 
+                src="/jan-seva-logo-1.png" 
+                alt="Jan Seva Kendra Logo" 
+                className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 object-contain"
+              />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight truncate">Jan Seva Kendra</h1>
+              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight truncate">
+                Jan Seva Kendra
+              </h1>
               <p className="text-xs sm:text-sm text-blue-100 hidden xs:block">सेवा ही धर्म है</p>
             </div>
           </Link>

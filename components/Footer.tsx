@@ -12,7 +12,11 @@ export default function Footer() {
           {/* About Section */}
           <div className="col-span-2 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center space-x-2 mb-2 sm:mb-3">
-              <FileText className="w-4 h-4 sm:w-5 sm:h-5 text-blue-400 flex-shrink-0" />
+              <img 
+                src="/jan-seva-logo-1.png" 
+                alt="Jan Seva Kendra Logo" 
+                className="w-8 h-8 sm:w-10 sm:h-10 object-contain flex-shrink-0"
+              />
               <h3 className="text-sm sm:text-base lg:text-lg font-bold">Jan Seva Kendra</h3>
             </div>
             <p className="text-xs sm:text-sm text-gray-300 leading-relaxed mb-1.5 sm:mb-2 line-clamp-2">

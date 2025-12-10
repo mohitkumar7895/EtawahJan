@@ -23,9 +23,16 @@ export default function Hero() {
         <div className="max-w-5xl mx-auto">
           {/* Main Content */}
           <div className="text-center mb-8 sm:mb-10">
-            <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold mb-3 sm:mb-4 px-2">
-              Welcome to Jan Seva Kendra
-            </h1>
+            <div className="flex items-center justify-center gap-3 sm:gap-4 mb-3 sm:mb-4 px-2">
+              <img 
+                src="/jan-seva-logo-1.png" 
+                alt="Jan Seva Kendra Logo" 
+                className="w-30 h-30 sm:w-24 sm:h-24 md:w-28 md:h-28 lg:w-32 lg:h-32 xl:w-36 xl:h-36 object-contain"
+              />
+              <h1 className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl xl:text-6xl font-bold">
+                Welcome to Jan Seva Kendra
+              </h1>
+            </div>
             <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl font-bold text-yellow-300 mb-2 px-2">
               Arpit Porwal
             </p>
