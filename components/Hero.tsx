@@ -37,9 +37,9 @@ export default function Hero() {
               <img 
                 src="/jan-seva-logo-1.png" 
                 alt="Jan Seva Kendra Logo" 
-                className="w-20 h-20 sm:w-24 sm:h-24 md:w-32 md:h-32 object-contain"
+                className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 object-contain"
               />
-              <h1 className="text-base sm:text-lg md:text-xl font-bold text-center whitespace-normal sm:whitespace-nowrap px-1">
+              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-center whitespace-normal sm:whitespace-nowrap px-1">
                 Welcome to Jan Seva Kendra
               </h1>
             </div>
@@ -50,14 +50,14 @@ export default function Hero() {
                 Welcome to Jan Seva Kendra
               </h1>
             </div>
-            <p className="text-lg sm:text-xl md:text-2xl lg:text-3xl xl:text-4xl font-bold text-yellow-300 mb-1 px-2 -mt-2 sm:-mt-1">
+            <p className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-bold text-yellow-300 mb-1 px-2 -mt-2 sm:-mt-1">
               Arpit Porwal
             </p>
           
-            <p className="text-sm sm:text-base md:text-lg lg:text-xl text-blue-100 mb-2 sm:mb-3 px-2">
+            <p className="text-base sm:text-lg md:text-xl lg:text-xl text-blue-100 mb-2 sm:mb-3 px-2">
               आपकी सेवा में हमेशा तत्पर
             </p>
-            <p className="text-xs sm:text-sm md:text-base lg:text-lg text-blue-200 mb-4 sm:mb-6 md:mb-8 px-2">
+            <p className="text-sm sm:text-base md:text-lg lg:text-lg text-blue-200 mb-4 sm:mb-6 md:mb-8 px-2">
               All Government & Private Services Under One Roof
             </p>
 
