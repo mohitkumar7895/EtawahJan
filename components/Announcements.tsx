@@ -113,11 +113,11 @@ export default function Announcements() {
           {/* Announcement Banner */}
           <div 
             className="bg-red-500/20 backdrop-blur-md rounded-xl shadow-2xl border-2 border-red-300/40 p-4 sm:p-6 relative animate-fade-in transition-all duration-500"
-            key={currentAnnouncement.id || currentAnnouncement._id}
+            key={currentAnnouncement?.id || currentAnnouncement?._id || safeIndex}
           >
             {/* Close button */}
             <button
-              onClick={() => handleDismiss(currentAnnouncement.id || currentAnnouncement._id || '')}
+              onClick={() => handleDismiss(currentAnnouncement?.id || currentAnnouncement?._id || '')}
               className="absolute top-2 right-2 sm:top-4 sm:right-4 p-1.5 sm:p-2 bg-white/20 hover:bg-white/30 rounded-full transition-all duration-200 backdrop-blur-sm z-20"
               aria-label="Dismiss announcement"
             >
@@ -135,7 +135,7 @@ export default function Announcements() {
               <div className="flex-1 min-w-0">
                 <div className="flex items-center gap-2 mb-2">
                   <h3 className="text-base sm:text-lg md:text-xl font-bold text-white drop-shadow-lg">
-                    {currentAnnouncement.title}
+                    {currentAnnouncement?.title || 'Announcement'}
                   </h3>
                   <div className="flex items-center gap-1 bg-red-500/80 text-white px-2 py-0.5 rounded-full text-xs font-bold animate-bounce">
                     <AlertCircle className="w-3 h-3" />
@@ -143,10 +143,10 @@ export default function Announcements() {
                   </div>
                 </div>
                 <p className="text-sm sm:text-base text-white/95 leading-relaxed mb-3">
-                  {currentAnnouncement.description}
+                  {currentAnnouncement?.description || ''}
                 </p>
                 <div className="text-xs sm:text-sm text-white/80">
-                  {currentAnnouncement.createdAt && (
+                  {currentAnnouncement?.createdAt && (
                     <span>
                       {new Date(currentAnnouncement.createdAt).toLocaleDateString('en-IN', {
                         year: 'numeric',
