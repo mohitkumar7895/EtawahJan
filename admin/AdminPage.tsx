@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Trash2, Edit, Plus, Loader2 } from 'lucide-react';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement } from '@/lib/api';
+import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download } from 'lucide-react';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getAllChats, getChat, sendMessage, uploadChatFile, type Chat } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'adminmohit1234';
@@ -25,15 +25,43 @@ export default function AdminPage() {
   const [announcementForm, setAnnouncementForm] = useState({ title: '', description: '', isActive: true });
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
   
-  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins' | 'announcements'>('vacancies');
+  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins' | 'announcements' | 'chats'>('vacancies');
+  
+  // Chat state
+  const [chats, setChats] = useState<Chat[]>([]);
+  const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [chatMessage, setChatMessage] = useState('');
+  const [chatFileInput, setChatFileInput] = useState<HTMLInputElement | null>(null);
+  const [chatPollingInterval, setChatPollingInterval] = useState<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
     if (isAuthed) {
       loadVacanciesFromAPI();
       loadAdminsFromAPI();
       loadAnnouncementsFromAPI();
+      if (activeTab === 'chats') {
+        loadChatsFromAPI();
+      }
     }
-  }, [isAuthed]);
+  }, [isAuthed, activeTab]);
+  
+  // Poll for new chats when on chats tab
+  useEffect(() => {
+    if (isAuthed && activeTab === 'chats') {
+      loadChatsFromAPI();
+      const interval = setInterval(() => {
+        loadChatsFromAPI();
+        if (selectedChat?.userPhone) {
+          loadSelectedChat();
+        }
+      }, 2000);
+      setChatPollingInterval(interval);
+      return () => {
+        clearInterval(interval);
+        setChatPollingInterval(null);
+      };
+    }
+  }, [isAuthed, activeTab, selectedChat?.userPhone]);
 
   const loadVacanciesFromAPI = async () => {
     setLoading(true);
@@ -289,6 +317,117 @@ export default function AdminPage() {
     }
   };
 
+  // Chat handlers
+  const loadChatsFromAPI = async () => {
+    try {
+      const data = await getAllChats();
+      setChats(data);
+    } catch (err) {
+      console.error('Error loading chats:', err);
+    }
+  };
+
+  const loadSelectedChat = async () => {
+    if (!selectedChat?.userPhone) return;
+    try {
+      const chatData = await getChat(selectedChat.userPhone);
+      setSelectedChat(chatData);
+    } catch (err) {
+      console.error('Error loading selected chat:', err);
+    }
+  };
+
+  const handleSelectChat = async (chat: Chat) => {
+    try {
+      const fullChat = await getChat(chat.userPhone);
+      setSelectedChat(fullChat);
+    } catch (err) {
+      console.error('Error loading chat:', err);
+      setError('Failed to load chat');
+    }
+  };
+
+  const handleSendChatMessage = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!chatMessage.trim() || !selectedChat?.userPhone || loading) return;
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await sendMessage(selectedChat.userPhone, 'admin', chatMessage.trim(), 'text');
+      setChatMessage('');
+      await loadSelectedChat();
+      await loadChatsFromAPI();
+    } catch (err: any) {
+      setError(err.message || 'Failed to send message');
+      console.error('Error sending message:', err);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleChatFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file || !selectedChat?.userPhone || loading) return;
+
+    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
+      setError('Please select an image or video file');
+      return;
+    }
+
+    if (file.size > 10 * 1024 * 1024) {
+      setError('File size must be less than 10MB');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await uploadChatFile(file, selectedChat.userPhone, 'admin');
+      await loadSelectedChat();
+      await loadChatsFromAPI();
+    } catch (err: any) {
+      setError(err.message || 'Failed to upload file');
+      console.error('Error uploading file:', err);
+    } finally {
+      setLoading(false);
+      if (chatFileInput) {
+        chatFileInput.value = '';
+      }
+    }
+  };
+
+  const formatTime = (timestamp: Date | string | undefined) => {
+    if (!timestamp) return '';
+    const date = new Date(timestamp);
+    return date.toLocaleDateString('en-IN', {
+      day: 'numeric',
+      month: 'short',
+      hour: '2-digit',
+      minute: '2-digit',
+    });
+  };
+
+  const handleDownloadImage = async (imageUrl: string) => {
+    try {
+      const response = await fetch(imageUrl);
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `chat-image-${Date.now()}.jpg`;
+      document.body.appendChild(link);
+      link.click();
+      document.body.removeChild(link);
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      console.error('Error downloading image:', error);
+      setError('Failed to download image');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow">
@@ -348,6 +487,16 @@ export default function AdminPage() {
                   }`}
                 >
                   Admins
+                </button>
+                <button
+                  onClick={() => setActiveTab('chats')}
+                  className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-medium border-b-2 transition-colors ${
+                    activeTab === 'chats'
+                      ? 'border-blue-600 text-blue-600'
+                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  }`}
+                >
+                  Chat Support
                 </button>
               </nav>
             </div>
@@ -652,6 +801,288 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
+            )}
+
+            {/* Chat Support Tab */}
+            {activeTab === 'chats' && (
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6" style={{ minHeight: '600px' }}>
+                {/* Chat List - Enhanced Design */}
+                <div className="lg:col-span-1 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg overflow-hidden flex flex-col border border-gray-200" style={{ maxHeight: '80vh' }}>
+                  {/* Header with gradient */}
+                  <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-4">
+                    <div className="flex items-center gap-2 mb-2">
+                      <MessageCircle className="w-5 h-5" />
+                      <h3 className="font-bold text-base">Customer Chats</h3>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs text-blue-100">
+                      <Phone className="w-3 h-3" />
+                      <span>7895094129, 9193898182</span>
+                    </div>
+                    {chats.length > 0 && (
+                      <div className="mt-3 pt-3 border-t border-blue-400/30">
+                        <div className="flex items-center justify-between">
+                          <span className="text-xs text-blue-100">Total Chats</span>
+                          <span className="bg-white/20 px-2 py-1 rounded-full text-xs font-semibold">{chats.length}</span>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Chat List */}
+                  <div className="flex-1 overflow-y-auto bg-white">
+                    {chats.length === 0 ? (
+                      <div className="flex flex-col items-center justify-center h-full p-8 text-center">
+                        <div className="bg-gray-100 rounded-full p-6 mb-4">
+                          <MessageCircle className="w-12 h-12 text-gray-400" />
+                        </div>
+                        <p className="text-sm font-medium text-gray-700 mb-1">No chats yet</p>
+                        <p className="text-xs text-gray-500">Customer chats will appear here</p>
+                      </div>
+                    ) : (
+                      <div className="divide-y divide-gray-100">
+                        {chats.map((chat) => {
+                          const isSelected = selectedChat?.userPhone === chat.userPhone;
+                          const lastMessage = chat.lastMessage;
+                          const isRecent = chat.lastMessageAt && new Date(chat.lastMessageAt).getTime() > Date.now() - 3600000; // Last hour
+                          
+                          return (
+                            <button
+                              key={chat.id || chat._id}
+                              onClick={() => handleSelectChat(chat)}
+                              className={`w-full p-4 text-left transition-all duration-200 hover:bg-gradient-to-r hover:from-blue-50 hover:to-indigo-50 ${
+                                isSelected 
+                                  ? 'bg-gradient-to-r from-blue-50 to-indigo-50 border-l-4 border-blue-600 shadow-sm' 
+                                  : ''
+                              }`}
+                            >
+                              <div className="flex items-start gap-3">
+                                {/* Avatar */}
+                                <div className={`flex-shrink-0 w-12 h-12 rounded-full flex items-center justify-center text-white font-bold text-sm ${
+                                  isSelected 
+                                    ? 'bg-gradient-to-br from-blue-600 to-indigo-600 shadow-md' 
+                                    : 'bg-gradient-to-br from-gray-400 to-gray-500'
+                                }`}>
+                                  <Phone className="w-5 h-5" />
+                                </div>
+                                
+                                {/* Content */}
+                                <div className="flex-1 min-w-0">
+                                  <div className="flex items-center justify-between mb-1">
+                                    <div className="font-bold text-sm text-gray-900 truncate">
+                                      {chat.userPhone}
+                                    </div>
+                                    {isRecent && !isSelected && (
+                                      <span className="flex-shrink-0 w-2 h-2 bg-green-500 rounded-full animate-pulse"></span>
+                                    )}
+                                  </div>
+                                  
+                                  {lastMessage && (
+                                    <div className="flex items-center gap-1.5 text-xs text-gray-600 mt-1 mb-1">
+                                      {lastMessage.type === 'text' ? (
+                                        <span className="truncate">{lastMessage.content}</span>
+                                      ) : lastMessage.type === 'image' ? (
+                                        <span className="flex items-center gap-1 text-blue-600">
+                                          <Image className="w-3 h-3" />
+                                          <span>Image</span>
+                                        </span>
+                                      ) : (
+                                        <span className="flex items-center gap-1 text-purple-600">
+                                          <Video className="w-3 h-3" />
+                                          <span>Video</span>
+                                        </span>
+                                      )}
+                                    </div>
+                                  )}
+                                  
+                                  <div className="flex items-center gap-2 text-xs text-gray-500">
+                                    <Clock className="w-3 h-3" />
+                                    <span>{formatTime(chat.lastMessageAt)}</span>
+                                    <span className="text-gray-400">•</span>
+                                    <span className="font-medium">{chat.messageCount || 0} msgs</span>
+                                  </div>
+                                </div>
+                              </div>
+                            </button>
+                          );
+                        })}
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Chat View - Enhanced Design */}
+                <div className="lg:col-span-2 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col border border-gray-200" style={{ maxHeight: '80vh' }}>
+                  {selectedChat ? (
+                    <>
+                      {/* Header with gradient */}
+                      <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-4">
+                        <div className="flex items-center gap-3">
+                          <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
+                            <Phone className="w-5 h-5" />
+                          </div>
+                          <div className="flex-1">
+                            <h3 className="font-bold text-base">{selectedChat.userPhone}</h3>
+                            <p className="text-xs text-blue-100 flex items-center gap-1">
+                              <User className="w-3 h-3" />
+                              Customer Chat
+                            </p>
+                          </div>
+                          <div className="text-right">
+                            <div className="text-xs text-blue-100">Total Messages</div>
+                            <div className="text-sm font-bold">{selectedChat.messages?.length || 0}</div>
+                          </div>
+                        </div>
+                      </div>
+                      
+                      {/* Messages Area */}
+                      <div className="flex-1 overflow-y-auto p-6 bg-gradient-to-b from-gray-50 to-white">
+                        {selectedChat.messages && selectedChat.messages.length > 0 ? (
+                          <div className="space-y-4">
+                            {selectedChat.messages.map((msg, index) => {
+                              const isAdmin = msg.sender === 'admin';
+                              const prevMsg = index > 0 ? selectedChat.messages[index - 1] : null;
+                              const showAvatar = !prevMsg || prevMsg.sender !== msg.sender;
+                              
+                              return (
+                                <div
+                                  key={index}
+                                  className={`flex items-end gap-2 ${isAdmin ? 'justify-end' : 'justify-start'}`}
+                                >
+                                  {!isAdmin && showAvatar && (
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-gray-400 to-gray-500 flex items-center justify-center flex-shrink-0">
+                                      <User className="w-4 h-4 text-white" />
+                                    </div>
+                                  )}
+                                  
+                                  <div className={`flex flex-col ${isAdmin ? 'items-end' : 'items-start'} max-w-[75%]`}>
+                                    <div
+                                      className={`rounded-2xl px-4 py-2.5 shadow-sm ${
+                                        isAdmin
+                                          ? 'bg-gradient-to-br from-blue-600 to-blue-700 text-white rounded-br-sm'
+                                          : 'bg-white text-gray-800 border border-gray-200 rounded-bl-sm'
+                                      }`}
+                                    >
+                                      {msg.type === 'text' ? (
+                                        <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.content}</p>
+                                      ) : msg.type === 'image' ? (
+                                        <div className="rounded-lg overflow-hidden relative group">
+                                          <img
+                                            src={msg.content}
+                                            alt="Shared image"
+                                            className="max-w-full h-auto rounded-lg"
+                                            onError={(e) => {
+                                              (e.target as HTMLImageElement).src = '/placeholder-image.png';
+                                            }}
+                                          />
+                                          <button
+                                            onClick={() => handleDownloadImage(msg.content)}
+                                            className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200 shadow-lg"
+                                            aria-label="Download image"
+                                            title="Download image"
+                                          >
+                                            <Download className="w-4 h-4" />
+                                          </button>
+                                        </div>
+                                      ) : (
+                                        <video
+                                          src={msg.content}
+                                          controls
+                                          className="max-w-full h-auto rounded-lg"
+                                        >
+                                          Your browser does not support the video tag.
+                                        </video>
+                                      )}
+                                    </div>
+                                    <p
+                                      className={`text-xs mt-1 px-1 ${
+                                        isAdmin ? 'text-gray-500' : 'text-gray-500'
+                                      }`}
+                                    >
+                                      {formatTime(msg.timestamp)}
+                                    </p>
+                                  </div>
+                                  
+                                  {isAdmin && showAvatar && (
+                                    <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-600 to-indigo-600 flex items-center justify-center flex-shrink-0 shadow-md">
+                                      <User className="w-4 h-4 text-white" />
+                                    </div>
+                                  )}
+                                </div>
+                              );
+                            })}
+                          </div>
+                        ) : (
+                          <div className="flex flex-col items-center justify-center h-full text-gray-500">
+                            <div className="bg-gray-100 rounded-full p-6 mb-4">
+                              <MessageCircle className="w-12 h-12 text-gray-400" />
+                            </div>
+                            <p className="text-sm font-medium">No messages yet</p>
+                            <p className="text-xs mt-1">Start the conversation!</p>
+                          </div>
+                        )}
+                      </div>
+                      
+                      {/* Error Message */}
+                      {error && (
+                        <div className="px-4 py-2 bg-red-50 border-t border-red-200">
+                          <p className="text-sm text-red-700 flex items-center gap-2">
+                            <span className="w-2 h-2 bg-red-500 rounded-full"></span>
+                            {error}
+                          </p>
+                        </div>
+                      )}
+                      
+                      {/* Input Area */}
+                      <div className="border-t border-gray-200 p-4 bg-white">
+                        <form onSubmit={handleSendChatMessage} className="flex items-center gap-2">
+                          <input
+                            type="file"
+                            ref={(el) => setChatFileInput(el)}
+                            onChange={handleChatFileUpload}
+                            accept="image/*,video/*"
+                            className="hidden"
+                          />
+                          <button
+                            type="button"
+                            onClick={() => chatFileInput?.click()}
+                            className="p-2.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200 hover:scale-110"
+                            aria-label="Upload image or video"
+                            disabled={loading}
+                          >
+                            <Paperclip className="w-5 h-5" />
+                          </button>
+                          <input
+                            type="text"
+                            value={chatMessage}
+                            onChange={(e) => setChatMessage(e.target.value)}
+                            placeholder="Type your message..."
+                            className="flex-1 px-4 py-3 border-2 border-gray-200 rounded-full focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-gray-900 transition-all"
+                            disabled={loading}
+                          />
+                          <button
+                            type="submit"
+                            disabled={!chatMessage.trim() || loading}
+                            className="p-3 bg-gradient-to-r from-blue-600 to-indigo-600 text-white rounded-full hover:from-blue-700 hover:to-indigo-700 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200 hover:scale-110 shadow-lg disabled:shadow-none"
+                            aria-label="Send message"
+                          >
+                            <Send className="w-5 h-5" />
+                          </button>
+                        </form>
+                      </div>
+                    </>
+                  ) : (
+                    <div className="flex items-center justify-center h-full bg-gradient-to-br from-gray-50 to-white">
+                      <div className="text-center">
+                        <div className="bg-gradient-to-br from-blue-100 to-indigo-100 rounded-full p-8 mb-4 mx-auto w-24 h-24 flex items-center justify-center">
+                          <MessageCircle className="w-12 h-12 text-blue-600" />
+                        </div>
+                        <p className="text-base font-semibold text-gray-700 mb-1">Select a chat</p>
+                        <p className="text-sm text-gray-500">Choose a customer chat from the list to view messages</p>
+                      </div>
+                    </div>
+                  )}
+                </div>
+              </div>
             )}
           </div>
         )}

@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, Phone, Menu, X } from 'lucide-react';
+import { FileText, Phone, Menu, X, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
@@ -23,6 +23,11 @@ export default function Header() {
     { path: '/vacancies', label: 'Vacancies' },
     { path: '/contact', label: 'Contact' },
   ];
+
+  const handleChatClick = () => {
+    // Dispatch event to open chat
+    window.dispatchEvent(new CustomEvent('openChat'));
+  };
 
   return (
     <header className="bg-gradient-to-r from-blue-700 via-blue-800 to-blue-900 text-white shadow-xl sticky top-0 z-50 backdrop-blur-sm">
@@ -59,8 +64,27 @@ export default function Header() {
             ))}
           </nav>
 
-          {/* Right Side - Phone & Mobile Menu */}
-          <div className="flex items-center space-x-4">
+          {/* Right Side - Phone, Chat & Mobile Menu */}
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            {/* Chat Button - Desktop */}
+            <button
+              onClick={handleChatClick}
+              className="hidden md:flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl group"
+              aria-label="Open Chat Support"
+            >
+              <MessageCircle className="w-4 h-4 group-hover:scale-110 transition" />
+              <span className="font-semibold text-sm">Chat</span>
+            </button>
+
+            {/* Chat Button - Mobile */}
+            <button
+              onClick={handleChatClick}
+              className="md:hidden bg-green-600 hover:bg-green-700 p-2 rounded-lg transition shadow-lg"
+              aria-label="Open Chat"
+            >
+              <MessageCircle className="w-5 h-5" />
+            </button>
+
             {/* Phone Number - Desktop */}
             <a 
               href="tel:9193898182" 
@@ -112,10 +136,20 @@ export default function Header() {
                   {link.label}
                 </Link>
               ))}
+              <button
+                onClick={() => {
+                  handleChatClick();
+                  setMobileMenuOpen(false);
+                }}
+                className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition mt-2 w-full"
+              >
+                <MessageCircle className="w-5 h-5" />
+                <span>Chat Support</span>
+              </button>
               <a 
                 href="tel:9193898182"
                 onClick={() => setMobileMenuOpen(false)}
-                className="flex items-center justify-center space-x-2 px-4 py-3 bg-green-600 hover:bg-green-700 rounded-lg font-semibold transition mt-2"
+                className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition mt-2"
               >
                 <Phone className="w-5 h-5" />
                 <span>Call Now: 9193898182</span>

@@ -451,4 +451,187 @@ export async function getActiveAnnouncements(): Promise<Announcement[]> {
   }
 }
 
+// Chat API
+export interface ChatMessage {
+  _id?: string;
+  sender: 'customer' | 'admin';
+  content: string;
+  type: 'text' | 'image' | 'video';
+  timestamp: Date | string;
+}
+
+export interface Chat {
+  _id?: string;
+  id?: string;
+  userPhone: string;
+  messages: ChatMessage[];
+  lastMessageAt?: Date | string;
+  lastMessage?: ChatMessage;
+  messageCount?: number;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+}
+
+export async function getChat(userPhone: string): Promise<Chat> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    const response = await fetch(`${API_BASE_URL}/api/chats?userPhone=${encodeURIComponent(userPhone)}`, {
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch chat');
+    }
+    
+    const data = await response.json();
+    return {
+      ...data,
+      id: data._id || data.id,
+    };
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout. Please try again.');
+    }
+    throw error;
+  }
+}
+
+export async function getAllChats(): Promise<Chat[]> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    const response = await fetch(`${API_BASE_URL}/api/chats?admin=true`, {
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      throw new Error('Failed to fetch chats');
+    }
+    
+    const data = await response.json();
+    
+    if (!Array.isArray(data)) {
+      return [];
+    }
+    
+    return data.map((chat: any) => ({
+      ...chat,
+      id: chat._id || chat.id,
+    }));
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout. Please try again.');
+    }
+    throw error;
+  }
+}
+
+export async function sendMessage(
+  userPhone: string,
+  sender: 'customer' | 'admin',
+  content: string,
+  type: 'text' | 'image' | 'video' = 'text'
+): Promise<Chat> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 15000);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/chats`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        userPhone,
+        sender,
+        content,
+        type,
+      }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.message || errorData.error || 'Failed to send message';
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    return {
+      ...data.chat,
+      id: data.chat._id || data.chat.id,
+    };
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout. Please try again.');
+    }
+    throw error;
+  }
+}
+
+export async function uploadChatFile(
+  file: File,
+  userPhone: string,
+  sender: 'customer' | 'admin'
+): Promise<{ fileUrl: string; chat: Chat }> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s for file upload
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+    formData.append('userPhone', userPhone);
+    formData.append('sender', sender);
+
+    const response = await fetch(`${API_BASE_URL}/api/chats/upload`, {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.message || errorData.error || 'Failed to upload file';
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    return {
+      fileUrl: data.fileUrl,
+      chat: {
+        ...data.chat,
+        id: data.chat._id || data.chat.id,
+      },
+    };
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout. Please try again.');
+    }
+    throw error;
+  }
+}
+
 
