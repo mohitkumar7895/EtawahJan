@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB, isDBConnected } from '@/lib/db';
 import Chat from '@/models/Chat';
+import User from '@/models/User';
 import { writeFile, mkdir } from 'fs/promises';
 import { join } from 'path';
 import { existsSync } from 'fs';
@@ -114,6 +115,25 @@ export async function POST(request: NextRequest) {
       }
     }
 
+    // Find or create user in database
+    let user = await User.findOne({ phoneNumber: cleanPhone });
+    if (!user) {
+      user = new User({
+        phoneNumber: cleanPhone,
+        firstChatAt: new Date(),
+        lastActiveAt: new Date(),
+        messageCount: 0,
+        isActive: true,
+      });
+      await user.save();
+      console.log("✅ New user created:", cleanPhone);
+    } else {
+      // Update last active time
+      user.lastActiveAt = new Date();
+      user.isActive = true;
+      await user.save();
+    }
+
     // Find or create chat
     let chat = await Chat.findOne({ userPhone: cleanPhone });
 
@@ -136,6 +156,12 @@ export async function POST(request: NextRequest) {
     chat.lastMessageAt = new Date();
 
     await chat.save();
+
+    // Update user's message count
+    if (user) {
+      user.messageCount = chat.messages.length;
+      await user.save();
+    }
 
     return NextResponse.json(
       {

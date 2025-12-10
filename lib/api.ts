@@ -634,4 +634,126 @@ export async function uploadChatFile(
   }
 }
 
+// User API
+export interface User {
+  _id?: string;
+  id?: string;
+  phoneNumber: string;
+  firstChatAt?: Date | string;
+  lastActiveAt?: Date | string;
+  messageCount?: number;
+  isActive?: boolean;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+}
+
+export async function saveUser(phoneNumber: string): Promise<User> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/users`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ phoneNumber }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.message || errorData.error || 'Failed to save user';
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    return {
+      ...data.user,
+      id: data.user._id || data.user.id,
+    };
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout. Please try again.');
+    }
+    throw error;
+  }
+}
+
+export async function updateUser(phoneNumber: string, updates: { messageCount?: number; lastActiveAt?: Date }): Promise<User> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 10000);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/users`, {
+      method: 'PUT',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ phoneNumber, ...updates }),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.message || errorData.error || 'Failed to update user';
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    return {
+      ...data.user,
+      id: data.user._id || data.user.id,
+    };
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout. Please try again.');
+    }
+    throw error;
+  }
+}
+
+export async function getUser(phoneNumber: string): Promise<User | null> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    const response = await fetch(`${API_BASE_URL}/api/users?phoneNumber=${encodeURIComponent(phoneNumber)}`, {
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      if (response.status === 404) {
+        return null;
+      }
+      throw new Error('Failed to fetch user');
+    }
+    
+    const data = await response.json();
+    return {
+      ...data,
+      id: data._id || data.id,
+    };
+  } catch (error: any) {
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout. Please try again.');
+    }
+    return null;
+  }
+}
+
 

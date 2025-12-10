@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from 'react';
 import { MessageCircle, X, Send, Image, Video, Download } from 'lucide-react';
-import { getChat, sendMessage, uploadChatFile, type Chat, type ChatMessage } from '@/lib/api';
+import { getChat, sendMessage, uploadChatFile, saveUser, updateUser, type Chat, type ChatMessage } from '@/lib/api';
 
 export default function ChatSupport() {
   const [isOpen, setIsOpen] = useState(false);
@@ -15,6 +15,20 @@ export default function ChatSupport() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+
+  // Load saved phone number from localStorage on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const savedPhone = localStorage.getItem('chatPhoneNumber');
+      if (savedPhone && savedPhone.trim()) {
+        const cleanPhone = savedPhone.trim().replace(/\D/g, '');
+        if (cleanPhone.length === 10) {
+          setPhoneNumber(cleanPhone);
+          setPhoneEntered(true);
+        }
+      }
+    }
+  }, []);
 
   // Listen for open chat event from navbar
   useEffect(() => {
@@ -54,6 +68,13 @@ export default function ChatSupport() {
     }
   }, [isOpen, phoneEntered, phoneNumber]);
 
+  // Auto-load chat when phone is already entered (from localStorage)
+  useEffect(() => {
+    if (phoneEntered && phoneNumber && isOpen) {
+      loadChat();
+    }
+  }, [phoneEntered, phoneNumber, isOpen]);
+
   const loadChat = async () => {
     if (!phoneNumber) return;
 
@@ -61,6 +82,19 @@ export default function ChatSupport() {
       const chatData = await getChat(phoneNumber);
       setChat(chatData);
       setError(null);
+      
+      // Update user's last active time when chat is loaded
+      if (chatData.messages && chatData.messages.length > 0) {
+        try {
+          await updateUser(phoneNumber, {
+            messageCount: chatData.messages.length,
+            lastActiveAt: new Date(),
+          });
+        } catch (err) {
+          console.error('Error updating user:', err);
+          // Don't show error to user
+        }
+      }
     } catch (err: any) {
       console.error('Error loading chat:', err);
       // Don't show error on polling, only on initial load
@@ -79,10 +113,30 @@ export default function ChatSupport() {
       return;
     }
 
-    setPhoneNumber(cleanPhone);
-    setPhoneEntered(true);
     setError(null);
-    await loadChat();
+    setLoading(true);
+
+    try {
+      // Save phone number to localStorage
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('chatPhoneNumber', cleanPhone);
+      }
+
+      // Save user to MongoDB database
+      await saveUser(cleanPhone);
+
+      setPhoneNumber(cleanPhone);
+      setPhoneEntered(true);
+      await loadChat();
+    } catch (err: any) {
+      console.error('Error saving user:', err);
+      // Still allow chat even if user save fails
+      setPhoneNumber(cleanPhone);
+      setPhoneEntered(true);
+      await loadChat();
+    } finally {
+      setLoading(false);
+    }
   };
 
   const handleSendMessage = async (e: React.FormEvent) => {
@@ -96,6 +150,19 @@ export default function ChatSupport() {
       await sendMessage(phoneNumber, 'customer', message.trim(), 'text');
       setMessage('');
       await loadChat();
+      
+      // Update user's message count and last active time
+      if (chat?.messages) {
+        try {
+          await updateUser(phoneNumber, {
+            messageCount: (chat.messages.length + 1),
+            lastActiveAt: new Date(),
+          });
+        } catch (err) {
+          console.error('Error updating user:', err);
+          // Don't show error to user, just log it
+        }
+      }
     } catch (err: any) {
       setError(err.message || 'Failed to send message');
       console.error('Error sending message:', err);
@@ -181,40 +248,70 @@ export default function ChatSupport() {
     }
   };
 
+  // Function to clear saved phone number (for changing number)
+  const handleClearPhone = () => {
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('chatPhoneNumber');
+    }
+    setPhoneNumber('');
+    setPhoneEntered(false);
+    setChat(null);
+    setError(null);
+  };
+
   return (
     <>
       {/* Floating Chat Button */}
       <button
         onClick={() => setIsOpen(true)}
-        className="fixed bottom-6 right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-4 shadow-2xl transition-all duration-300 hover:scale-110 flex items-center justify-center"
+        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-blue-600 hover:bg-blue-700 text-white rounded-full p-3 sm:p-4 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center"
         aria-label="Open chat support"
       >
-        <MessageCircle className="w-6 h-6" />
+        <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
       </button>
 
       {/* Chat Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-4">
-          <div className="bg-white rounded-lg shadow-2xl w-full max-w-md h-[600px] flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-0 sm:p-4">
+          <div className="bg-white rounded-none sm:rounded-lg shadow-2xl w-full h-full sm:h-[600px] sm:max-w-md flex flex-col">
             {/* Header */}
-            <div className="bg-blue-600 text-white p-4 rounded-t-lg flex items-center justify-between">
-              <h2 className="text-lg font-semibold">Chat Support</h2>
-              <button
-                onClick={handleClose}
-                className="hover:bg-blue-700 rounded-full p-1 transition-colors"
-                aria-label="Close chat"
-              >
-                <X className="w-5 h-5" />
-              </button>
+            <div className="bg-blue-600 text-white p-3 sm:p-4 rounded-none sm:rounded-t-lg flex items-center justify-between flex-shrink-0">
+              <div className="flex items-center gap-2">
+                <h2 className="text-base sm:text-lg font-semibold">Chat Support</h2>
+                {phoneEntered && phoneNumber && (
+                  <span className="text-xs sm:text-sm text-blue-100 bg-blue-700/50 px-2 py-0.5 rounded-full">
+                    {phoneNumber}
+                  </span>
+                )}
+              </div>
+              <div className="flex items-center gap-1">
+                {phoneEntered && phoneNumber && (
+                  <button
+                    onClick={handleClearPhone}
+                    className="text-xs sm:text-sm text-blue-100 hover:text-white hover:bg-blue-700 px-2 py-1 rounded transition-colors active:bg-blue-800"
+                    aria-label="Change number"
+                    title="Change phone number"
+                  >
+                    Change
+                  </button>
+                )}
+                <button
+                  onClick={handleClose}
+                  className="hover:bg-blue-700 rounded-full p-1.5 sm:p-1 transition-colors active:bg-blue-800"
+                  aria-label="Close chat"
+                >
+                  <X className="w-5 h-5 sm:w-5 sm:h-5" />
+                </button>
+              </div>
             </div>
 
             {/* Content */}
             <div className="flex-1 flex flex-col overflow-hidden">
               {!phoneEntered ? (
                 // Phone Number Form
-                <div className="flex-1 flex items-center justify-center p-6">
+                <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
                   <form onSubmit={handlePhoneSubmit} className="w-full max-w-sm">
-                    <label className="block text-gray-700 font-medium mb-2">
+                    <label className="block text-gray-700 font-medium mb-2 text-sm sm:text-base">
                       Enter Your Mobile Number
                     </label>
                     <input
@@ -225,16 +322,16 @@ export default function ChatSupport() {
                         setError(null);
                       }}
                       placeholder="10-digit mobile number"
-                      className="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                      className="w-full px-3 sm:px-4 py-2.5 sm:py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 text-base sm:text-base"
                       maxLength={10}
                       required
                     />
                     {error && (
-                      <p className="mt-2 text-sm text-red-600">{error}</p>
+                      <p className="mt-2 text-xs sm:text-sm text-red-600">{error}</p>
                     )}
                     <button
                       type="submit"
-                      className="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white py-3 rounded-lg font-medium transition-colors"
+                      className="w-full mt-4 bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white py-2.5 sm:py-3 rounded-lg font-medium transition-colors text-sm sm:text-base"
                     >
                       Start Chat
                     </button>
@@ -244,9 +341,9 @@ export default function ChatSupport() {
                 // Chat Interface
                 <>
                   {/* Messages Area */}
-                  <div className="flex-1 overflow-y-auto p-4 bg-gray-50">
+                  <div className="flex-1 overflow-y-auto p-3 sm:p-4 bg-gray-50">
                     {chat?.messages && chat.messages.length > 0 ? (
-                      <div className="space-y-3">
+                      <div className="space-y-2 sm:space-y-3">
                         {chat.messages.map((msg: ChatMessage, index: number) => {
                           const isCustomer = msg.sender === 'customer';
                           return (
@@ -255,14 +352,14 @@ export default function ChatSupport() {
                               className={`flex ${isCustomer ? 'justify-end' : 'justify-start'}`}
                             >
                               <div
-                                className={`max-w-[75%] rounded-lg p-3 ${
+                                className={`max-w-[85%] sm:max-w-[75%] rounded-lg p-2.5 sm:p-3 ${
                                   isCustomer
                                     ? 'bg-blue-600 text-white'
                                     : 'bg-white text-gray-800 border border-gray-200'
                                 }`}
                               >
                                 {msg.type === 'text' ? (
-                                  <p className="text-sm whitespace-pre-wrap break-words">{msg.content}</p>
+                                  <p className="text-xs sm:text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.content}</p>
                                 ) : msg.type === 'image' ? (
                                   <div className="relative group">
                                     <img
@@ -275,11 +372,11 @@ export default function ChatSupport() {
                                     />
                                     <button
                                       onClick={() => handleDownloadImage(msg.content)}
-                                      className="absolute top-2 right-2 bg-black/70 hover:bg-black/90 text-white p-2 rounded-full opacity-0 group-hover:opacity-100 transition-opacity duration-200"
+                                      className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 bg-black/70 hover:bg-black/90 active:bg-black text-white p-1.5 sm:p-2 rounded-full opacity-100 sm:opacity-0 sm:group-hover:opacity-100 transition-opacity duration-200"
                                       aria-label="Download image"
                                       title="Download image"
                                     >
-                                      <Download className="w-4 h-4" />
+                                      <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                     </button>
                                   </div>
                                 ) : (
@@ -292,7 +389,7 @@ export default function ChatSupport() {
                                   </video>
                                 )}
                                 <p
-                                  className={`text-xs mt-1 ${
+                                  className={`text-[10px] sm:text-xs mt-1 ${
                                     isCustomer ? 'text-blue-100' : 'text-gray-500'
                                   }`}
                                 >
@@ -305,7 +402,7 @@ export default function ChatSupport() {
                       </div>
                     ) : (
                       <div className="flex items-center justify-center h-full text-gray-500">
-                        <p>No messages yet. Start the conversation!</p>
+                        <p className="text-xs sm:text-sm text-center px-4">No messages yet. Start the conversation!</p>
                       </div>
                     )}
                     <div ref={messagesEndRef} />
@@ -313,14 +410,14 @@ export default function ChatSupport() {
 
                   {/* Error Message */}
                   {error && (
-                    <div className="px-4 py-2 bg-red-100 text-red-700 text-sm">
+                    <div className="px-3 sm:px-4 py-1.5 sm:py-2 bg-red-100 text-red-700 text-xs sm:text-sm flex-shrink-0">
                       {error}
                     </div>
                   )}
 
                   {/* Input Area */}
-                  <div className="border-t border-gray-200 p-4 bg-white">
-                    <form onSubmit={handleSendMessage} className="flex items-center gap-2">
+                  <div className="border-t border-gray-200 p-2.5 sm:p-4 bg-white flex-shrink-0">
+                    <form onSubmit={handleSendMessage} className="flex items-center gap-1.5 sm:gap-2">
                       <input
                         type="file"
                         ref={fileInputRef}
@@ -331,27 +428,27 @@ export default function ChatSupport() {
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
-                        className="p-2 text-gray-600 hover:text-blue-600 hover:bg-gray-100 rounded-full transition-colors"
+                        className="p-1.5 sm:p-2 text-gray-600 hover:text-blue-600 active:text-blue-700 hover:bg-gray-100 active:bg-gray-200 rounded-full transition-colors flex-shrink-0"
                         aria-label="Upload image or video"
                         disabled={loading}
                       >
-                        <Image className="w-5 h-5" />
+                        <Image className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                       <input
                         type="text"
                         value={message}
                         onChange={(e) => setMessage(e.target.value)}
                         placeholder="Type a message..."
-                        className="flex-1 px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900"
+                        className="flex-1 px-3 sm:px-4 py-2 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 text-sm sm:text-base"
                         disabled={loading}
                       />
                       <button
                         type="submit"
                         disabled={!message.trim() || loading}
-                        className="p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                        className="p-1.5 sm:p-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 active:bg-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex-shrink-0"
                         aria-label="Send message"
                       >
-                        <Send className="w-5 h-5" />
+                        <Send className="w-4 h-4 sm:w-5 sm:h-5" />
                       </button>
                     </form>
                   </div>
