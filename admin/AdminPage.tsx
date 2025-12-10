@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download } from 'lucide-react';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getAllChats, getChat, sendMessage, uploadChatFile, type Chat } from '@/lib/api';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'adminmohit1234';
@@ -425,6 +425,32 @@ export default function AdminPage() {
     } catch (error) {
       console.error('Error downloading image:', error);
       setError('Failed to download image');
+    }
+  };
+
+  const handleDeleteChat = async (chatId: string, userPhone: string) => {
+    if (!confirm(`Are you sure you want to delete the entire chat with ${userPhone}? This action cannot be undone.`)) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await deleteChat(chatId);
+      
+      // If deleted chat was selected, clear selection
+      if (selectedChat?.id === chatId || selectedChat?._id === chatId) {
+        setSelectedChat(null);
+      }
+      
+      // Reload chats list
+      await loadChatsFromAPI();
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete chat');
+      console.error('Error deleting chat:', err);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -927,9 +953,20 @@ export default function AdminPage() {
                               Customer Chat
                             </p>
                           </div>
-                          <div className="text-right">
-                            <div className="text-xs text-blue-100">Total Messages</div>
-                            <div className="text-sm font-bold">{selectedChat.messages?.length || 0}</div>
+                          <div className="flex items-center gap-3">
+                            <div className="text-right">
+                              <div className="text-xs text-blue-100">Total Messages</div>
+                              <div className="text-sm font-bold">{selectedChat.messages?.length || 0}</div>
+                            </div>
+                            <button
+                              onClick={() => handleDeleteChat(selectedChat.id || selectedChat._id || '', selectedChat.userPhone)}
+                              className="p-2 bg-red-500/20 hover:bg-red-500/30 active:bg-red-500/40 rounded-lg transition-colors flex-shrink-0"
+                              aria-label="Delete chat"
+                              title="Delete this chat"
+                              disabled={loading}
+                            >
+                              <Trash2 className="w-5 h-5 text-white" />
+                            </button>
                           </div>
                         </div>
                       </div>
