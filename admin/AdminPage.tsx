@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download } from 'lucide-react';
+import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X } from 'lucide-react';
 import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
@@ -481,12 +481,12 @@ export default function AdminPage() {
           </div>
         ) : (
           <div>
-            {/* Tabs Navigation */}
-            <div className="mb-4 sm:mb-6 border-b border-gray-200">
-              <nav className="flex space-x-4 sm:space-x-8">
+            {/* Tabs Navigation - Mobile Responsive */}
+            <div className="mb-3 sm:mb-6 border-b border-gray-200 overflow-x-auto">
+              <nav className="flex space-x-2 sm:space-x-4 md:space-x-8 min-w-max sm:min-w-0">
                 <button
                   onClick={() => setActiveTab('vacancies')}
-                  className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-medium border-b-2 transition-colors ${
+                  className={`px-2 sm:px-3 md:px-4 py-2 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'vacancies'
                       ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -496,7 +496,7 @@ export default function AdminPage() {
                 </button>
                 <button
                   onClick={() => setActiveTab('announcements')}
-                  className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-medium border-b-2 transition-colors ${
+                  className={`px-2 sm:px-3 md:px-4 py-2 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'announcements'
                       ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -506,7 +506,7 @@ export default function AdminPage() {
                 </button>
                 <button
                   onClick={() => setActiveTab('admins')}
-                  className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-medium border-b-2 transition-colors ${
+                  className={`px-2 sm:px-3 md:px-4 py-2 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'admins'
                       ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -516,7 +516,7 @@ export default function AdminPage() {
                 </button>
                 <button
                   onClick={() => setActiveTab('chats')}
-                  className={`px-3 sm:px-4 py-2 text-sm sm:text-base font-medium border-b-2 transition-colors ${
+                  className={`px-2 sm:px-3 md:px-4 py-2 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'chats'
                       ? 'border-blue-600 text-blue-600'
                       : 'border-transparent text-gray-500 hover:text-gray-700'
@@ -833,7 +833,7 @@ export default function AdminPage() {
             {activeTab === 'chats' && (
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6" style={{ minHeight: '600px' }}>
                 {/* Chat List - Enhanced Design */}
-                <div className="lg:col-span-1 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg overflow-hidden flex flex-col border border-gray-200" style={{ maxHeight: '80vh' }}>
+                <div className={`lg:col-span-1 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg overflow-hidden flex flex-col border border-gray-200 ${selectedChat ? 'hidden lg:flex' : 'flex'}`} style={{ maxHeight: '80vh' }}>
                   {/* Header with gradient */}
                   <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-4">
                     <div className="flex items-center gap-2 mb-2">
@@ -937,12 +937,19 @@ export default function AdminPage() {
                 </div>
 
                 {/* Chat View - Enhanced Design */}
-                <div className="lg:col-span-2 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col border border-gray-200" style={{ maxHeight: '80vh' }}>
+                <div className={`lg:col-span-2 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col border border-gray-200 ${selectedChat ? 'flex' : 'hidden lg:flex'}`} style={{ maxHeight: '80vh' }}>
                   {selectedChat ? (
                     <>
                       {/* Header with gradient */}
                       <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-4">
                         <div className="flex items-center gap-3">
+                          <button
+                            onClick={() => setSelectedChat(null)}
+                            className="lg:hidden text-white hover:bg-white/20 active:bg-white/30 rounded-full p-1.5 transition-colors flex-shrink-0"
+                            aria-label="Back to chats"
+                          >
+                            <X className="w-5 h-5" />
+                          </button>
                           <div className="w-10 h-10 rounded-full bg-white/20 flex items-center justify-center">
                             <Phone className="w-5 h-5" />
                           </div>
