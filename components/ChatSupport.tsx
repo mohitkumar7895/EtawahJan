@@ -231,6 +231,18 @@ export default function ChatSupport() {
 
   const handleDownloadImage = async (imageUrl: string) => {
     try {
+      // Handle data URLs (base64)
+      if (imageUrl.startsWith('data:')) {
+        const link = document.createElement('a');
+        link.href = imageUrl;
+        link.download = `chat-image-${Date.now()}.jpg`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        return;
+      }
+      
+      // Handle regular URLs
       const response = await fetch(imageUrl);
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);

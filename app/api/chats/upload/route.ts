@@ -69,25 +69,6 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Create uploads directory if it doesn't exist
-    // Use single recursive mkdir call to create all parent directories at once
-    const publicDir = join(process.cwd(), 'public');
-    const uploadsDir = join(publicDir, 'uploads', 'chat');
-    
-    // Create directories recursively - mkdir with recursive: true creates all parent directories automatically
-    try {
-      await mkdir(uploadsDir, { recursive: true });
-    } catch (dirError: any) {
-      console.error("❌ Error creating upload directories:", dirError);
-      return NextResponse.json(
-        { 
-          error: "Failed to create upload directory", 
-          message: `Directory creation failed: ${dirError.message}` 
-        },
-        { status: 500 }
-      );
-    }
-
     // Generate unique filename
     const timestamp = Date.now();
     const randomStr = Math.random().toString(36).substring(2, 15);
@@ -99,15 +80,65 @@ export async function POST(request: NextRequest) {
       else if (messageType === 'pdf') fileExtension = 'pdf';
     }
     const filename = `${timestamp}-${randomStr}.${fileExtension}`;
-    const filepath = join(uploadsDir, filename);
-
-    // Save file
+    
+    // Get file bytes
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
-    await writeFile(filepath, buffer);
-
-    // File URL (relative to public folder)
-    const fileUrl = `/uploads/chat/${filename}`;
+    
+    // Try to save to public/uploads/chat directory first
+    let fileUrl: string;
+    let uploadSuccess = false;
+    
+    try {
+      const publicDir = join(process.cwd(), 'public');
+      const uploadsDir = join(publicDir, 'uploads', 'chat');
+      
+      // Create directories recursively
+      await mkdir(uploadsDir, { recursive: true });
+      
+      const filepath = join(uploadsDir, filename);
+      await writeFile(filepath, buffer);
+      
+      // File URL (relative to public folder)
+      fileUrl = `/uploads/chat/${filename}`;
+      uploadSuccess = true;
+    } catch (dirError: any) {
+      // If directory creation fails (serverless environment), use /tmp
+      console.warn("⚠️ Public directory creation failed, trying /tmp:", dirError.message);
+      
+      try {
+        // Use /tmp directory for serverless environments
+        const tmpDir = '/tmp/uploads/chat';
+        await mkdir(tmpDir, { recursive: true });
+        
+        const tmpFilePath = join(tmpDir, filename);
+        await writeFile(tmpFilePath, buffer);
+        
+        // Convert file to base64 data URL for serverless environments
+        // This allows the file to be served without needing a persistent file system
+        const base64 = buffer.toString('base64');
+        const mimeType = file.type || (messageType === 'image' ? 'image/jpeg' : messageType === 'video' ? 'video/mp4' : 'application/pdf');
+        fileUrl = `data:${mimeType};base64,${base64}`;
+        uploadSuccess = true;
+      } catch (tmpError: any) {
+        console.error("❌ Error saving to /tmp:", tmpError);
+        // Last resort: convert to base64 data URL directly
+        const base64 = buffer.toString('base64');
+        const mimeType = file.type || (messageType === 'image' ? 'image/jpeg' : messageType === 'video' ? 'video/mp4' : 'application/pdf');
+        fileUrl = `data:${mimeType};base64,${base64}`;
+        uploadSuccess = true;
+      }
+    }
+    
+    if (!uploadSuccess) {
+      return NextResponse.json(
+        { 
+          error: "Failed to save file", 
+          message: "Unable to save file to any available location" 
+        },
+        { status: 500 }
+      );
+    }
 
     // Connect to database
     if (!isDBConnected()) {
