@@ -47,7 +47,7 @@ export default function Header() {
             </div>
             <div className="min-w-0">
               <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight truncate">
-                 welcome Jan Seva Kendra
+                 Jan Seva Kendra
               </h1>
               <p className="text-xs sm:text-sm text-blue-100 hidden xs:block">सेवा ही धर्म है</p>
             </div>
