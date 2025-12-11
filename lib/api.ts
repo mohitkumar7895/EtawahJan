@@ -455,7 +455,7 @@ export interface ChatMessage {
   _id?: string;
   sender: 'customer' | 'admin';
   content: string;
-  type: 'text' | 'image' | 'video';
+  type: 'text' | 'image' | 'video' | 'pdf';
   timestamp: Date | string;
 }
 
@@ -544,7 +544,7 @@ export async function sendMessage(
   userPhone: string,
   sender: 'customer' | 'admin',
   content: string,
-  type: 'text' | 'image' | 'video' = 'text'
+  type: 'text' | 'image' | 'video' | 'pdf' = 'text'
 ): Promise<Chat> {
   const controller = new AbortController();
   const timeoutId = setTimeout(() => controller.abort(), 15000);

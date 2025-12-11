@@ -371,8 +371,15 @@ export default function AdminPage() {
     const file = e.target.files?.[0];
     if (!file || !selectedChat?.userPhone || loading) return;
 
-    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
-      setError('Please select an image or video file');
+    const fileName = file.name.toLowerCase();
+    const isValidFile = 
+      file.type.startsWith('image/') || 
+      file.type.startsWith('video/') || 
+      file.type === 'application/pdf' || 
+      fileName.endsWith('.pdf');
+
+    if (!isValidFile) {
+      setError('Please select an image, video, or PDF file');
       return;
     }
 
@@ -1027,7 +1034,7 @@ export default function AdminPage() {
                                             <Download className="w-4 h-4" />
                                           </button>
                                         </div>
-                                      ) : (
+                                      ) : msg.type === 'video' ? (
                                         <video
                                           src={msg.content}
                                           controls
@@ -1035,7 +1042,25 @@ export default function AdminPage() {
                                         >
                                           Your browser does not support the video tag.
                                         </video>
-                                      )}
+                                      ) : msg.type === 'pdf' ? (
+                                        <div className="space-y-2">
+                                          <div className="flex items-center gap-2 text-sm">
+                                            <svg className="w-5 h-5" fill="currentColor" viewBox="0 0 20 20">
+                                              <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                                            </svg>
+                                            <span>PDF Document</span>
+                                          </div>
+                                          <a
+                                            href={msg.content}
+                                            target="_blank"
+                                            rel="noopener noreferrer"
+                                            className="inline-flex items-center gap-2 px-3 py-2 bg-white/20 hover:bg-white/30 text-white rounded-lg text-sm transition-colors"
+                                          >
+                                            <Download className="w-4 h-4" />
+                                            View/Download PDF
+                                          </a>
+                                        </div>
+                                      ) : null}
                                     </div>
                                     <p
                                       className={`text-xs mt-1 px-1 ${
@@ -1083,14 +1108,14 @@ export default function AdminPage() {
                             type="file"
                             ref={(el) => setChatFileInput(el)}
                             onChange={handleChatFileUpload}
-                            accept="image/*,video/*"
+                            accept="image/*,video/*,application/pdf,.pdf"
                             className="hidden"
                           />
                           <button
                             type="button"
                             onClick={() => chatFileInput?.click()}
                             className="p-2.5 text-gray-600 hover:text-blue-600 hover:bg-blue-50 rounded-full transition-all duration-200 hover:scale-110"
-                            aria-label="Upload image or video"
+                            aria-label="Upload image, video, or PDF"
                             disabled={loading}
                           >
                             <Paperclip className="w-5 h-5" />

@@ -44,15 +44,18 @@ export async function POST(request: NextRequest) {
 
     // Check file type
     const fileType = file.type;
-    let messageType: 'image' | 'video' = 'image';
+    const fileName = file.name.toLowerCase();
+    let messageType: 'image' | 'video' | 'pdf' = 'image';
     
     if (fileType.startsWith('image/')) {
       messageType = 'image';
     } else if (fileType.startsWith('video/')) {
       messageType = 'video';
+    } else if (fileType === 'application/pdf' || fileName.endsWith('.pdf')) {
+      messageType = 'pdf';
     } else {
       return NextResponse.json(
-        { error: "Invalid file type. Only images and videos are allowed." },
+        { error: "Invalid file type. Only images, videos, and PDFs are allowed." },
         { status: 400 }
       );
     }
@@ -67,23 +70,13 @@ export async function POST(request: NextRequest) {
     }
 
     // Create uploads directory if it doesn't exist
-    // Ensure all parent directories are created recursively
+    // Use single recursive mkdir call to create all parent directories at once
     const publicDir = join(process.cwd(), 'public');
-    const uploadsBaseDir = join(publicDir, 'uploads');
-    const uploadsDir = join(uploadsBaseDir, 'chat');
+    const uploadsDir = join(publicDir, 'uploads', 'chat');
     
-    // Create directories recursively - ensure all parent directories exist
-    // Using recursive: true will create all parent directories automatically
+    // Create directories recursively - mkdir with recursive: true creates all parent directories automatically
     try {
-      if (!existsSync(publicDir)) {
-        await mkdir(publicDir, { recursive: true });
-      }
-      if (!existsSync(uploadsBaseDir)) {
-        await mkdir(uploadsBaseDir, { recursive: true });
-      }
-      if (!existsSync(uploadsDir)) {
-        await mkdir(uploadsDir, { recursive: true });
-      }
+      await mkdir(uploadsDir, { recursive: true });
     } catch (dirError: any) {
       console.error("❌ Error creating upload directories:", dirError);
       return NextResponse.json(
@@ -98,7 +91,13 @@ export async function POST(request: NextRequest) {
     // Generate unique filename
     const timestamp = Date.now();
     const randomStr = Math.random().toString(36).substring(2, 15);
-    const fileExtension = file.name.split('.').pop() || (messageType === 'image' ? 'jpg' : 'mp4');
+    let fileExtension = file.name.split('.').pop();
+    if (!fileExtension) {
+      // Default extensions based on message type
+      if (messageType === 'image') fileExtension = 'jpg';
+      else if (messageType === 'video') fileExtension = 'mp4';
+      else if (messageType === 'pdf') fileExtension = 'pdf';
+    }
     const filename = `${timestamp}-${randomStr}.${fileExtension}`;
     const filepath = join(uploadsDir, filename);
 

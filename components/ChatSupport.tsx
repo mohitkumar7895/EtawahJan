@@ -176,8 +176,15 @@ export default function ChatSupport() {
     if (!file || !phoneNumber || loading) return;
 
     // Check file type
-    if (!file.type.startsWith('image/') && !file.type.startsWith('video/')) {
-      setError('Please select an image or video file');
+    const fileName = file.name.toLowerCase();
+    const isValidFile = 
+      file.type.startsWith('image/') || 
+      file.type.startsWith('video/') || 
+      file.type === 'application/pdf' || 
+      fileName.endsWith('.pdf');
+    
+    if (!isValidFile) {
+      setError('Please select an image, video, or PDF file');
       return;
     }
 
@@ -272,8 +279,8 @@ export default function ChatSupport() {
 
       {/* Chat Modal */}
       {isOpen && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-0 sm:p-4">
-          <div className="bg-white rounded-none sm:rounded-lg shadow-2xl w-full h-full sm:h-[600px] sm:max-w-md flex flex-col">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50 p-0 sm:p-4" style={{ overflow: 'hidden' }}>
+          <div className="bg-white rounded-none sm:rounded-lg shadow-2xl w-full h-full sm:h-[600px] sm:max-w-md flex flex-col" style={{ maxHeight: '100dvh', height: '100%' }}>
             {/* Header */}
             <div className="bg-blue-600 text-white p-3 sm:p-4 rounded-none sm:rounded-t-lg flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2">
@@ -341,7 +348,7 @@ export default function ChatSupport() {
                 // Chat Interface
                 <>
                   {/* Messages Area */}
-                  <div className="flex-1 overflow-y-auto p-3 sm:p-4 bg-gray-50">
+                  <div className="flex-1 overflow-y-auto p-3 sm:p-4 bg-gray-50" style={{ WebkitOverflowScrolling: 'touch' }}>
                     {chat?.messages && chat.messages.length > 0 ? (
                       <div className="space-y-2 sm:space-y-3">
                         {chat.messages.map((msg: ChatMessage, index: number) => {
@@ -379,7 +386,7 @@ export default function ChatSupport() {
                                       <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
                                     </button>
                                   </div>
-                                ) : (
+                                ) : msg.type === 'video' ? (
                                   <video
                                     src={msg.content}
                                     controls
@@ -387,7 +394,25 @@ export default function ChatSupport() {
                                   >
                                     Your browser does not support the video tag.
                                   </video>
-                                )}
+                                ) : msg.type === 'pdf' ? (
+                                  <div className="space-y-2">
+                                    <div className="flex items-center gap-2 text-xs sm:text-sm">
+                                      <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fillRule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4z" clipRule="evenodd" />
+                                      </svg>
+                                      <span>PDF Document</span>
+                                    </div>
+                                    <a
+                                      href={msg.content}
+                                      target="_blank"
+                                      rel="noopener noreferrer"
+                                      className="inline-flex items-center gap-2 px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs sm:text-sm transition-colors"
+                                    >
+                                      <Download className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
+                                      View/Download PDF
+                                    </a>
+                                  </div>
+                                ) : null}
                                 <p
                                   className={`text-[10px] sm:text-xs mt-1 ${
                                     isCustomer ? 'text-blue-100' : 'text-gray-500'
@@ -416,20 +441,20 @@ export default function ChatSupport() {
                   )}
 
                   {/* Input Area */}
-                  <div className="border-t border-gray-200 p-2.5 sm:p-4 bg-white flex-shrink-0">
+                  <div className="border-t border-gray-200 p-2.5 sm:p-4 bg-white flex-shrink-0" style={{ position: 'sticky', bottom: 0 }}>
                     <form onSubmit={handleSendMessage} className="flex items-center gap-1.5 sm:gap-2">
                       <input
                         type="file"
                         ref={fileInputRef}
                         onChange={handleFileUpload}
-                        accept="image/*,video/*"
+                        accept="image/*,video/*,application/pdf,.pdf"
                         className="hidden"
                       />
                       <button
                         type="button"
                         onClick={() => fileInputRef.current?.click()}
                         className="p-1.5 sm:p-2 text-gray-600 hover:text-blue-600 active:text-blue-700 hover:bg-gray-100 active:bg-gray-200 rounded-full transition-colors flex-shrink-0"
-                        aria-label="Upload image or video"
+                        aria-label="Upload image, video, or PDF"
                         disabled={loading}
                       >
                         <Image className="w-4 h-4 sm:w-5 sm:h-5" />
@@ -441,6 +466,19 @@ export default function ChatSupport() {
                         placeholder="Type a message..."
                         className="flex-1 px-3 sm:px-4 py-2 sm:py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-transparent text-gray-900 text-sm sm:text-base"
                         disabled={loading}
+                        onFocus={(e) => {
+                          // Prevent page scroll on mobile when keyboard opens
+                          if (window.innerWidth < 640) {
+                            setTimeout(() => {
+                              const inputRect = e.target.getBoundingClientRect();
+                              const viewportHeight = window.innerHeight;
+                              // Only scroll if input is near bottom (keyboard area)
+                              if (inputRect.bottom > viewportHeight * 0.7) {
+                                e.target.scrollIntoView({ behavior: 'smooth', block: 'nearest', inline: 'nearest' });
+                              }
+                            }, 100);
+                          }
+                        }}
                       />
                       <button
                         type="submit"
