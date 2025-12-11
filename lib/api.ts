@@ -720,6 +720,46 @@ export async function updateUser(phoneNumber: string, updates: { messageCount?: 
   }
 }
 
+// Payment API
+export interface Payment {
+  _id?: string;
+  id?: string;
+  razorpayOrderId: string;
+  razorpayPaymentId: string;
+  razorpaySignature: string;
+  amount: number;
+  currency: string;
+  status: 'pending' | 'success' | 'failed';
+  customerName?: string;
+  customerEmail?: string;
+  customerPhone?: string;
+  receipt?: string;
+  paymentDate: Date | string;
+  createdAt?: Date | string;
+  updatedAt?: Date | string;
+}
+
+export async function getAllPayments(): Promise<Payment[]> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/payments`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch payments');
+    }
+
+    const data = await response.json();
+    return data.payments || [];
+  } catch (error: any) {
+    console.error('Error fetching payments:', error);
+    return [];
+  }
+}
+
 export async function getUser(phoneNumber: string): Promise<User | null> {
   try {
     const controller = new AbortController();

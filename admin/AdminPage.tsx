@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X } from 'lucide-react';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat } from '@/lib/api';
+import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle } from 'lucide-react';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'adminmohit1234';
@@ -25,7 +25,11 @@ export default function AdminPage() {
   const [announcementForm, setAnnouncementForm] = useState({ title: '', description: '', isActive: true });
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
   
-  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins' | 'announcements' | 'chats'>('vacancies');
+  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins' | 'announcements' | 'chats' | 'payments'>('vacancies');
+  
+  // Payment state
+  const [payments, setPayments] = useState<Payment[]>([]);
+  const [paymentStats, setPaymentStats] = useState({ total: 0, totalAmount: 0 });
   
   // Chat state
   const [chats, setChats] = useState<Chat[]>([]);
@@ -41,6 +45,9 @@ export default function AdminPage() {
       loadAnnouncementsFromAPI();
       if (activeTab === 'chats') {
         loadChatsFromAPI();
+      }
+      if (activeTab === 'payments') {
+        loadPaymentsFromAPI();
       }
     }
   }, [isAuthed, activeTab]);
@@ -327,6 +334,24 @@ export default function AdminPage() {
     }
   };
 
+  const loadPaymentsFromAPI = async () => {
+    try {
+      const data = await getAllPayments();
+      setPayments(data);
+      
+      // Calculate stats
+      const successfulPayments = data.filter((p: Payment) => p.status === 'success');
+      const totalAmount = successfulPayments.reduce((sum: number, p: Payment) => sum + (p.amount || 0), 0);
+      setPaymentStats({
+        total: data.length,
+        totalAmount: totalAmount,
+      });
+    } catch (err) {
+      console.error('Error loading payments:', err);
+      setPayments([]);
+    }
+  };
+
   const loadSelectedChat = async () => {
     if (!selectedChat?.userPhone) return;
     try {
@@ -463,103 +488,328 @@ export default function AdminPage() {
 
   return (
     <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow">
+      <header className="bg-white shadow sticky top-0 z-50">
         <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
-          <h1 className="text-lg sm:text-xl font-bold">Admin Panel</h1>
+          <h1 className="text-base sm:text-lg md:text-xl font-bold truncate">Admin Panel</h1>
           {isAuthed ? (
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <button onClick={handleLogout} className="px-2 sm:px-3 py-1.5 sm:py-2 bg-red-600 text-white rounded text-sm sm:text-base">Logout</button>
+              <button onClick={handleLogout} className="px-2 sm:px-3 py-1.5 sm:py-2 bg-red-600 text-white rounded text-xs sm:text-sm md:text-base whitespace-nowrap">Logout</button>
             </div>
           ) : null}
         </div>
       </header>
 
-      <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+      <main className="container mx-auto px-2 sm:px-3 md:px-4 py-4 sm:py-6 md:py-8">
         {!isAuthed ? (
-          <div className="max-w-md mx-auto bg-white rounded shadow p-4 sm:p-6">
-            <h2 className="text-base sm:text-lg font-semibold mb-3 sm:mb-4">Admin Login</h2>
-            <div className="space-y-3">
-              <input value={user} onChange={(e) => setUser(e.target.value)} placeholder="Username" className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" />
-              <input value={pass} onChange={(e) => setPass(e.target.value)} placeholder="Password" type="password" className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" />
-              <div className="flex items-center justify-end">
-                <button onClick={handleLogin} className="bg-blue-600 text-white px-4 py-2 rounded text-sm sm:text-base">Login</button>
+          <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
+            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-4 sm:mb-6 text-center">Admin Login</h2>
+            <div className="space-y-4">
+              <input value={user} onChange={(e) => setUser(e.target.value)} placeholder="Username" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+              <input value={pass} onChange={(e) => setPass(e.target.value)} placeholder="Password" type="password" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+              <div className="flex items-center justify-center">
+                <button onClick={handleLogin} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-sm sm:text-base font-medium transition-colors shadow-md hover:shadow-lg">Login</button>
               </div>
             </div>
           </div>
         ) : (
           <div>
             {/* Tabs Navigation - Mobile Responsive */}
-            <div className="mb-3 sm:mb-6 border-b border-gray-200 overflow-x-auto">
-              <nav className="flex space-x-2 sm:space-x-4 md:space-x-8 min-w-max sm:min-w-0">
+            <div className="mb-4 sm:mb-6 border-b border-gray-200 overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
+              <nav className="flex space-x-1 sm:space-x-2 md:space-x-4 lg:space-x-8 min-w-max">
                 <button
                   onClick={() => setActiveTab('vacancies')}
-                  className={`px-2 sm:px-3 md:px-4 py-2 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'vacancies'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   Vacancies
                 </button>
                 <button
                   onClick={() => setActiveTab('announcements')}
-                  className={`px-2 sm:px-3 md:px-4 py-2 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'announcements'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   Announcements
                 </button>
                 <button
                   onClick={() => setActiveTab('admins')}
-                  className={`px-2 sm:px-3 md:px-4 py-2 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'admins'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                   }`}
                 >
                   Admins
                 </button>
                 <button
-                  onClick={() => setActiveTab('chats')}
-                  className={`px-2 sm:px-3 md:px-4 py-2 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
-                    activeTab === 'chats'
-                      ? 'border-blue-600 text-blue-600'
-                      : 'border-transparent text-gray-500 hover:text-gray-700'
+                  onClick={() => setActiveTab('payments')}
+                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
+                    activeTab === 'payments'
+                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
                   }`}
                 >
-                  Chat Support
+                  <CreditCard className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="hidden xs:inline">Payments</span>
+                  <span className="xs:hidden">Pay</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('chats')}
+                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
+                    activeTab === 'chats'
+                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="hidden sm:inline">Chat Support</span>
+                  <span className="sm:hidden">Chat</span>
                 </button>
               </nav>
             </div>
 
+            {/* Payments Tab */}
+            {activeTab === 'payments' && (
+              <div className="space-y-4 sm:space-y-6">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 sm:p-6 border border-green-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs sm:text-sm text-green-700 font-medium mb-1">Total Payments</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-green-900">{paymentStats.total}</p>
+                      </div>
+                      <CreditCard className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 sm:p-6 border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs sm:text-sm text-blue-700 font-medium mb-1">Total Amount</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-blue-900">
+                          <IndianRupee className="w-5 h-5 sm:w-6 sm:h-6 inline" />
+                          {paymentStats.totalAmount.toLocaleString('en-IN')}
+                        </p>
+                      </div>
+                      <IndianRupee className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 sm:p-6 border border-purple-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs sm:text-sm text-purple-700 font-medium mb-1">Successful</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-purple-900">
+                          {payments.filter((p) => p.status === 'success').length}
+                        </p>
+                      </div>
+                      <CheckCircle className="w-8 h-8 sm:w-10 sm:h-10 text-purple-600" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Payments Table */}
+                <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 sm:px-6 py-3 sm:py-4">
+                    <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                      <CreditCard className="w-5 h-5 sm:w-6 sm:h-6" />
+                      Payment History
+                    </h3>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    {payments.length === 0 ? (
+                      <div className="p-8 sm:p-12 text-center">
+                        <CreditCard className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-600 font-medium mb-1">No payments yet</p>
+                        <p className="text-sm text-gray-500">Payment records will appear here</p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block">
+                          <table className="w-full">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Payment ID</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Amount</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Customer</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Date</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                              {payments.map((payment) => (
+                                <tr key={payment.id || payment._id} className="hover:bg-gray-50 transition-colors">
+                                  <td className="px-4 py-3">
+                                    <div className="text-sm font-mono text-gray-900">
+                                      {payment.razorpayPaymentId.substring(0, 20)}...
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      Order: {payment.razorpayOrderId.substring(0, 15)}...
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="flex items-center gap-1 text-base font-bold text-gray-900">
+                                      <IndianRupee className="w-4 h-4" />
+                                      {payment.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    {payment.status === 'success' ? (
+                                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                        <CheckCircle className="w-4 h-4" />
+                                        Success
+                                      </span>
+                                    ) : payment.status === 'failed' ? (
+                                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                        <XCircle className="w-4 h-4" />
+                                        Failed
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 px-3 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
+                                        <Clock className="w-4 h-4" />
+                                        Pending
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="text-sm text-gray-900">
+                                      {payment.customerName || 'N/A'}
+                                    </div>
+                                    {payment.customerPhone && (
+                                      <div className="text-xs text-gray-500 mt-1">
+                                        {payment.customerPhone}
+                                      </div>
+                                    )}
+                                    {payment.customerEmail && (
+                                      <div className="text-xs text-gray-500">
+                                        {payment.customerEmail}
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="text-sm text-gray-900">
+                                      {new Date(payment.paymentDate).toLocaleDateString('en-IN', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric',
+                                      })}
+                                    </div>
+                                    <div className="text-xs text-gray-500 mt-1">
+                                      {new Date(payment.paymentDate).toLocaleTimeString('en-IN', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })}
+                                    </div>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden space-y-3 p-3">
+                          {payments.map((payment) => (
+                            <div key={payment.id || payment._id} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex-1">
+                                  <div className="flex items-center gap-2 mb-2">
+                                    {payment.status === 'success' ? (
+                                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                        <CheckCircle className="w-3 h-3" />
+                                        Success
+                                      </span>
+                                    ) : payment.status === 'failed' ? (
+                                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-red-100 text-red-700">
+                                        <XCircle className="w-3 h-3" />
+                                        Failed
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center gap-1 px-2 py-1 rounded-full text-xs font-semibold bg-yellow-100 text-yellow-700">
+                                        <Clock className="w-3 h-3" />
+                                        Pending
+                                      </span>
+                                    )}
+                                    <div className="flex items-center gap-1 text-base font-bold text-gray-900">
+                                      <IndianRupee className="w-4 h-4" />
+                                      {payment.amount.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                    </div>
+                                  </div>
+                                  <div className="text-xs font-mono text-gray-600 mb-1">
+                                    {payment.razorpayPaymentId.substring(0, 24)}...
+                                  </div>
+                                </div>
+                              </div>
+                              
+                              <div className="space-y-2 pt-2 border-t border-gray-100">
+                                {payment.customerName && (
+                                  <div className="flex items-center gap-2">
+                                    <User className="w-3 h-3 text-gray-400" />
+                                    <span className="text-xs text-gray-700">{payment.customerName}</span>
+                                  </div>
+                                )}
+                                {payment.customerPhone && (
+                                  <div className="flex items-center gap-2">
+                                    <Phone className="w-3 h-3 text-gray-400" />
+                                    <span className="text-xs text-gray-700">{payment.customerPhone}</span>
+                                  </div>
+                                )}
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-3 h-3 text-gray-400" />
+                                  <span className="text-xs text-gray-700">
+                                    {new Date(payment.paymentDate).toLocaleDateString('en-IN', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      year: 'numeric',
+                                    })} at {new Date(payment.paymentDate).toLocaleTimeString('en-IN', {
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })}
+                                  </span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
+            )}
+
             {/* Vacancies Tab */}
             {activeTab === 'vacancies' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-                <div className="lg:col-span-1">
-                  <div className="bg-white rounded shadow p-3 sm:p-4">
-                    <h3 className="font-semibold mb-2 text-sm sm:text-base">Add / Edit Vacancy</h3>
-                <div className="space-y-2">
-                  <input name="title" value={form.title} onChange={handleChange} placeholder="Title" className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" />
-                  <input name="tag" value={form.tag} onChange={handleChange} placeholder="Tag (Result/Notification)" className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" />
-                  <div className="grid grid-cols-2 gap-2">
-                    <input name="vacancies" value={form.vacancies} onChange={handleChange} placeholder="Vacancies" className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" />
-                    <input name="date" value={form.date} onChange={handleChange} placeholder="Date" className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" />
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+            <div className="lg:col-span-1 order-2 lg:order-1">
+              <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 md:p-6">
+                <h3 className="font-semibold mb-4 text-base sm:text-lg md:text-xl">Add / Edit Vacancy</h3>
+                <div className="space-y-3 sm:space-y-4">
+                  <input name="title" value={form.title} onChange={handleChange} placeholder="Title" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+                  <input name="tag" value={form.tag} onChange={handleChange} placeholder="Tag (Result/Notification)" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <input name="vacancies" value={form.vacancies} onChange={handleChange} placeholder="Vacancies" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+                    <input name="date" value={form.date} onChange={handleChange} placeholder="Date" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
                   </div>
-                  <input name="link" value={form.link} onChange={handleChange} placeholder="Link (optional)" className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" />
-                  <textarea name="info" value={form.info} onChange={handleChange} placeholder="Short info" rows={3} className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500 resize-none" />
+                  <input name="link" value={form.link} onChange={handleChange} placeholder="Link (optional)" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
+                  <textarea name="info" value={form.info} onChange={handleChange} placeholder="Short info" rows={4} className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
 
-                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                  <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                     <button 
                       onClick={handleAdd} 
                       disabled={loading}
-                      className="inline-flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded disabled:opacity-50 text-sm sm:text-base"
+                      className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-3 rounded-lg disabled:opacity-50 text-sm sm:text-base font-medium transition-colors shadow-md hover:shadow-lg"
                     >
                       {loading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                       ) : (
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                       )}
                       <span>{editingId ? 'Update' : 'Add'}</span>
                     </button>
@@ -571,7 +821,7 @@ export default function AdminPage() {
                           setForm({ title: '', tag: '', info: '', date: '', lastDate: '', vacancies: '', link: '' }); 
                         }} 
                         disabled={loading}
-                        className="px-3 py-2 border rounded disabled:opacity-50 text-sm sm:text-base"
+                        className="w-full sm:w-auto px-4 sm:px-6 py-3 border-2 border-gray-300 hover:border-gray-400 rounded-lg disabled:opacity-50 text-sm sm:text-base font-medium transition-colors"
                       >
                         Cancel Edit
                       </button>
@@ -581,11 +831,11 @@ export default function AdminPage() {
               </div>
             </div>
 
-            <div className="lg:col-span-2">
-              <div className="bg-white rounded shadow p-3 sm:p-4">
-                <div className="flex items-center justify-between mb-3">
-                  <h3 className="font-semibold text-sm sm:text-base">Existing Vacancies</h3>
-                  {loading && <Loader2 className="w-4 h-4 animate-spin text-blue-600" />}
+            <div className="lg:col-span-2 order-1 lg:order-2">
+              <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 md:p-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-base sm:text-lg md:text-xl">Existing Vacancies</h3>
+                  {loading && <Loader2 className="w-5 h-5 animate-spin text-blue-600" />}
                 </div>
                 {error && (
                   <div className="mb-3 p-2 bg-red-100 text-red-700 text-xs sm:text-sm rounded">
@@ -597,35 +847,39 @@ export default function AdminPage() {
                 ) : vacancies.length === 0 ? (
                   <p className="text-sm text-gray-500">No vacancies yet.</p>
                 ) : (
-                  <div className="space-y-3">
+                  <div className="space-y-3 sm:space-y-4">
                     {vacancies.map((v) => (
-                      <div key={v.id || v._id} className="p-3 border rounded flex flex-col sm:flex-row items-start sm:items-start justify-between gap-3">
+                      <div key={v.id || v._id} className="p-3 sm:p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all flex flex-col gap-3 sm:gap-4">
                         <div className="flex-1 min-w-0">
-                          <div className="font-semibold text-sm sm:text-base mb-1">{v.title}</div>
-                          <div className="text-xs sm:text-sm text-gray-600 mb-1">{v.tag} • {v.vacancies ?? '-'} • {v.date ?? '-'}</div>
-                          <div className="text-xs sm:text-sm text-gray-600">{v.info}</div>
+                          <div className="font-semibold text-sm sm:text-base md:text-lg mb-2 text-gray-900 break-words">{v.title}</div>
+                          <div className="text-xs sm:text-sm text-gray-600 mb-2 flex flex-wrap gap-2">
+                            <span className="bg-gray-100 px-2 py-1 rounded">{v.tag}</span>
+                            <span>{v.vacancies ?? '-'} vacancies</span>
+                            <span>{v.date ?? '-'}</span>
+                          </div>
+                          <div className="text-xs sm:text-sm text-gray-700 mb-2 break-words">{v.info}</div>
+                          {v.link && (
+                            <a href={v.link} target="_blank" rel="noreferrer" className="text-xs sm:text-sm text-blue-600 hover:text-blue-800 break-all inline-flex items-center gap-1">
+                              <span>🔗</span> Open link
+                            </a>
+                          )}
                         </div>
 
-                        <div className="flex flex-col sm:flex-row items-start sm:items-end space-y-2 sm:space-y-0 sm:space-x-2 w-full sm:w-auto">
-                          <div className="flex space-x-2 w-full sm:w-auto">
-                            <button 
-                              onClick={() => handleEdit(v.id || v._id || '')} 
-                              disabled={loading}
-                              className="flex-1 sm:flex-none px-2 py-1 border rounded text-xs sm:text-sm inline-flex items-center justify-center disabled:opacity-50"
-                            >
-                              <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1"/> Edit
-                            </button>
-                            <button 
-                              onClick={() => handleDelete(v.id || v._id || '')} 
-                              disabled={loading}
-                              className="flex-1 sm:flex-none px-2 py-1 bg-red-600 text-white rounded text-xs sm:text-sm inline-flex items-center justify-center disabled:opacity-50"
-                            >
-                              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1"/> Delete
-                            </button>
-                          </div>
-                          {v.link && (
-                            <a href={v.link} target="_blank" rel="noreferrer" className="text-xs text-blue-600 break-all sm:break-normal">Open link</a>
-                          )}
+                        <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2 border-t border-gray-100">
+                          <button 
+                            onClick={() => handleEdit(v.id || v._id || '')} 
+                            disabled={loading}
+                            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border-2 border-blue-500 text-blue-600 hover:bg-blue-50 rounded-lg text-xs sm:text-sm font-medium inline-flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
+                          >
+                            <Edit className="w-4 h-4"/> Edit
+                          </button>
+                          <button 
+                            onClick={() => handleDelete(v.id || v._id || '')} 
+                            disabled={loading}
+                            className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs sm:text-sm font-medium inline-flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
+                          >
+                            <Trash2 className="w-4 h-4"/> Delete
+                          </button>
                         </div>
                       </div>
                     ))}
@@ -639,46 +893,46 @@ export default function AdminPage() {
             {/* Announcements Tab */}
             {activeTab === 'announcements' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              <div className="lg:col-span-1">
-                <div className="bg-white rounded shadow p-3 sm:p-4">
-                  <h3 className="font-semibold mb-2 text-sm sm:text-base">Add / Edit Announcement</h3>
-                  <div className="space-y-2">
+              <div className="lg:col-span-1 order-2 lg:order-1">
+                <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 md:p-6">
+                  <h3 className="font-semibold mb-4 text-base sm:text-lg md:text-xl">Add / Edit Announcement</h3>
+                    <div className="space-y-3 sm:space-y-4">
                     <input 
                       name="title" 
                       value={announcementForm.title} 
                       onChange={handleAnnouncementChange} 
                       placeholder="Title *" 
-                      className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" 
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
                     />
                     <textarea 
                       name="description" 
                       value={announcementForm.description} 
                       onChange={handleAnnouncementChange} 
                       placeholder="Description *" 
-                      rows={4} 
-                      className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500 resize-none" 
+                      rows={5} 
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
                     />
-                    <label className="flex items-center space-x-2 cursor-pointer">
+                    <label className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
                       <input
                         type="checkbox"
                         name="isActive"
                         checked={announcementForm.isActive}
                         onChange={handleAnnouncementChange}
-                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                        className="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
                       />
-                      <span className="text-sm sm:text-base text-gray-700">Active (visible on home page)</span>
+                      <span className="text-sm sm:text-base text-gray-700 font-medium">Active (visible on home page)</span>
                     </label>
 
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center space-y-2 sm:space-y-0 sm:space-x-2">
+                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                       <button 
                         onClick={handleAddAnnouncement} 
                         disabled={loading}
-                        className="inline-flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded disabled:opacity-50 text-sm sm:text-base"
+                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-3 rounded-lg disabled:opacity-50 text-sm sm:text-base font-medium transition-colors shadow-md hover:shadow-lg"
                       >
                         {loading ? (
-                          <Loader2 className="w-4 h-4 animate-spin" />
+                          <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                         ) : (
-                          <Plus className="w-4 h-4" />
+                          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                         )}
                         <span>{editingAnnouncementId ? 'Update' : 'Add'}</span>
                       </button>
@@ -690,7 +944,7 @@ export default function AdminPage() {
                             setAnnouncementForm({ title: '', description: '', isActive: true }); 
                           }} 
                           disabled={loading}
-                          className="px-3 py-2 border rounded disabled:opacity-50 text-sm sm:text-base"
+                          className="w-full sm:w-auto px-4 sm:px-6 py-3 border-2 border-gray-300 hover:border-gray-400 rounded-lg disabled:opacity-50 text-sm sm:text-base font-medium transition-colors"
                         >
                           Cancel Edit
                         </button>
@@ -700,11 +954,11 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="lg:col-span-2">
-                <div className="bg-white rounded shadow p-3 sm:p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-sm sm:text-base">Existing Announcements</h3>
-                    {loading && <Loader2 className="w-4 h-4 animate-spin text-blue-600" />}
+              <div className="lg:col-span-2 order-1 lg:order-2">
+                <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 md:p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-base sm:text-lg md:text-xl">Existing Announcements</h3>
+                    {loading && <Loader2 className="w-5 h-5 animate-spin text-blue-600" />}
                   </div>
                   {error && (
                     <div className="mb-3 p-2 bg-red-100 text-red-700 text-xs sm:text-sm rounded">
@@ -716,38 +970,38 @@ export default function AdminPage() {
                   ) : announcements.length === 0 ? (
                     <p className="text-sm text-gray-500">No announcements yet.</p>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-3 sm:space-y-4">
                       {announcements.map((a) => (
-                        <div key={a.id || a._id} className="p-3 border rounded flex flex-col sm:flex-row items-start sm:items-start justify-between gap-3">
+                        <div key={a.id || a._id} className="p-3 sm:p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all flex flex-col gap-3 sm:gap-4">
                           <div className="flex-1 min-w-0">
-                            <div className="flex items-center gap-2 mb-1">
-                              <div className="font-semibold text-sm sm:text-base">{a.title}</div>
+                            <div className="flex flex-wrap items-center gap-2 mb-2">
+                              <div className="font-semibold text-sm sm:text-base md:text-lg text-gray-900 break-words">{a.title}</div>
                               {a.isActive ? (
-                                <span className="px-2 py-0.5 bg-green-100 text-green-800 text-xs rounded">Active</span>
+                                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Active</span>
                               ) : (
-                                <span className="px-2 py-0.5 bg-gray-100 text-gray-800 text-xs rounded">Inactive</span>
+                                <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full">Inactive</span>
                               )}
                             </div>
-                            <div className="text-xs sm:text-sm text-gray-600 mb-1">{a.description}</div>
+                            <div className="text-xs sm:text-sm text-gray-700 mb-2 break-words">{a.description}</div>
                             <div className="text-xs text-gray-500">
                               Created: {a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'N/A'}
                             </div>
                           </div>
 
-                          <div className="flex space-x-2 w-full sm:w-auto">
+                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2 border-t border-gray-100">
                             <button 
                               onClick={() => handleEditAnnouncement(a.id || a._id || '')} 
                               disabled={loading}
-                              className="flex-1 sm:flex-none px-2 py-1 border rounded text-xs sm:text-sm inline-flex items-center justify-center disabled:opacity-50"
+                              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border-2 border-blue-500 text-blue-600 hover:bg-blue-50 rounded-lg text-xs sm:text-sm font-medium inline-flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
                             >
-                              <Edit className="w-3 h-3 sm:w-4 sm:h-4 mr-1"/> Edit
+                              <Edit className="w-4 h-4"/> Edit
                             </button>
                             <button 
                               onClick={() => handleDeleteAnnouncement(a.id || a._id || '')} 
                               disabled={loading}
-                              className="flex-1 sm:flex-none px-2 py-1 bg-red-600 text-white rounded text-xs sm:text-sm inline-flex items-center justify-center disabled:opacity-50"
+                              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs sm:text-sm font-medium inline-flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
                             >
-                              <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1"/> Delete
+                              <Trash2 className="w-4 h-4"/> Delete
                             </button>
                           </div>
                         </div>
@@ -762,32 +1016,32 @@ export default function AdminPage() {
             {/* Admins Tab */}
             {activeTab === 'admins' && (
             <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              <div className="lg:col-span-1">
-                <div className="bg-white rounded shadow p-3 sm:p-4">
-                  <h3 className="font-semibold mb-2 text-sm sm:text-base">Add Admin</h3>
-                  <div className="space-y-2">
+              <div className="lg:col-span-1 order-2 lg:order-1">
+                <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 md:p-6">
+                  <h3 className="font-semibold mb-4 text-base sm:text-lg md:text-xl">Add Admin</h3>
+                  <div className="space-y-3 sm:space-y-4">
                     <input 
                       value={adminForm.username} 
                       onChange={(e) => setAdminForm({ ...adminForm, username: e.target.value })} 
                       placeholder="Username *" 
-                      className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" 
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
                     />
                     <input 
                       value={adminForm.password} 
                       onChange={(e) => setAdminForm({ ...adminForm, password: e.target.value })} 
                       placeholder="Password *" 
                       type="password" 
-                      className="w-full px-3 py-2 border rounded text-sm sm:text-base text-gray-900 placeholder-gray-500" 
+                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
                     />
                     <button 
                       onClick={handleAddAdmin} 
                       disabled={loading}
-                      className="w-full inline-flex items-center justify-center space-x-2 bg-blue-600 text-white px-3 py-2 rounded disabled:opacity-50 text-sm sm:text-base"
+                      className="w-full inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-3 rounded-lg disabled:opacity-50 text-sm sm:text-base font-medium transition-colors shadow-md hover:shadow-lg"
                     >
                       {loading ? (
-                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
                       ) : (
-                        <Plus className="w-4 h-4" />
+                        <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
                       )}
                       <span>Add Admin</span>
                     </button>
@@ -795,11 +1049,11 @@ export default function AdminPage() {
                 </div>
               </div>
 
-              <div className="lg:col-span-2">
-                <div className="bg-white rounded shadow p-3 sm:p-4">
-                  <div className="flex items-center justify-between mb-3">
-                    <h3 className="font-semibold text-sm sm:text-base">Existing Admins</h3>
-                    {loading && <Loader2 className="w-4 h-4 animate-spin text-blue-600" />}
+              <div className="lg:col-span-2 order-1 lg:order-2">
+                <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 md:p-6">
+                  <div className="flex items-center justify-between mb-4">
+                    <h3 className="font-semibold text-base sm:text-lg md:text-xl">Existing Admins</h3>
+                    {loading && <Loader2 className="w-5 h-5 animate-spin text-blue-600" />}
                   </div>
                   {error && (
                     <div className="mb-3 p-2 bg-red-100 text-red-700 text-xs sm:text-sm rounded">
@@ -811,21 +1065,21 @@ export default function AdminPage() {
                   ) : admins.length === 0 ? (
                     <p className="text-sm text-gray-500">No admins yet.</p>
                   ) : (
-                    <div className="space-y-3">
+                    <div className="space-y-3 sm:space-y-4">
                       {admins.map((a) => (
-                        <div key={a.id || a._id} className="p-3 border rounded flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
-                          <div className="flex-1">
-                            <div className="font-semibold text-sm sm:text-base">{a.username}</div>
-                            <div className="text-xs text-gray-500">
+                        <div key={a.id || a._id} className="p-3 sm:p-4 border-2 border-gray-200 rounded-lg hover:border-red-300 hover:shadow-md transition-all flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+                          <div className="flex-1 min-w-0">
+                            <div className="font-semibold text-sm sm:text-base md:text-lg text-gray-900 mb-1">{a.username}</div>
+                            <div className="text-xs sm:text-sm text-gray-500">
                               Created: {a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'N/A'}
                             </div>
                           </div>
                           <button 
                             onClick={() => handleDeleteAdmin(a.id || a._id || '')} 
                             disabled={loading}
-                            className="px-2 py-1 bg-red-600 text-white rounded text-xs sm:text-sm inline-flex items-center justify-center disabled:opacity-50"
+                            className="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs sm:text-sm font-medium inline-flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
                           >
-                            <Trash2 className="w-3 h-3 sm:w-4 sm:h-4 mr-1"/> Delete
+                            <Trash2 className="w-4 h-4"/> Delete
                           </button>
                         </div>
                       ))}
@@ -838,9 +1092,9 @@ export default function AdminPage() {
 
             {/* Chat Support Tab */}
             {activeTab === 'chats' && (
-              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6" style={{ minHeight: '600px' }}>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-3 sm:gap-4 md:gap-6" style={{ minHeight: '500px' }}>
                 {/* Chat List - Enhanced Design */}
-                <div className={`lg:col-span-1 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg overflow-hidden flex flex-col border border-gray-200 ${selectedChat ? 'hidden lg:flex' : 'flex'}`} style={{ maxHeight: '80vh' }}>
+                <div className={`lg:col-span-1 bg-gradient-to-br from-white to-gray-50 rounded-xl shadow-lg overflow-hidden flex flex-col border-2 border-gray-200 ${selectedChat ? 'hidden lg:flex' : 'flex'}`} style={{ maxHeight: 'calc(100vh - 200px)' }}>
                   {/* Header with gradient */}
                   <div className="bg-gradient-to-r from-blue-600 via-blue-700 to-indigo-700 text-white p-4">
                     <div className="flex items-center gap-2 mb-2">
@@ -944,7 +1198,7 @@ export default function AdminPage() {
                 </div>
 
                 {/* Chat View - Enhanced Design */}
-                <div className={`lg:col-span-2 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col border border-gray-200 ${selectedChat ? 'flex' : 'hidden lg:flex'}`} style={{ maxHeight: '80vh' }}>
+                <div className={`lg:col-span-2 bg-white rounded-xl shadow-lg overflow-hidden flex flex-col border-2 border-gray-200 ${selectedChat ? 'flex' : 'hidden lg:flex'}`} style={{ maxHeight: 'calc(100vh - 200px)' }}>
                   {selectedChat ? (
                     <>
                       {/* Header with gradient */}
