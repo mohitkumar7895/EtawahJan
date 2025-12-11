@@ -84,13 +84,17 @@ export async function POST(request: NextRequest) {
       cwd.includes('/tmp') ||
       cwd === '/';
     
+    // Force base64 in production to avoid file system issues
+    const isProduction = process.env.NODE_ENV === 'production';
+    const forceBase64 = process.env.FORCE_BASE64_STORAGE === 'true' || isProduction;
+    
     let fileUrl: string;
     
-    // Always try base64 first for serverless, or if file system might fail
-    if (isServerless) {
-      // For serverless: Convert directly to base64 data URL
+    // Always try base64 first for serverless, production, or if file system might fail
+    if (isServerless || forceBase64) {
+      // For serverless/production: Convert directly to base64 data URL
       // This works without needing file system access
-      console.log("📦 Serverless environment detected - using base64 storage");
+      console.log(`📦 ${isServerless ? 'Serverless' : 'Production'} environment detected - using base64 storage`);
       const base64 = buffer.toString('base64');
       const mimeType = file.type || (messageType === 'image' ? 'image/jpeg' : messageType === 'video' ? 'video/mp4' : 'application/pdf');
       fileUrl = `data:${mimeType};base64,${base64}`;

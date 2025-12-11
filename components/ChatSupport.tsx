@@ -411,13 +411,16 @@ export default function ChatSupport() {
                                       src={msg.content}
                                       alt="Shared image"
                                       className="max-w-full h-auto rounded"
+                                      loading="lazy"
                                       onError={(e) => {
                                         const img = e.target as HTMLImageElement;
-                                        // Prevent infinite loop - if already a data URI, hide the image
-                                        if (img.src.startsWith('data:')) {
+                                        // Prevent infinite loop - if already a data URI or placeholder, hide the image
+                                        if (img.src.startsWith('data:') || img.dataset.errorHandled === 'true') {
                                           img.style.display = 'none';
                                           return;
                                         }
+                                        // Mark as handled to prevent multiple retries
+                                        img.dataset.errorHandled = 'true';
                                         // Set placeholder data URI
                                         img.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iNDAwIiBoZWlnaHQ9IjMwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMTAwJSIgaGVpZ2h0PSIxMDAlIiBmaWxsPSIjZGRkIi8+PHRleHQgeD0iNTAlIiB5PSI1MCUiIGZvbnQtZmFtaWx5PSJBcmlhbCwgc2Fucy1zZXJpZiIgZm9udC1zaXplPSIxOCIgZmlsbD0iIzk5OSIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZHk9Ii4zZW0iPkltYWdlIG5vdCBhdmFpbGFibGU8L3RleHQ+PC9zdmc+';
                                       }}
