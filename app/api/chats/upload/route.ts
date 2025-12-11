@@ -67,9 +67,32 @@ export async function POST(request: NextRequest) {
     }
 
     // Create uploads directory if it doesn't exist
-    const uploadsDir = join(process.cwd(), 'public', 'uploads', 'chat');
-    if (!existsSync(uploadsDir)) {
-      await mkdir(uploadsDir, { recursive: true });
+    // Ensure all parent directories are created recursively
+    const publicDir = join(process.cwd(), 'public');
+    const uploadsBaseDir = join(publicDir, 'uploads');
+    const uploadsDir = join(uploadsBaseDir, 'chat');
+    
+    // Create directories recursively - ensure all parent directories exist
+    // Using recursive: true will create all parent directories automatically
+    try {
+      if (!existsSync(publicDir)) {
+        await mkdir(publicDir, { recursive: true });
+      }
+      if (!existsSync(uploadsBaseDir)) {
+        await mkdir(uploadsBaseDir, { recursive: true });
+      }
+      if (!existsSync(uploadsDir)) {
+        await mkdir(uploadsDir, { recursive: true });
+      }
+    } catch (dirError: any) {
+      console.error("❌ Error creating upload directories:", dirError);
+      return NextResponse.json(
+        { 
+          error: "Failed to create upload directory", 
+          message: `Directory creation failed: ${dirError.message}` 
+        },
+        { status: 500 }
+      );
     }
 
     // Generate unique filename
