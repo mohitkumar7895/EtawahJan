@@ -2,6 +2,9 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB, isDBConnected } from '@/lib/db';
 import Payment from '@/models/Payment';
 
+// Force dynamic rendering since we use request.url
+export const dynamic = 'force-dynamic';
+
 /**
  * GET /api/payments
  * Get all payments
@@ -74,4 +77,5 @@ export async function GET(request: NextRequest) {
     );
   }
 }
+
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { MessageCircle, X, Send, Image, Video, Download } from 'lucide-react';
 import { getChat, sendMessage, uploadChatFile, saveUser, updateUser, type Chat, type ChatMessage } from '@/lib/api';
 
@@ -55,29 +55,10 @@ export default function ChatSupport() {
         }
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chat?.messages?.length]); // Only trigger on message count change, not on every render
 
-  // Poll for new messages when chat is open
-  useEffect(() => {
-    if (isOpen && phoneEntered && phoneNumber) {
-      // Initial load
-      loadChat(true);
-
-      // Poll every 5 seconds for new messages (reduced from 2s for better performance)
-      const interval = setInterval(() => {
-        loadChat(false); // false = don't update user on polling
-      }, 5000);
-
-      setPollingInterval(interval);
-
-      return () => {
-        clearInterval(interval);
-        setPollingInterval(null);
-      };
-    }
-  }, [isOpen, phoneEntered, phoneNumber]);
-
-  const loadChat = async (isInitialLoad: boolean = false) => {
+  const loadChat = useCallback(async (isInitialLoad: boolean = false) => {
     if (!phoneNumber) return;
 
     try {
@@ -117,7 +98,27 @@ export default function ChatSupport() {
         setError(err.message || 'Failed to load chat');
       }
     }
-  };
+  }, [phoneNumber]);
+
+  // Poll for new messages when chat is open
+  useEffect(() => {
+    if (isOpen && phoneEntered && phoneNumber) {
+      // Initial load
+      loadChat(true);
+
+      // Poll every 5 seconds for new messages (reduced from 2s for better performance)
+      const interval = setInterval(() => {
+        loadChat(false); // false = don't update user on polling
+      }, 5000);
+
+      setPollingInterval(interval);
+
+      return () => {
+        clearInterval(interval);
+        setPollingInterval(null);
+      };
+    }
+  }, [isOpen, phoneEntered, phoneNumber, loadChat]);
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
