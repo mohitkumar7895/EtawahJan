@@ -474,9 +474,9 @@ export interface Chat {
 export async function getChat(userPhone: string): Promise<Chat> {
   try {
     const controller = new AbortController();
-    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    const timeoutId = setTimeout(() => controller.abort(), 8000); // Reduced timeout
     
-    const response = await fetch(`${API_BASE_URL}/api/chats?userPhone=${encodeURIComponent(userPhone)}`, {
+    const response = await fetch(`${API_BASE_URL}/api/chats?userPhone=${encodeURIComponent(userPhone)}&_t=${Date.now()}`, {
       signal: controller.signal,
       headers: {
         'Content-Type': 'application/json',

@@ -41,23 +41,32 @@ export default function ChatSupport() {
     };
   }, []);
 
-  // Auto-scroll to bottom when messages change
+  // Auto-scroll to bottom when messages change (only if user is near bottom)
   useEffect(() => {
-    if (messagesEndRef.current) {
-      messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+    if (messagesEndRef.current && chat?.messages) {
+      const messagesContainer = messagesEndRef.current.parentElement;
+      if (messagesContainer) {
+        const isNearBottom = 
+          messagesContainer.scrollHeight - messagesContainer.scrollTop - messagesContainer.clientHeight < 100;
+        
+        // Only auto-scroll if user is already near bottom (not if they scrolled up)
+        if (isNearBottom) {
+          messagesEndRef.current.scrollIntoView({ behavior: 'smooth' });
+        }
+      }
     }
-  }, [chat?.messages]);
+  }, [chat?.messages?.length]); // Only trigger on message count change, not on every render
 
   // Poll for new messages when chat is open
   useEffect(() => {
     if (isOpen && phoneEntered && phoneNumber) {
       // Initial load
-      loadChat();
+      loadChat(true);
 
-      // Poll every 2 seconds for new messages
+      // Poll every 5 seconds for new messages (reduced from 2s for better performance)
       const interval = setInterval(() => {
-        loadChat();
-      }, 2000);
+        loadChat(false); // false = don't update user on polling
+      }, 5000);
 
       setPollingInterval(interval);
 
@@ -68,37 +77,45 @@ export default function ChatSupport() {
     }
   }, [isOpen, phoneEntered, phoneNumber]);
 
-  // Auto-load chat when phone is already entered (from localStorage)
-  useEffect(() => {
-    if (phoneEntered && phoneNumber && isOpen) {
-      loadChat();
-    }
-  }, [phoneEntered, phoneNumber, isOpen]);
-
-  const loadChat = async () => {
+  const loadChat = async (isInitialLoad: boolean = false) => {
     if (!phoneNumber) return;
 
     try {
       const chatData = await getChat(phoneNumber);
-      setChat(chatData);
-      setError(null);
       
-      // Update user's last active time when chat is loaded
-      if (chatData.messages && chatData.messages.length > 0) {
-        try {
-          await updateUser(phoneNumber, {
+      // Only update state if messages actually changed (prevent unnecessary re-renders)
+      setChat(prevChat => {
+        const prevMessageCount = prevChat?.messages?.length || 0;
+        const newMessageCount = chatData.messages?.length || 0;
+        
+        // Only update if messages changed or it's initial load
+        if (isInitialLoad || prevMessageCount !== newMessageCount) {
+          return chatData;
+        }
+        return prevChat;
+      });
+      
+      if (isInitialLoad) {
+        setError(null);
+        
+        // Update user's last active time only on initial load (not on every poll)
+        if (chatData.messages && chatData.messages.length > 0) {
+          // Don't await - run in background to not block UI
+          updateUser(phoneNumber, {
             messageCount: chatData.messages.length,
             lastActiveAt: new Date(),
+          }).catch(err => {
+            console.error('Error updating user:', err);
+            // Don't show error to user
           });
-        } catch (err) {
-          console.error('Error updating user:', err);
-          // Don't show error to user
         }
       }
     } catch (err: any) {
       console.error('Error loading chat:', err);
-      // Don't show error on polling, only on initial load
-      setError(err.message || 'Failed to load chat');
+      // Only show error on initial load, not on polling
+      if (isInitialLoad) {
+        setError(err.message || 'Failed to load chat');
+      }
     }
   };
 
@@ -143,29 +160,27 @@ export default function ChatSupport() {
     e.preventDefault();
     if (!message.trim() || !phoneNumber || loading) return;
 
+    const messageText = message.trim();
+    setMessage(''); // Clear input immediately for better UX
     setLoading(true);
     setError(null);
 
     try {
-      await sendMessage(phoneNumber, 'customer', message.trim(), 'text');
-      setMessage('');
-      await loadChat();
+      await sendMessage(phoneNumber, 'customer', messageText, 'text');
+      // Reload chat immediately after sending
+      await loadChat(true);
       
-      // Update user's message count and last active time
-      if (chat?.messages) {
-        try {
-          await updateUser(phoneNumber, {
-            messageCount: (chat.messages.length + 1),
-            lastActiveAt: new Date(),
-          });
-        } catch (err) {
-          console.error('Error updating user:', err);
-          // Don't show error to user, just log it
-        }
-      }
+      // Update user in background (don't await to keep UI responsive)
+      updateUser(phoneNumber, {
+        lastActiveAt: new Date(),
+      }).catch(err => {
+        console.error('Error updating user:', err);
+      });
     } catch (err: any) {
       setError(err.message || 'Failed to send message');
       console.error('Error sending message:', err);
+      // Restore message if send failed
+      setMessage(messageText);
     } finally {
       setLoading(false);
     }
@@ -196,18 +211,28 @@ export default function ChatSupport() {
 
     setLoading(true);
     setError(null);
+    
+    // Clear input immediately
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
 
     try {
       await uploadChatFile(file, phoneNumber, 'customer');
-      await loadChat();
+      // Reload chat immediately after upload
+      await loadChat(true);
+      
+      // Update user in background
+      updateUser(phoneNumber, {
+        lastActiveAt: new Date(),
+      }).catch(err => {
+        console.error('Error updating user:', err);
+      });
     } catch (err: any) {
       setError(err.message || 'Failed to upload file');
       console.error('Error uploading file:', err);
     } finally {
       setLoading(false);
-      if (fileInputRef.current) {
-        fileInputRef.current.value = '';
-      }
     }
   };
 
