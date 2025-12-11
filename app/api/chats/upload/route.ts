@@ -69,75 +69,64 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    // Generate unique filename
-    const timestamp = Date.now();
-    const randomStr = Math.random().toString(36).substring(2, 15);
-    let fileExtension = file.name.split('.').pop();
-    if (!fileExtension) {
-      // Default extensions based on message type
-      if (messageType === 'image') fileExtension = 'jpg';
-      else if (messageType === 'video') fileExtension = 'mp4';
-      else if (messageType === 'pdf') fileExtension = 'pdf';
-    }
-    const filename = `${timestamp}-${randomStr}.${fileExtension}`;
-    
-    // Get file bytes
+    // Get file bytes first
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
     
-    // Try to save to public/uploads/chat directory first
+    // Detect serverless environment (AWS Lambda, Vercel, etc.)
+    // Check multiple indicators for serverless
+    const cwd = process.cwd();
+    const isServerless = 
+      process.env.VERCEL || 
+      process.env.AWS_LAMBDA_FUNCTION_NAME || 
+      process.env.LAMBDA_TASK_ROOT ||
+      cwd.includes('/var/task') ||
+      cwd.includes('/tmp') ||
+      cwd === '/';
+    
     let fileUrl: string;
-    let uploadSuccess = false;
     
-    try {
-      const publicDir = join(process.cwd(), 'public');
-      const uploadsDir = join(publicDir, 'uploads', 'chat');
-      
-      // Create directories recursively
-      await mkdir(uploadsDir, { recursive: true });
-      
-      const filepath = join(uploadsDir, filename);
-      await writeFile(filepath, buffer);
-      
-      // File URL (relative to public folder)
-      fileUrl = `/uploads/chat/${filename}`;
-      uploadSuccess = true;
-    } catch (dirError: any) {
-      // If directory creation fails (serverless environment), use /tmp
-      console.warn("⚠️ Public directory creation failed, trying /tmp:", dirError.message);
-      
+    // Always try base64 first for serverless, or if file system might fail
+    if (isServerless) {
+      // For serverless: Convert directly to base64 data URL
+      // This works without needing file system access
+      console.log("📦 Serverless environment detected - using base64 storage");
+      const base64 = buffer.toString('base64');
+      const mimeType = file.type || (messageType === 'image' ? 'image/jpeg' : messageType === 'video' ? 'video/mp4' : 'application/pdf');
+      fileUrl = `data:${mimeType};base64,${base64}`;
+    } else {
+      // For regular server: Try to save to file system
       try {
-        // Use /tmp directory for serverless environments
-        const tmpDir = '/tmp/uploads/chat';
-        await mkdir(tmpDir, { recursive: true });
+        const timestamp = Date.now();
+        const randomStr = Math.random().toString(36).substring(2, 15);
+        let fileExtension = file.name.split('.').pop();
+        if (!fileExtension) {
+          // Default extensions based on message type
+          if (messageType === 'image') fileExtension = 'jpg';
+          else if (messageType === 'video') fileExtension = 'mp4';
+          else if (messageType === 'pdf') fileExtension = 'pdf';
+        }
+        const filename = `${timestamp}-${randomStr}.${fileExtension}`;
         
-        const tmpFilePath = join(tmpDir, filename);
-        await writeFile(tmpFilePath, buffer);
+        const publicDir = join(process.cwd(), 'public');
+        const uploadsDir = join(publicDir, 'uploads', 'chat');
         
-        // Convert file to base64 data URL for serverless environments
-        // This allows the file to be served without needing a persistent file system
+        // Create directories recursively
+        await mkdir(uploadsDir, { recursive: true });
+        
+        const filepath = join(uploadsDir, filename);
+        await writeFile(filepath, buffer);
+        
+        // File URL (relative to public folder)
+        fileUrl = `/uploads/chat/${filename}`;
+        console.log("✅ File saved to:", fileUrl);
+      } catch (fileError: any) {
+        // If file system fails (including directory creation errors), fallback to base64
+        console.warn("⚠️ File system save failed, using base64 fallback:", fileError.message);
         const base64 = buffer.toString('base64');
         const mimeType = file.type || (messageType === 'image' ? 'image/jpeg' : messageType === 'video' ? 'video/mp4' : 'application/pdf');
         fileUrl = `data:${mimeType};base64,${base64}`;
-        uploadSuccess = true;
-      } catch (tmpError: any) {
-        console.error("❌ Error saving to /tmp:", tmpError);
-        // Last resort: convert to base64 data URL directly
-        const base64 = buffer.toString('base64');
-        const mimeType = file.type || (messageType === 'image' ? 'image/jpeg' : messageType === 'video' ? 'video/mp4' : 'application/pdf');
-        fileUrl = `data:${mimeType};base64,${base64}`;
-        uploadSuccess = true;
       }
-    }
-    
-    if (!uploadSuccess) {
-      return NextResponse.json(
-        { 
-          error: "Failed to save file", 
-          message: "Unable to save file to any available location" 
-        },
-        { status: 500 }
-      );
     }
 
     // Connect to database
@@ -233,7 +222,10 @@ export async function POST(request: NextRequest) {
   } catch (error: any) {
     console.error("❌ Error uploading file:", error);
     return NextResponse.json(
-      { error: "Failed to upload file", message: error.message },
+      { 
+        error: "Failed to upload file", 
+        message: error.message || "Unknown error occurred. Please try again." 
+      },
       { status: 500 }
     );
   }
