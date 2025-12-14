@@ -1,6 +1,7 @@
 import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import ChatSupport from '@/components/ChatSupport'
+import VisitorTracker from '@/components/VisitorTracker'
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.jan-seva.site/'),
@@ -175,6 +176,7 @@ export default function RootLayout({
       <body className="min-h-screen bg-white">
         {children}
         <ChatSupport />
+        <VisitorTracker />
       </body>
     </html>
   )

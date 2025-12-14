@@ -762,6 +762,97 @@ export interface Payment {
   updatedAt?: Date | string;
 }
 
+export interface Visitor {
+  _id?: string;
+  sessionId: string;
+  ipAddress: string;
+  userAgent: string;
+  page: string;
+  referrer: string;
+  country: string;
+  city: string;
+  device: string;
+  browser: string;
+  os: string;
+  name?: string;
+  email?: string;
+  isActive: boolean;
+  lastActivity: string | Date;
+  firstVisit: string | Date;
+  visitCount: number;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}
+
+export interface VisitorStats {
+  total: number;
+  active: number;
+  today: number;
+}
+
+export async function trackVisitor(data: {
+  sessionId: string;
+  page: string;
+  referrer?: string;
+  userAgent?: string;
+  device?: string;
+  browser?: string;
+  os?: string;
+  country?: string;
+  city?: string;
+  name?: string;
+  email?: string;
+}): Promise<{ success: boolean; visitor?: Visitor }> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/visitors`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(data),
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to track visitor');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error tracking visitor:', error);
+    return { success: false };
+  }
+}
+
+export async function getVisitors(): Promise<{
+  success: boolean;
+  activeVisitors: Visitor[];
+  allVisitors: Visitor[];
+  stats: VisitorStats;
+}> {
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/visitors`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch visitors');
+    }
+
+    return await response.json();
+  } catch (error) {
+    console.error('Error fetching visitors:', error);
+    return {
+      success: false,
+      activeVisitors: [],
+      allVisitors: [],
+      stats: { total: 0, active: 0, today: 0 },
+    };
+  }
+}
+
 export async function getAllPayments(): Promise<Payment[]> {
   try {
     const response = await fetch(`${API_BASE_URL}/api/payments`, {

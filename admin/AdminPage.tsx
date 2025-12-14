@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle } from 'lucide-react';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment } from '@/lib/api';
+import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle, Eye, Globe, Monitor, Smartphone, Tablet } from 'lucide-react';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'adminmohit1234';
@@ -25,7 +25,7 @@ export default function AdminPage() {
   const [announcementForm, setAnnouncementForm] = useState({ title: '', description: '', isActive: true });
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
   
-  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins' | 'announcements' | 'chats' | 'payments'>('vacancies');
+  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins' | 'announcements' | 'chats' | 'payments' | 'visitors'>('vacancies');
   
   // Payment state
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -37,6 +37,13 @@ export default function AdminPage() {
   const [chatMessage, setChatMessage] = useState('');
   const [chatFileInput, setChatFileInput] = useState<HTMLInputElement | null>(null);
   const [chatPollingInterval, setChatPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  
+  // Visitor state
+  const [visitors, setVisitors] = useState<Visitor[]>([]);
+  const [activeVisitors, setActiveVisitors] = useState<Visitor[]>([]);
+  const [visitorStats, setVisitorStats] = useState<VisitorStats>({ total: 0, active: 0, today: 0 });
+  const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
+  const [isLive, setIsLive] = useState(true);
 
   useEffect(() => {
     if (isAuthed) {
@@ -48,6 +55,9 @@ export default function AdminPage() {
       }
       if (activeTab === 'payments') {
         loadPaymentsFromAPI();
+      }
+      if (activeTab === 'visitors') {
+        loadVisitorsFromAPI();
       }
     }
   }, [isAuthed, activeTab]);
@@ -69,6 +79,20 @@ export default function AdminPage() {
       };
     }
   }, [isAuthed, activeTab, selectedChat?.userPhone]);
+
+  // Poll for visitors when on visitors tab - Real-time updates
+  useEffect(() => {
+    if (isAuthed && activeTab === 'visitors') {
+      loadVisitorsFromAPI();
+      // Refresh every 2 seconds for real-time tracking
+      const interval = setInterval(() => {
+        loadVisitorsFromAPI();
+      }, 2000); // Refresh every 2 seconds for live updates
+      return () => {
+        clearInterval(interval);
+      };
+    }
+  }, [isAuthed, activeTab]);
 
   const loadVacanciesFromAPI = async () => {
     setLoading(true);
@@ -352,6 +376,33 @@ export default function AdminPage() {
     }
   };
 
+  const loadVisitorsFromAPI = async () => {
+    try {
+      const data = await getVisitors();
+      if (data.success) {
+        setActiveVisitors(data.activeVisitors || []);
+        setVisitors(data.allVisitors || []);
+        setVisitorStats(data.stats || { total: 0, active: 0, today: 0 });
+        setLastUpdateTime(new Date());
+        setIsLive(true);
+      }
+    } catch (err) {
+      console.error('Error loading visitors:', err);
+      setActiveVisitors([]);
+      setVisitors([]);
+      setVisitorStats({ total: 0, active: 0, today: 0 });
+      setIsLive(false);
+    }
+  };
+
+  // Helper function to check if visitor is new (arrived in last 1 minute)
+  const isNewVisitor = (visitor: Visitor) => {
+    const firstVisit = new Date(visitor.firstVisit);
+    const now = new Date();
+    const diffInSeconds = (now.getTime() - firstVisit.getTime()) / 1000;
+    return diffInSeconds < 60; // New if arrived in last 60 seconds
+  };
+
   const loadSelectedChat = async () => {
     if (!selectedChat?.userPhone) return;
     try {
@@ -569,6 +620,18 @@ export default function AdminPage() {
                   <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                   <span className="hidden sm:inline">Chat Support</span>
                   <span className="sm:hidden">Chat</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('visitors')}
+                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
+                    activeTab === 'visitors'
+                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Globe className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="hidden sm:inline">Visitors</span>
+                  <span className="sm:hidden">Visit</span>
                 </button>
               </nav>
             </div>
@@ -1088,6 +1151,428 @@ export default function AdminPage() {
                 </div>
               </div>
             </div>
+            )}
+
+            {/* Visitors Tab */}
+            {activeTab === 'visitors' && (
+              <div className="space-y-4 sm:space-y-6">
+                {/* Stats Cards */}
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  <div className="bg-gradient-to-br from-blue-50 to-blue-100 rounded-lg p-4 sm:p-6 border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs sm:text-sm text-blue-700 font-medium mb-1">Total Visitors</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-blue-900">{visitorStats.total}</p>
+                      </div>
+                      <Globe className="w-8 h-8 sm:w-10 sm:h-10 text-blue-600" />
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-green-50 to-green-100 rounded-lg p-4 sm:p-6 border border-green-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs sm:text-sm text-green-700 font-medium mb-1">Active Now</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-green-900">{visitorStats.active}</p>
+                      </div>
+                      <Eye className="w-8 h-8 sm:w-10 sm:h-10 text-green-600" />
+                    </div>
+                  </div>
+                  <div className="bg-gradient-to-br from-purple-50 to-purple-100 rounded-lg p-4 sm:p-6 border border-purple-200">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-xs sm:text-sm text-purple-700 font-medium mb-1">Today</p>
+                        <p className="text-2xl sm:text-3xl font-bold text-purple-900">{visitorStats.today}</p>
+                      </div>
+                      <Clock className="w-8 h-8 sm:w-10 sm:h-10 text-purple-600" />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Real-time Status Indicator */}
+                <div className="bg-white rounded-lg shadow-md border border-gray-200 p-4">
+                  <div className="flex items-center justify-between">
+                    <div className="flex items-center gap-3">
+                      <div className={`w-3 h-3 rounded-full ${isLive ? 'bg-green-500 animate-pulse' : 'bg-red-500'}`}></div>
+                      <span className="text-sm font-medium text-gray-700">
+                        {isLive ? '🟢 Live Tracking Active' : '🔴 Connection Lost'}
+                      </span>
+                    </div>
+                    <div className="text-xs text-gray-500">
+                      Last updated: {lastUpdateTime.toLocaleTimeString('en-IN', { hour: '2-digit', minute: '2-digit', second: '2-digit' })}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Active Visitors */}
+                <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gradient-to-r from-green-600 to-green-700 text-white px-4 sm:px-6 py-3 sm:py-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                        <Eye className="w-5 h-5 sm:w-6 sm:h-6" />
+                        Live Active Visitors ({activeVisitors.length})
+                      </h3>
+                      {activeVisitors.length > 0 && (
+                        <div className="text-xs bg-white/20 px-2 py-1 rounded-full">
+                          {activeVisitors.filter(v => isNewVisitor(v)).length} new
+                        </div>
+                      )}
+                    </div>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    {activeVisitors.length === 0 ? (
+                      <div className="p-8 sm:p-12 text-center">
+                        <Globe className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-600 font-medium mb-1">No active visitors</p>
+                        <p className="text-sm text-gray-500">Active visitors will appear here</p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block">
+                          <table className="w-full">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Name/Email</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Device</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Browser/OS</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Page</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Location</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Last Activity</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Visits</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                              {activeVisitors.map((visitor) => {
+                                const isNew = isNewVisitor(visitor);
+                                return (
+                                <tr key={visitor.sessionId} className={`hover:bg-gray-50 transition-colors ${isNew ? 'bg-yellow-50 border-l-4 border-yellow-400' : ''}`}>
+                                  <td className="px-4 py-3">
+                                    {visitor.name || visitor.email ? (
+                                      <div>
+                                        {visitor.name && (
+                                          <div className="text-sm font-semibold text-gray-900">{visitor.name}</div>
+                                        )}
+                                        {visitor.email && (
+                                          <div className="text-xs text-gray-600 truncate max-w-xs">{visitor.email}</div>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <div className="text-xs text-gray-400 italic">Not provided</div>
+                                    )}
+                                    {isNew && (
+                                      <div className="mt-1">
+                                        <span className="inline-flex items-center gap-1 text-xs text-yellow-700 bg-yellow-100 px-2 py-0.5 rounded">
+                                          <span>🆕</span>
+                                          <span>New</span>
+                                        </span>
+                                      </div>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="flex items-center gap-2">
+                                      {visitor.device === 'Mobile' ? (
+                                        <Smartphone className="w-4 h-4 text-gray-600" />
+                                      ) : visitor.device === 'Tablet' ? (
+                                        <Tablet className="w-4 h-4 text-gray-600" />
+                                      ) : (
+                                        <Monitor className="w-4 h-4 text-gray-600" />
+                                      )}
+                                      <span className="text-sm text-gray-900">{visitor.device || 'Desktop'}</span>
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="text-sm text-gray-900">{visitor.browser || 'Unknown'}</div>
+                                    <div className="text-xs text-gray-500">{visitor.os || 'Unknown'}</div>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="text-sm text-gray-900 font-mono truncate max-w-xs">{visitor.page || '/'}</div>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="text-sm text-gray-900">
+                                      {visitor.city ? `${visitor.city}, ` : ''}{visitor.country || 'Unknown'}
+                                    </div>
+                                    <div className="text-xs text-gray-500 font-mono">{visitor.ipAddress}</div>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="text-sm text-gray-900">
+                                      {new Date(visitor.lastActivity).toLocaleTimeString('en-IN', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {new Date(visitor.lastActivity).toLocaleDateString('en-IN', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                      })}
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                                      {visitor.visitCount || 1}
+                                    </span>
+                                  </td>
+                                </tr>
+                                );
+                              })}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden space-y-3 p-3">
+                          {activeVisitors.map((visitor) => {
+                            const isNew = isNewVisitor(visitor);
+                            return (
+                            <div key={visitor.sessionId} className={`bg-white border rounded-lg p-4 shadow-sm ${isNew ? 'border-yellow-400 border-l-4 bg-yellow-50' : 'border-gray-200'}`}>
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  {visitor.device === 'Mobile' ? (
+                                    <Smartphone className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                                  ) : visitor.device === 'Tablet' ? (
+                                    <Tablet className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                                  ) : (
+                                    <Monitor className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    {visitor.name || visitor.email ? (
+                                      <div>
+                                        {visitor.name && (
+                                          <div className="font-semibold text-sm text-gray-900 truncate">{visitor.name}</div>
+                                        )}
+                                        {visitor.email && (
+                                          <div className="text-xs text-gray-600 truncate">{visitor.email}</div>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <div className="font-semibold text-sm text-gray-900">{visitor.device || 'Desktop'}</div>
+                                    )}
+                                    <div className="text-xs text-gray-500">{visitor.browser} • {visitor.os}</div>
+                                  </div>
+                                </div>
+                                <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 flex-shrink-0 ml-2">
+                                  Active
+                                </span>
+                              </div>
+                              
+                              <div className="space-y-2 pt-2 border-t border-gray-100">
+                                <div className="flex items-center gap-2">
+                                  <Globe className="w-3 h-3 text-gray-400" />
+                                  <span className="text-xs text-gray-700 font-mono truncate">{visitor.page || '/'}</span>
+                                </div>
+                                {visitor.city || visitor.country ? (
+                                  <div className="flex items-center gap-2">
+                                    <span className="text-xs text-gray-400">📍</span>
+                                    <span className="text-xs text-gray-700">
+                                      {visitor.city ? `${visitor.city}, ` : ''}{visitor.country || 'Unknown'}
+                                    </span>
+                                  </div>
+                                ) : null}
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-3 h-3 text-gray-400" />
+                                  <span className="text-xs text-gray-700">
+                                    {new Date(visitor.lastActivity).toLocaleString('en-IN', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-gray-400">Visits:</span>
+                                  <span className="text-xs font-semibold text-gray-900">{visitor.visitCount || 1}</span>
+                                </div>
+                              </div>
+                              {isNew && (
+                                <div className="mt-2 flex items-center gap-1 text-xs text-yellow-700 bg-yellow-100 px-2 py-1 rounded">
+                                  <span>🆕</span>
+                                  <span>New Visitor (Just arrived)</span>
+                                </div>
+                              )}
+                            </div>
+                            );
+                          })}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+
+                {/* All Visitors (Recent) */}
+                <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gradient-to-r from-gray-600 to-gray-700 text-white px-4 sm:px-6 py-3 sm:py-4">
+                    <h3 className="text-lg sm:text-xl font-bold flex items-center gap-2">
+                      <User className="w-5 h-5 sm:w-6 sm:h-6" />
+                      Recent Visitors ({visitors.length})
+                    </h3>
+                  </div>
+
+                  <div className="overflow-x-auto">
+                    {visitors.length === 0 ? (
+                      <div className="p-8 sm:p-12 text-center">
+                        <User className="w-12 h-12 sm:w-16 sm:h-16 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-600 font-medium mb-1">No visitors yet</p>
+                        <p className="text-sm text-gray-500">Visitor records will appear here</p>
+                      </div>
+                    ) : (
+                      <>
+                        {/* Desktop Table View */}
+                        <div className="hidden md:block">
+                          <table className="w-full">
+                            <thead className="bg-gray-50 border-b border-gray-200">
+                              <tr>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Name/Email</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Device</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Browser/OS</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Page</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">First Visit</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Status</th>
+                                <th className="px-4 py-3 text-left text-sm font-semibold text-gray-700">Visits</th>
+                              </tr>
+                            </thead>
+                            <tbody className="divide-y divide-gray-200">
+                              {visitors.slice(0, 50).map((visitor) => (
+                                <tr key={visitor.sessionId} className="hover:bg-gray-50 transition-colors">
+                                  <td className="px-4 py-3">
+                                    {visitor.name || visitor.email ? (
+                                      <div>
+                                        {visitor.name && (
+                                          <div className="text-sm font-semibold text-gray-900">{visitor.name}</div>
+                                        )}
+                                        {visitor.email && (
+                                          <div className="text-xs text-gray-600 truncate max-w-xs">{visitor.email}</div>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <div className="text-xs text-gray-400 italic">Not provided</div>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="flex items-center gap-2">
+                                      {visitor.device === 'Mobile' ? (
+                                        <Smartphone className="w-4 h-4 text-gray-600" />
+                                      ) : visitor.device === 'Tablet' ? (
+                                        <Tablet className="w-4 h-4 text-gray-600" />
+                                      ) : (
+                                        <Monitor className="w-4 h-4 text-gray-600" />
+                                      )}
+                                      <span className="text-sm text-gray-900">{visitor.device || 'Desktop'}</span>
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="text-sm text-gray-900">{visitor.browser || 'Unknown'}</div>
+                                    <div className="text-xs text-gray-500">{visitor.os || 'Unknown'}</div>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="text-sm text-gray-900 font-mono truncate max-w-xs">{visitor.page || '/'}</div>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <div className="text-sm text-gray-900">
+                                      {new Date(visitor.firstVisit).toLocaleDateString('en-IN', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        year: 'numeric',
+                                      })}
+                                    </div>
+                                    <div className="text-xs text-gray-500">
+                                      {new Date(visitor.firstVisit).toLocaleTimeString('en-IN', {
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })}
+                                    </div>
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    {visitor.isActive ? (
+                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700">
+                                        Active
+                                      </span>
+                                    ) : (
+                                      <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700">
+                                        Inactive
+                                      </span>
+                                    )}
+                                  </td>
+                                  <td className="px-4 py-3">
+                                    <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
+                                      {visitor.visitCount || 1}
+                                    </span>
+                                  </td>
+                                </tr>
+                              ))}
+                            </tbody>
+                          </table>
+                        </div>
+
+                        {/* Mobile Card View */}
+                        <div className="md:hidden space-y-3 p-3">
+                          {visitors.slice(0, 20).map((visitor) => (
+                            <div key={visitor.sessionId} className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm">
+                              <div className="flex items-start justify-between mb-3">
+                                <div className="flex items-center gap-2 flex-1 min-w-0">
+                                  {visitor.device === 'Mobile' ? (
+                                    <Smartphone className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                                  ) : visitor.device === 'Tablet' ? (
+                                    <Tablet className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                                  ) : (
+                                    <Monitor className="w-5 h-5 text-gray-600 flex-shrink-0" />
+                                  )}
+                                  <div className="flex-1 min-w-0">
+                                    {visitor.name || visitor.email ? (
+                                      <div>
+                                        {visitor.name && (
+                                          <div className="font-semibold text-sm text-gray-900 truncate">{visitor.name}</div>
+                                        )}
+                                        {visitor.email && (
+                                          <div className="text-xs text-gray-600 truncate">{visitor.email}</div>
+                                        )}
+                                      </div>
+                                    ) : (
+                                      <div className="font-semibold text-sm text-gray-900">{visitor.device || 'Desktop'}</div>
+                                    )}
+                                    <div className="text-xs text-gray-500">{visitor.browser} • {visitor.os}</div>
+                                  </div>
+                                </div>
+                                {visitor.isActive ? (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 flex-shrink-0 ml-2">
+                                    Active
+                                  </span>
+                                ) : (
+                                  <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-gray-100 text-gray-700 flex-shrink-0 ml-2">
+                                    Inactive
+                                  </span>
+                                )}
+                              </div>
+                              
+                              <div className="space-y-2 pt-2 border-t border-gray-100">
+                                <div className="flex items-center gap-2">
+                                  <Globe className="w-3 h-3 text-gray-400" />
+                                  <span className="text-xs text-gray-700 font-mono truncate">{visitor.page || '/'}</span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <Clock className="w-3 h-3 text-gray-400" />
+                                  <span className="text-xs text-gray-700">
+                                    {new Date(visitor.firstVisit).toLocaleString('en-IN', {
+                                      day: 'numeric',
+                                      month: 'short',
+                                      hour: '2-digit',
+                                      minute: '2-digit',
+                                    })}
+                                  </span>
+                                </div>
+                                <div className="flex items-center gap-2">
+                                  <span className="text-xs text-gray-400">Visits:</span>
+                                  <span className="text-xs font-semibold text-gray-900">{visitor.visitCount || 1}</span>
+                                </div>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </>
+                    )}
+                  </div>
+                </div>
+              </div>
             )}
 
             {/* Chat Support Tab */}
