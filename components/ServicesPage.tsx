@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, FileCheck, Zap, Receipt, Wallet, PiggyBank, Smartphone, GraduationCap, Shield, Users, Phone, Droplets, Flame, IndianRupee, FileEdit, CheckCircle, X, CheckCircle2, ChevronLeft, Scale, BookOpen, Laptop, MapPin, Banknote, Book, Scissors, FileImage, ClipboardList, PenTool, Globe, Code, Palette, Image, Layout, Monitor } from 'lucide-react';
+import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, FileCheck, Zap, Receipt, Wallet, PiggyBank, Smartphone, GraduationCap, Shield, Users, Phone, Droplets, Flame, IndianRupee, FileEdit, CheckCircle, X, CheckCircle2, ChevronLeft, Scale, BookOpen, Laptop, MapPin, Banknote, Book, Scissors, FileImage, ClipboardList, PenTool, Globe, Code, Palette, Image, Layout, Monitor, Video, Instagram, Camera, Film, Music, Youtube } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getVacancies, submitServiceApplication } from '@/lib/api';
@@ -117,7 +117,7 @@ const services = [
   { icon: FileText, name: 'Legal Aid Services', category: 'CSC Services', description: 'Legal aid and consultation services' },
   
   // IT Services - All in One
-  { icon: Laptop, name: 'IT Services', category: 'IT Services', description: 'Complete IT solutions: Website Development, Software Development, Mobile Apps, Graphic Design, Post Design, Banner Design, Logo Design and more' },
+  { icon: Laptop, name: 'IT Services', category: 'IT Services', description: 'Complete IT solutions: Website Development, Software Development, Mobile Apps, Graphic Design, Video Editing, Instagram Posts, Photo Editing, Logo Design and more' },
   
   // Individual IT Services (shown when IT Services is clicked)
   { icon: Globe, name: 'Website Development', category: 'IT Services', description: 'Professional website design and development services', parentService: 'IT Services' },
@@ -125,8 +125,16 @@ const services = [
   { icon: Smartphone, name: 'Mobile App Development', category: 'IT Services', description: 'Android and iOS mobile application development', parentService: 'IT Services' },
   { icon: Palette, name: 'Graphic Design', category: 'IT Services', description: 'Professional graphic design services', parentService: 'IT Services' },
   { icon: Image, name: 'Post Design', category: 'IT Services', description: 'Social media post and advertisement design', parentService: 'IT Services' },
+  { icon: Instagram, name: 'Instagram Post Design', category: 'IT Services', description: 'Professional Instagram post, story, and reel design', parentService: 'IT Services' },
+  { icon: Video, name: 'Video Editing', category: 'IT Services', description: 'Professional video editing and post-production services', parentService: 'IT Services' },
+  { icon: Film, name: 'Video Production', category: 'IT Services', description: 'Complete video production and shooting services', parentService: 'IT Services' },
+  { icon: Youtube, name: 'YouTube Video Editing', category: 'IT Services', description: 'YouTube video editing, thumbnails, and optimization', parentService: 'IT Services' },
+  { icon: Camera, name: 'Photo Editing', category: 'IT Services', description: 'Professional photo editing and retouching services', parentService: 'IT Services' },
   { icon: Layout, name: 'Banner Design', category: 'IT Services', description: 'Banner and hoarding design services', parentService: 'IT Services' },
   { icon: Monitor, name: 'Logo Design', category: 'IT Services', description: 'Professional logo design and branding services', parentService: 'IT Services' },
+  { icon: Music, name: 'Audio Editing', category: 'IT Services', description: 'Audio editing, mixing, and sound design services', parentService: 'IT Services' },
+  { icon: Code, name: 'Web Application Development', category: 'IT Services', description: 'Custom web applications and software solutions', parentService: 'IT Services' },
+  { icon: Laptop, name: 'E-Commerce Website', category: 'IT Services', description: 'E-commerce website development and setup', parentService: 'IT Services' },
 ];
 
 // Documents required mapping for each service
@@ -207,8 +215,16 @@ const serviceDocuments: Record<string, string[]> = {
   'Mobile App Development': ['App requirements', 'Features list', 'Platform (Android/iOS)', 'Payment'],
   'Graphic Design': ['Design requirements', 'Content/text', 'Images/photos', 'Payment'],
   'Post Design': ['Post content', 'Design requirements', 'Images/photos', 'Payment'],
+  'Instagram Post Design': ['Post content', 'Design requirements', 'Images/photos', 'Brand guidelines', 'Payment'],
+  'Video Editing': ['Video footage', 'Editing requirements', 'Music/sound effects', 'Payment'],
+  'Video Production': ['Script/storyboard', 'Shooting requirements', 'Location details', 'Payment'],
+  'YouTube Video Editing': ['Video footage', 'Thumbnail requirements', 'SEO requirements', 'Payment'],
+  'Photo Editing': ['Original photos', 'Editing requirements', 'Style preferences', 'Payment'],
   'Banner Design': ['Banner content', 'Size specifications', 'Design requirements', 'Payment'],
   'Logo Design': ['Company/business name', 'Design preferences', 'Color scheme', 'Payment'],
+  'Audio Editing': ['Audio files', 'Editing requirements', 'Music/sound effects', 'Payment'],
+  'Web Application Development': ['Project requirements', 'Business details', 'Technical specifications', 'Payment'],
+  'E-Commerce Website': ['Product details', 'Business information', 'Payment gateway requirements', 'Payment'],
 };
 
 type Service = {
