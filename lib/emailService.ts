@@ -6,11 +6,13 @@ const RESEND_API_KEY = process.env.RESEND_API_KEY;
 const RECIPIENTS = process.env.RECIPIENT_EMAILS 
   ? process.env.RECIPIENT_EMAILS.split(',').map(email => email.trim())
   : ["dhaniramsingh711@gmail.com", "mohitporwal596@gmail.com"];
-const FROM_ADDRESS = process.env.FROM_EMAIL || "Jun Seva Kendra <onboarding@resend.dev>";
-
 // Gmail SMTP configuration (fallback)
 const GMAIL_USER = process.env.GMAIL_USER;
 const GMAIL_APP_PASSWORD = process.env.GMAIL_APP_PASSWORD;
+
+// Use Gmail address if available for better deliverability
+const FROM_ADDRESS = process.env.FROM_EMAIL || 
+  (GMAIL_USER ? `Jan Seva Kendra <${GMAIL_USER}>` : "Jan Seva Kendra <onboarding@resend.dev>");
 
 // Initialize Resend
 let resend: Resend | null = null;
@@ -67,11 +69,32 @@ export async function sendEmail({
       console.log(`📤 [Resend] Subject: ${subject}`);
       console.log(`📤 [Resend] API Key: ${RESEND_API_KEY ? RESEND_API_KEY.substring(0, 10) + '...' : 'NOT SET'}`);
       
+      // Create plain text version for better deliverability
+      const textVersion = html
+        .replace(/<[^>]*>/g, '')
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/\s+/g, ' ')
+        .trim();
+
       const response = await resend.emails.send({
         from: FROM_ADDRESS,
         to,
         subject,
         html,
+        text: textVersion,
+        reply_to: GMAIL_USER || 'noreply@jansevakendra.com',
+        headers: {
+          'X-Priority': '1',
+          'X-MSMail-Priority': 'High',
+          'Importance': 'high',
+          'Precedence': 'bulk',
+          'X-Auto-Response-Suppress': 'All',
+          'Auto-Submitted': 'auto-generated',
+        },
       });
 
       console.log(`📤 [Resend] Full Response:`, JSON.stringify(response, null, 2));
@@ -154,11 +177,47 @@ export async function sendEmail({
       console.log(`📤 [Gmail] Attempting to send email (fallback)`);
       console.log(`📤 [Gmail] To: ${to}`);
       
+      // Create plain text version from HTML for better deliverability
+      const textVersion = html
+        .replace(/<[^>]*>/g, '') // Remove HTML tags
+        .replace(/&nbsp;/g, ' ')
+        .replace(/&amp;/g, '&')
+        .replace(/&lt;/g, '<')
+        .replace(/&gt;/g, '>')
+        .replace(/&quot;/g, '"')
+        .replace(/\s+/g, ' ') // Remove extra spaces
+        .trim();
+
+      // Use Gmail address directly for better deliverability
+      const fromAddress = GMAIL_USER || FROM_ADDRESS;
+      const displayName = 'Jan Seva Kendra - Etawah';
+      
+      // Clean subject - remove spam trigger words
+      const cleanSubject = subject
+        .replace(/[🔔💬⚠️]/g, '') // Remove emojis
+        .replace(/URGENT/gi, '')
+        .replace(/IMPORTANT/gi, '')
+        .trim();
+
       const info = await nodemailerTransporter.sendMail({
-        from: GMAIL_USER || FROM_ADDRESS,
+        from: `"${displayName}" <${fromAddress}>`,
         to,
-        subject,
+        subject: cleanSubject,
         html,
+        text: textVersion,
+        replyTo: fromAddress,
+        headers: {
+          'X-Priority': '1',
+          'X-MSMail-Priority': 'High',
+          'Importance': 'high',
+          'X-Mailer': 'Jan Seva Kendra',
+          'Message-ID': `<${Date.now()}-${Math.random().toString(36)}@jansevakendra.com>`,
+          'X-Auto-Response-Suppress': 'All',
+          'Precedence': 'bulk',
+        },
+        priority: 'high',
+        // Add date header
+        date: new Date(),
       });
 
       console.log(`✅ [Gmail] ✅✅✅ EMAIL SENT SUCCESSFULLY ✅✅✅`);

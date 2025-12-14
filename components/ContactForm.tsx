@@ -7,7 +7,6 @@ import { submitServiceApplication } from '@/lib/api';
 const serviceOptions = [
   // Documents
   'Aadhaar Card',
-  'Bank Account Linking',
   'PAN Card',
   'Voter ID Card',
   'Ration Card',
@@ -81,6 +80,50 @@ const serviceOptions = [
   'Xerox & Printing',
   'Form Filling Services',
   'Other Services',
+  
+  // School Project Work Services
+  'School Project Writing',
+  'Project Printing & Binding',
+  'Project Design & Layout',
+  'Project Cover Page Design',
+  'Project Report Writing',
+  'School Assignment Help',
+  'Project Research Work',
+  'Project Cutting & Pasting',
+  'School Certificate Printing',
+  'Report Card Printing',
+  'School Form Filling',
+  'School Document Services',
+  
+  // CSC Services - Land & Property
+  'Land Records (Bhulekh)',
+  'Property Registration',
+  'Property Documents',
+  
+  // CSC Services - Travel & Booking
+  'Train Ticket Booking',
+  'Bus Ticket Booking',
+  'Insurance Premium Payment',
+  
+  // CSC Services - Banking & Financial
+  'Banking Services',
+  'Money Transfer',
+  'Aadhaar Enabled Payment',
+  
+  // CSC Services - Education & Skills
+  'Exam Form Filling',
+  'Skill Development Courses',
+  'Digital Literacy',
+  
+  // CSC Services - Legal & Court
+  'Court Case Status',
+  'Legal Aid Services',
+  'Court Fee Payment',
+  
+  // CSC Services - Other
+  'RTI Application',
+  'Family Card Services',
+  'E-Stamp Services',
 ];
 
 type ContactFormProps = {

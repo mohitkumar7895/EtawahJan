@@ -4,6 +4,8 @@ export const serviceApplicationTemplate = (data: any) => `
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+    <meta name="format-detection" content="telephone=no">
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -105,13 +107,13 @@ export const serviceApplicationTemplate = (data: any) => `
 <body>
     <div class="container">
         <div class="header">
-            <h1>🔔 नया सेवा आवेदन</h1>
+            <h1>नया सेवा आवेदन</h1>
             <p>New Service Application - Jan Seva Kendra</p>
         </div>
         <div class="content">
             <div class="alert">
-                <strong>⚠️ IMPORTANT - नया आवेदन प्राप्त हुआ!</strong>
-                कृपया इस आवेदन पर तुरंत कार्रवाई करें। Please take immediate action on this application.
+                <strong>नया आवेदन प्राप्त हुआ</strong>
+                कृपया इस आवेदन पर कार्रवाई करें। Please take action on this application.
             </div>
             
             <div class="field">

@@ -55,7 +55,9 @@ export async function POST(request: NextRequest) {
     console.log({ name, email, phone, service, address });
     console.log(`📧 Recipients: ${RECIPIENTS.join(', ')}`);
 
-    const subject = `🔔 URGENT: नया सेवा आवेदन - ${service} | New Application - ${service}`;
+    // Remove emojis and spam trigger words from subject for better deliverability
+    const cleanService = service.replace(/[🔔]/g, '').trim();
+    const subject = `नया सेवा आवेदन - ${cleanService} | New Service Application - ${cleanService}`;
     const html = serviceApplicationTemplate({
       name,
       email,

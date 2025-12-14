@@ -6,6 +6,7 @@ export interface ContactFormData {
   mobile: string;
   address: string;
   service_type: string;
+  email?: string;
 }
 
 export interface ContactUsData {
@@ -15,6 +16,9 @@ export interface ContactUsData {
 }
 
 export async function submitServiceApplication(formData: ContactFormData) {
+  console.log('📡 API Call: POST /api/apply-service');
+  console.log('📡 Request Data:', JSON.stringify(formData, null, 2));
+  
   const response = await fetch(`${API_BASE_URL}/api/apply-service`, {
     method: 'POST',
     headers: {
@@ -23,11 +27,30 @@ export async function submitServiceApplication(formData: ContactFormData) {
     body: JSON.stringify(formData),
   });
 
+  console.log('📡 Response Status:', response.status, response.statusText);
+  
+  const data = await response.json().catch((err) => {
+    console.error('❌ Failed to parse response JSON:', err);
+    return { error: 'Failed to parse server response' };
+  });
+
+  console.log('📡 Response Data:', JSON.stringify(data, null, 2));
+
   if (!response.ok) {
-    throw new Error('Failed to submit service application');
+    const errorMessage = data.error || data.message || 'Failed to submit service application';
+    console.error('❌ API Error Response:', data);
+    throw new Error(errorMessage);
   }
 
-  return response.json();
+  // Check if email was sent successfully
+  if (data.success === false || (data.emailStatus && data.emailStatus.includes('0/'))) {
+    console.warn('⚠️ Email sending failed:', data);
+    // Don't throw error, just log warning - form was submitted
+  } else {
+    console.log('✅ Service application submitted and email sent:', data.emailStatus || 'Success');
+  }
+
+  return data;
 }
 
 export async function submitContactForm(formData: ContactUsData) {
