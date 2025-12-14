@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, Building2, FileCheck, ShieldCheck, Zap, Receipt, Wallet, PiggyBank, Smartphone, GraduationCap, Shield, Users, Phone, Droplets, Flame, IndianRupee, FileEdit, CheckCircle, X, CheckCircle2, ChevronLeft, Train, Bus, Landmark, Scale, BookOpen, Laptop, MapPin, FileSearch, Banknote, Book, Scissors, FileImage, ClipboardList, PenTool } from 'lucide-react';
+import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, FileCheck, Zap, Receipt, Wallet, PiggyBank, Smartphone, GraduationCap, Shield, Users, Phone, Droplets, Flame, IndianRupee, FileEdit, CheckCircle, X, CheckCircle2, ChevronLeft, Scale, BookOpen, Laptop, MapPin, Banknote, Book, Scissors, FileImage, ClipboardList, PenTool, Globe, Code, Palette, Image, Layout, Monitor } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getVacancies, submitServiceApplication } from '@/lib/api';
@@ -41,15 +41,12 @@ const services = [
   
   // Employment
   { icon: Briefcase, name: 'Employment Registration', category: 'Employment', description: 'Job registration and employment services' },
-  { icon: Briefcase, name: 'EPF Services', category: 'Employment', description: 'EPF account opening and services' },
-  { icon: Briefcase, name: 'ESIC Registration', category: 'Employment', description: 'ESIC registration and card services' },
   
   // Pension
   { icon: PiggyBank, name: 'Pension Services', category: 'Pension', description: 'Pension application, registration, and related services' },
   { icon: PiggyBank, name: 'Old Age Pension', category: 'Pension', description: 'Old age pension application and services' },
   { icon: PiggyBank, name: 'Widow Pension', category: 'Pension', description: 'Widow pension application and services' },
   { icon: PiggyBank, name: 'Disability Pension', category: 'Pension', description: 'Disability pension application and services' },
-  { icon: CheckCircle, name: 'Jeevan Pramaan (Digital Life Certificate)', category: 'Pension', description: 'Digital life certificate for pensioners' },
   
   // Transport
   { icon: Car, name: 'Driving License Services', category: 'Transport', description: 'Driving license application, renewal, and related services' },
@@ -62,9 +59,7 @@ const services = [
   // Insurance
   { icon: Heart, name: 'Health Insurance', category: 'Insurance', description: 'Health insurance application and claim assistance' },
   { icon: Shield, name: 'Ayushman Bharat Card', category: 'Insurance', description: 'Ayushman Bharat health insurance card application' },
-  { icon: Shield, name: 'PMJAY Card', category: 'Insurance', description: 'PM Jan Arogya Yojana card application and services' },
   { icon: Briefcase, name: 'Life Insurance', category: 'Insurance', description: 'Life insurance policies and services' },
-  { icon: ShieldCheck, name: 'Crop Insurance', category: 'Insurance', description: 'Crop insurance application and claim' },
   
   // Government Schemes
   { icon: Home, name: 'PM Awas Yojana', category: 'Schemes', description: 'Pradhan Mantri Awas Yojana housing scheme application' },
@@ -80,22 +75,14 @@ const services = [
   { icon: Droplets, name: 'Water Connection', category: 'Utility', description: 'Water connection application and services' },
   { icon: Phone, name: 'Mobile Recharge', category: 'Utility', description: 'Mobile recharge and top-up services' },
   { icon: Smartphone, name: 'DTH Recharge', category: 'Utility', description: 'DTH recharge and subscription services' },
-  { icon: Flame, name: 'Gas Booking', category: 'Utility', description: 'LPG gas cylinder booking services' },
   { icon: Receipt, name: 'Tax Deduction', category: 'Utility', description: 'Tax deduction certificate and related services' },
   { icon: Receipt, name: 'Income Tax Filing', category: 'Utility', description: 'Income tax return filing assistance' },
   { icon: Wallet, name: 'Withdraw/Payment Withdrawal', category: 'Utility', description: 'Payment withdrawal and transaction services' },
   
-  // Business
-  { icon: FileText, name: 'GST Registration', category: 'Business', description: 'GST registration and filing services' },
-  { icon: Building2, name: 'Company Registration', category: 'Business', description: 'Company and firm registration' },
-  
-  // Legal
-  { icon: FileText, name: 'Legal Documentation', category: 'Legal', description: 'Legal document preparation and attestation' },
-  { icon: FileText, name: 'Affidavit Services', category: 'Legal', description: 'Affidavit preparation and attestation' },
-  
   // General
   { icon: Printer, name: 'Xerox & Printing', category: 'Printing', description: 'Photocopy and printing services' },
-  { icon: FileText, name: 'Form Filling Services', category: 'General', description: 'Form filling assistance for all services' },
+  { icon: FileText, name: 'Sarkari Form Online', category: 'General', description: 'All government form filling services online' },
+  { icon: Receipt, name: 'Challan Jama', category: 'General', description: 'Challan payment and deposit services' },
   
   // School Project Work Services
   { icon: Book, name: 'School Project Writing', category: 'School Services', description: 'School project writing and content assistance' },
@@ -113,13 +100,7 @@ const services = [
   
   // CSC Services - Land & Property
   { icon: MapPin, name: 'Land Records (Bhulekh)', category: 'CSC Services', description: 'Land records search, copy, and related services' },
-  { icon: FileSearch, name: 'Property Registration', category: 'CSC Services', description: 'Property registration and document services' },
   { icon: FileText, name: 'Property Documents', category: 'CSC Services', description: 'Property related document services' },
-  
-  // CSC Services - Travel & Booking
-  { icon: Train, name: 'Train Ticket Booking', category: 'CSC Services', description: 'IRCTC train ticket booking services' },
-  { icon: Bus, name: 'Bus Ticket Booking', category: 'CSC Services', description: 'Bus ticket booking services' },
-  { icon: Receipt, name: 'Insurance Premium Payment', category: 'CSC Services', description: 'Insurance premium payment services' },
   
   // CSC Services - Banking & Financial
   { icon: Wallet, name: 'Banking Services', category: 'CSC Services', description: 'Banking services and transactions' },
@@ -134,12 +115,18 @@ const services = [
   // CSC Services - Legal & Court
   { icon: Scale, name: 'Court Case Status', category: 'CSC Services', description: 'Check court case status online' },
   { icon: FileText, name: 'Legal Aid Services', category: 'CSC Services', description: 'Legal aid and consultation services' },
-  { icon: Landmark, name: 'Court Fee Payment', category: 'CSC Services', description: 'Court fee payment services' },
   
-  // CSC Services - Other
-  { icon: FileText, name: 'RTI Application', category: 'CSC Services', description: 'Right to Information application filing' },
-  { icon: Users, name: 'Family Card Services', category: 'CSC Services', description: 'Family card related services' },
-  { icon: Receipt, name: 'E-Stamp Services', category: 'CSC Services', description: 'E-stamp paper services' },
+  // IT Services - All in One
+  { icon: Laptop, name: 'IT Services', category: 'IT Services', description: 'Complete IT solutions: Website Development, Software Development, Mobile Apps, Graphic Design, Post Design, Banner Design, Logo Design and more' },
+  
+  // Individual IT Services (shown when IT Services is clicked)
+  { icon: Globe, name: 'Website Development', category: 'IT Services', description: 'Professional website design and development services', parentService: 'IT Services' },
+  { icon: Code, name: 'Software Development', category: 'IT Services', description: 'Custom software development and programming services', parentService: 'IT Services' },
+  { icon: Smartphone, name: 'Mobile App Development', category: 'IT Services', description: 'Android and iOS mobile application development', parentService: 'IT Services' },
+  { icon: Palette, name: 'Graphic Design', category: 'IT Services', description: 'Professional graphic design services', parentService: 'IT Services' },
+  { icon: Image, name: 'Post Design', category: 'IT Services', description: 'Social media post and advertisement design', parentService: 'IT Services' },
+  { icon: Layout, name: 'Banner Design', category: 'IT Services', description: 'Banner and hoarding design services', parentService: 'IT Services' },
+  { icon: Monitor, name: 'Logo Design', category: 'IT Services', description: 'Professional logo design and branding services', parentService: 'IT Services' },
 ];
 
 // Documents required mapping for each service
@@ -163,13 +150,10 @@ const serviceDocuments: Record<string, string[]> = {
   'Domicile Certificate': ['Aadhaar Card', 'Address proof', 'Birth certificate', 'School certificates'],
   'Address Change Services': ['Existing documents', 'Aadhaar Card', 'New address proof', 'Old address proof'],
   'Employment Registration': ['Aadhaar Card', 'Educational certificates', 'Resume', 'Photo', 'Address proof'],
-  'EPF Services': ['Aadhaar Card', 'PAN Card', 'Bank account details', 'Employer details', 'Photo'],
-  'ESIC Registration': ['Aadhaar Card', 'PAN Card', 'Bank account details', 'Employer details', 'Photo'],
   'Pension Services': ['Aadhaar Card', 'Bank account details', 'Age proof', 'Service certificate', 'Photo'],
   'Old Age Pension': ['Aadhaar Card', 'Age proof (60+ years)', 'Bank account details', 'Income certificate', 'Address proof'],
   'Widow Pension': ['Aadhaar Card', 'Husband\'s death certificate', 'Bank account details', 'Income certificate', 'Address proof'],
   'Disability Pension': ['Aadhaar Card', 'Disability certificate', 'Bank account details', 'Income certificate', 'Medical reports'],
-  'Jeevan Pramaan (Digital Life Certificate)': ['Aadhaar Card', 'Pension payment order', 'Bank account details', 'Mobile number'],
   'Driving License Services': ['Aadhaar Card', 'Age proof', 'Address proof', 'Medical certificate', 'Passport size photos'],
   'Vehicle Registration': ['Aadhaar Card', 'Address proof', 'Vehicle invoice', 'Insurance certificate', 'PUC certificate'],
   'Vehicle Number Plate Online': ['RC Book', 'Aadhaar Card', 'Address proof', 'Vehicle details'],
@@ -178,9 +162,7 @@ const serviceDocuments: Record<string, string[]> = {
   'Vehicle Transfer': ['RC Book', 'Aadhaar Card of buyer and seller', 'Sale deed', 'NOC', 'Insurance'],
   'Health Insurance': ['Aadhaar Card', 'Age proof', 'Medical history', 'Bank account details', 'Photo'],
   'Ayushman Bharat Card': ['Aadhaar Card', 'Ration Card or Income certificate', 'Family details', 'Mobile number', 'Photo'],
-  'PMJAY Card': ['Aadhaar Card', 'Ration Card or Income certificate', 'Family details', 'Mobile number', 'Photo'],
   'Life Insurance': ['Aadhaar Card', 'Age proof', 'Medical certificate', 'Bank account details', 'Photo'],
-  'Crop Insurance': ['Aadhaar Card', 'Land documents', 'Bank account details', 'Crop details', 'Farmer ID'],
   'PM Awas Yojana': ['Aadhaar Card', 'Income certificate', 'Address proof', 'Bank account details', 'Family details'],
   'Ujjwala Yojana': ['Aadhaar Card', 'BPL card or Income certificate', 'Bank account details', 'Address proof', 'Photo'],
   'PM Kisan Registration': ['Aadhaar Card', 'Bank account details', 'Land documents', 'Mobile number'],
@@ -192,16 +174,12 @@ const serviceDocuments: Record<string, string[]> = {
   'Water Connection': ['Aadhaar Card', 'Address proof', 'Property documents', 'Bank account details'],
   'Mobile Recharge': ['Mobile number', 'Payment method'],
   'DTH Recharge': ['DTH connection details', 'Payment method'],
-  'Gas Booking': ['Aadhaar Card', 'Gas connection details', 'Bank account details'],
   'Tax Deduction': ['PAN Card', 'Aadhaar Card', 'Income proof', 'Bank statements'],
   'Income Tax Filing': ['PAN Card', 'Aadhaar Card', 'Form 16', 'Bank statements', 'Investment proofs'],
   'Withdraw/Payment Withdrawal': ['Aadhaar Card', 'Bank account details', 'Identity proof'],
-  'GST Registration': ['PAN Card', 'Aadhaar Card', 'Business address proof', 'Bank account details', 'Business documents'],
-  'Company Registration': ['PAN Card', 'Aadhaar Card', 'Address proof', 'Business plan', 'Partnership deed (if applicable)'],
-  'Legal Documentation': ['Aadhaar Card', 'Relevant documents', 'Witness details', 'Photo'],
-  'Affidavit Services': ['Aadhaar Card', 'Supporting documents', 'Witness details', 'Photo'],
   'Xerox & Printing': ['Original documents', 'Payment'],
-  'Form Filling Services': ['Aadhaar Card', 'Relevant documents', 'Photo'],
+  'Sarkari Form Online': ['Aadhaar Card', 'Relevant documents', 'Photo', 'Required certificates'],
+  'Challan Jama': ['Challan number', 'Aadhaar Card', 'Payment method', 'Relevant documents'],
   'School Project Writing': ['Project topic', 'Project requirements', 'Content/material', 'Payment'],
   'Project Printing & Binding': ['Project file/content', 'Printing requirements', 'Binding preference', 'Payment'],
   'Project Design & Layout': ['Project content', 'Design requirements', 'Images/photos', 'Payment'],
@@ -215,11 +193,7 @@ const serviceDocuments: Record<string, string[]> = {
   'School Form Filling': ['Aadhaar Card', 'School documents', 'Student details', 'Photo'],
   'School Document Services': ['Aadhaar Card', 'Relevant school documents', 'Payment'],
   'Land Records (Bhulekh)': ['Aadhaar Card', 'Property details', 'Khasra/Khatauni number'],
-  'Property Registration': ['Aadhaar Card', 'Property documents', 'Sale deed', 'Identity proof', 'Address proof'],
   'Property Documents': ['Aadhaar Card', 'Property details', 'Previous documents'],
-  'Train Ticket Booking': ['Aadhaar Card', 'Mobile number', 'Payment method'],
-  'Bus Ticket Booking': ['Aadhaar Card', 'Mobile number', 'Payment method'],
-  'Insurance Premium Payment': ['Policy number', 'Aadhaar Card', 'Payment method'],
   'Banking Services': ['Aadhaar Card', 'Bank account details', 'Identity proof'],
   'Money Transfer': ['Aadhaar Card', 'Beneficiary details', 'Payment method'],
   'Aadhaar Enabled Payment': ['Aadhaar Card', 'Bank account linked with Aadhaar', 'Biometric verification'],
@@ -228,10 +202,13 @@ const serviceDocuments: Record<string, string[]> = {
   'Digital Literacy': ['Aadhaar Card', 'Photo', 'Basic information'],
   'Court Case Status': ['Case number', 'Court details', 'Aadhaar Card'],
   'Legal Aid Services': ['Aadhaar Card', 'Case details', 'Supporting documents'],
-  'Court Fee Payment': ['Case details', 'Court information', 'Payment method'],
-  'RTI Application': ['Aadhaar Card', 'RTI application form', 'Fee payment'],
-  'Family Card Services': ['Aadhaar Card of all family members', 'Family details', 'Address proof'],
-  'E-Stamp Services': ['Aadhaar Card', 'Document details', 'Payment method'],
+  'Website Development': ['Business details', 'Requirements', 'Content/material', 'Payment'],
+  'Software Development': ['Project requirements', 'Business details', 'Technical specifications', 'Payment'],
+  'Mobile App Development': ['App requirements', 'Features list', 'Platform (Android/iOS)', 'Payment'],
+  'Graphic Design': ['Design requirements', 'Content/text', 'Images/photos', 'Payment'],
+  'Post Design': ['Post content', 'Design requirements', 'Images/photos', 'Payment'],
+  'Banner Design': ['Banner content', 'Size specifications', 'Design requirements', 'Payment'],
+  'Logo Design': ['Company/business name', 'Design preferences', 'Color scheme', 'Payment'],
 };
 
 type Service = {
@@ -239,6 +216,7 @@ type Service = {
   name: string;
   category: string;
   description: string;
+  parentService?: string;
 };
 
 export default function ServicesPageComponent() {
@@ -247,6 +225,7 @@ export default function ServicesPageComponent() {
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
+  const [showITServices, setShowITServices] = useState(false);
   const [formData, setFormData] = useState({
     name: '',
     mobile: '',
@@ -288,34 +267,51 @@ export default function ServicesPageComponent() {
 
   const categories = ['All', ...Array.from(new Set(services.map(s => s.category)))];
   const filteredServices = selectedCategory === 'All' 
-    ? services 
-    : services.filter(s => s.category === selectedCategory);
+    ? services.filter(s => !s.parentService) 
+    : services.filter(s => s.category === selectedCategory && !s.parentService);
 
   const handleServiceClick = (service: Service) => {
     console.log('Service clicked:', service.name);
-    setSelectedService(service);
-    setIsModalOpen(true);
-    setShowForm(false);
-    setSubmitSuccess(false);
-    setError('');
-    setFormData({ name: '', mobile: '', address: '', service_type: '' });
+    if (service.name === 'IT Services') {
+      setShowITServices(true);
+      setSelectedService(service);
+      setIsModalOpen(true);
+      setShowForm(false);
+      setSubmitSuccess(false);
+      setError('');
+      setFormData({ name: '', mobile: '', address: '', service_type: '' });
+    } else {
+      setShowITServices(false);
+      setSelectedService(service);
+      setIsModalOpen(true);
+      setShowForm(false);
+      setSubmitSuccess(false);
+      setError('');
+      setFormData({ name: '', mobile: '', address: '', service_type: '' });
+    }
     // Prevent body scroll when modal is open
     if (typeof document !== 'undefined') {
       document.body.style.overflow = 'hidden';
     }
+  };
+  
+  const handleITServiceClick = (service: Service) => {
+    setShowITServices(false);
+    setSelectedService(service);
+    setShowForm(false);
+    setSubmitSuccess(false);
+    setError('');
+    setFormData({ name: '', mobile: '', address: '', service_type: service.name });
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
     setSelectedService(null);
     setShowForm(false);
+    setShowITServices(false);
     setSubmitSuccess(false);
     setError('');
     setFormData({ name: '', mobile: '', address: '', service_type: '' });
-    // Restore body scroll
-    if (typeof document !== 'undefined') {
-      document.body.style.overflow = 'unset';
-    }
     // Restore body scroll
     if (typeof document !== 'undefined') {
       document.body.style.overflow = 'unset';
@@ -412,7 +408,9 @@ export default function ServicesPageComponent() {
   };
 
   const getDocumentsForService = (serviceName: string): string[] => {
-    return serviceDocuments[serviceName] || ['Aadhaar Card', 'Address Proof', 'Photo', 'Relevant supporting documents'];
+    const docs = serviceDocuments[serviceName];
+    console.log('Service Name:', serviceName, 'Documents:', docs);
+    return docs || ['Aadhaar Card', 'Address Proof', 'Photo', 'Relevant supporting documents'];
   };
 
   return (
@@ -509,7 +507,44 @@ export default function ServicesPageComponent() {
 
             {/* Modal Body */}
             <div className="p-4 sm:p-6 flex-1 overflow-y-auto">
-              {!showForm ? (
+              {showITServices && selectedService?.name === 'IT Services' ? (
+                <>
+                  {/* IT Services Grid */}
+                  <div className="mb-4 sm:mb-6">
+                    <h3 className="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 flex items-center gap-2">
+                      <Laptop className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600 flex-shrink-0" />
+                      <span className="text-sm sm:text-base">IT Services</span>
+                    </h3>
+                    <p className="text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base">{selectedService.description}</p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                      {services.filter(s => s.parentService === 'IT Services').map((service, idx) => {
+                        const Icon = service.icon;
+                        return (
+                          <div
+                            key={idx}
+                            onClick={() => handleITServiceClick(service)}
+                            className="bg-gradient-to-br from-blue-50 to-white p-4 sm:p-5 rounded-lg border border-blue-100 hover:border-blue-300 hover:shadow-lg transition transform hover:scale-105 cursor-pointer"
+                          >
+                            <div className="flex flex-col items-center text-center">
+                              <div className="bg-blue-100 p-3 sm:p-4 rounded-full mb-3 sm:mb-4">
+                                <Icon className="w-6 h-6 sm:w-7 sm:h-7 text-blue-600" />
+                              </div>
+                              <h4 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base leading-tight">{service.name}</h4>
+                              <p className="text-xs sm:text-sm text-gray-600">{service.description}</p>
+                            </div>
+                          </div>
+                        );
+                      })}
+                    </div>
+                  </div>
+                  <button
+                    onClick={handleCloseModal}
+                    className="w-full px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 font-semibold rounded-lg hover:bg-gray-50 transition text-sm sm:text-base"
+                  >
+                    Close
+                  </button>
+                </>
+              ) : !showForm ? (
                 <>
                   {/* Service Description */}
                   <p className="text-gray-700 mb-4 sm:mb-6 text-sm sm:text-base">{selectedService.description}</p>

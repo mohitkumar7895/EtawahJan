@@ -33,7 +33,6 @@ const serviceOptions = [
   'Old Age Pension',
   'Widow Pension',
   'Disability Pension',
-  'Jeevan Pramaan (Digital Life Certificate)',
   
   // Transport
   'Driving License Services',
@@ -46,7 +45,6 @@ const serviceOptions = [
   // Insurance
   'Health Insurance',
   'Ayushman Bharat Card',
-  'PMJAY Card',
   'Life Insurance',
   
   // Government Schemes
@@ -63,22 +61,18 @@ const serviceOptions = [
   'Water Connection',
   'Mobile Recharge',
   'DTH Recharge',
-  'Gas Booking',
   'Tax Deduction',
   'Income Tax Filing',
   'Withdraw/Payment Withdrawal',
   
   // Business
-  'GST Registration',
-  'Company Registration',
   
   // Legal
-  'Legal Documentation',
-  'Affidavit Services',
   
   // General
   'Xerox & Printing',
-  'Form Filling Services',
+  'Sarkari Form Online',
+  'Challan Jama',
   'Other Services',
   
   // School Project Work Services
@@ -97,13 +91,9 @@ const serviceOptions = [
   
   // CSC Services - Land & Property
   'Land Records (Bhulekh)',
-  'Property Registration',
   'Property Documents',
   
   // CSC Services - Travel & Booking
-  'Train Ticket Booking',
-  'Bus Ticket Booking',
-  'Insurance Premium Payment',
   
   // CSC Services - Banking & Financial
   'Banking Services',
@@ -118,12 +108,9 @@ const serviceOptions = [
   // CSC Services - Legal & Court
   'Court Case Status',
   'Legal Aid Services',
-  'Court Fee Payment',
   
-  // CSC Services - Other
-  'RTI Application',
-  'Family Card Services',
-  'E-Stamp Services',
+  // IT Services
+  'IT Services',
 ];
 
 type ContactFormProps = {

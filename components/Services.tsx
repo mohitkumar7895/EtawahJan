@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, Zap, Receipt, Wallet, FileCheck, PiggyBank, Smartphone, Building2, GraduationCap, Shield, Users, Phone, Droplets, Flame, IndianRupee, FileEdit, CheckCircle, X, CheckCircle2, ChevronLeft, Train, Bus, Landmark, Scale, BookOpen, Laptop, MapPin, FileSearch, Banknote, Book, Scissors, FileImage, ClipboardList, PenTool } from 'lucide-react';
+import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, Zap, Receipt, Wallet, FileCheck, PiggyBank, Smartphone, GraduationCap, Shield, Users, Phone, Droplets, Flame, IndianRupee, FileEdit, CheckCircle, X, CheckCircle2, ChevronLeft, Scale, BookOpen, Laptop, MapPin, Banknote, Book, Scissors, FileImage, ClipboardList, PenTool } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getVacancies, type Vacancy, submitServiceApplication } from '@/lib/api';
@@ -35,7 +35,6 @@ const services = [
   { icon: PiggyBank, name: 'Old Age Pension', category: 'Pension' },
   { icon: PiggyBank, name: 'Widow Pension', category: 'Pension' },
   { icon: PiggyBank, name: 'Disability Pension', category: 'Pension' },
-  { icon: CheckCircle, name: 'Jeevan Pramaan (Digital Life Certificate)', category: 'Pension' },
   
   // Transport
   { icon: Car, name: 'Driving License Services', category: 'Transport' },
@@ -48,7 +47,6 @@ const services = [
   // Insurance
   { icon: Heart, name: 'Health Insurance', category: 'Insurance' },
   { icon: Shield, name: 'Ayushman Bharat Card', category: 'Insurance' },
-  { icon: Shield, name: 'PMJAY Card', category: 'Insurance' },
   { icon: Briefcase, name: 'Life Insurance', category: 'Insurance' },
   
   // Government Schemes
@@ -65,22 +63,14 @@ const services = [
   { icon: Droplets, name: 'Water Connection', category: 'Utility' },
   { icon: Phone, name: 'Mobile Recharge', category: 'Utility' },
   { icon: Smartphone, name: 'DTH Recharge', category: 'Utility' },
-  { icon: Flame, name: 'Gas Booking', category: 'Utility' },
   { icon: Receipt, name: 'Tax Deduction', category: 'Utility' },
   { icon: Receipt, name: 'Income Tax Filing', category: 'Utility' },
   { icon: Wallet, name: 'Withdraw/Payment Withdrawal', category: 'Utility' },
   
-  // Business
-  { icon: FileText, name: 'GST Registration', category: 'Business' },
-  { icon: Building2, name: 'Company Registration', category: 'Business' },
-  
-  // Legal
-  { icon: FileText, name: 'Legal Documentation', category: 'Legal' },
-  { icon: FileText, name: 'Affidavit Services', category: 'Legal' },
-  
   // General
   { icon: Printer, name: 'Xerox & Printing', category: 'Printing' },
-  { icon: FileText, name: 'Form Filling Services', category: 'General' },
+  { icon: FileText, name: 'Sarkari Form Online', category: 'General' },
+  { icon: Receipt, name: 'Challan Jama', category: 'General' },
   
   // School Project Work Services
   { icon: Book, name: 'School Project Writing', category: 'School Services' },
@@ -98,13 +88,7 @@ const services = [
   
   // CSC Services - Land & Property
   { icon: MapPin, name: 'Land Records (Bhulekh)', category: 'CSC Services' },
-  { icon: FileSearch, name: 'Property Registration', category: 'CSC Services' },
   { icon: FileText, name: 'Property Documents', category: 'CSC Services' },
-  
-  // CSC Services - Travel & Booking
-  { icon: Train, name: 'Train Ticket Booking', category: 'CSC Services' },
-  { icon: Bus, name: 'Bus Ticket Booking', category: 'CSC Services' },
-  { icon: Receipt, name: 'Insurance Premium Payment', category: 'CSC Services' },
   
   // CSC Services - Banking & Financial
   { icon: Wallet, name: 'Banking Services', category: 'CSC Services' },
@@ -119,12 +103,9 @@ const services = [
   // CSC Services - Legal & Court
   { icon: Scale, name: 'Court Case Status', category: 'CSC Services' },
   { icon: FileText, name: 'Legal Aid Services', category: 'CSC Services' },
-  { icon: Landmark, name: 'Court Fee Payment', category: 'CSC Services' },
   
-  // CSC Services - Other
-  { icon: FileText, name: 'RTI Application', category: 'CSC Services' },
-  { icon: Users, name: 'Family Card Services', category: 'CSC Services' },
-  { icon: Receipt, name: 'E-Stamp Services', category: 'CSC Services' },
+  // IT Services - All in One
+  { icon: Laptop, name: 'IT Services', category: 'IT Services' },
 ];
 
 // Documents required mapping for each service
@@ -154,7 +135,6 @@ const serviceDocuments: Record<string, string[]> = {
   'Old Age Pension': ['Aadhaar Card', 'Age proof (60+ years)', 'Bank account details', 'Income certificate', 'Address proof'],
   'Widow Pension': ['Aadhaar Card', 'Husband\'s death certificate', 'Bank account details', 'Income certificate', 'Address proof'],
   'Disability Pension': ['Aadhaar Card', 'Disability certificate', 'Bank account details', 'Income certificate', 'Medical reports'],
-  'Jeevan Pramaan (Digital Life Certificate)': ['Aadhaar Card', 'Pension payment order', 'Bank account details', 'Mobile number'],
   'Driving License Services': ['Aadhaar Card', 'Age proof', 'Address proof', 'Medical certificate', 'Passport size photos'],
   'Vehicle Registration': ['Aadhaar Card', 'Address proof', 'Vehicle invoice', 'Insurance certificate', 'PUC certificate'],
   'Vehicle Number Plate Online': ['RC Book', 'Aadhaar Card', 'Address proof', 'Vehicle details'],
@@ -163,9 +143,7 @@ const serviceDocuments: Record<string, string[]> = {
   'Vehicle Transfer': ['RC Book', 'Aadhaar Card of buyer and seller', 'Sale deed', 'NOC', 'Insurance'],
   'Health Insurance': ['Aadhaar Card', 'Age proof', 'Medical history', 'Bank account details', 'Photo'],
   'Ayushman Bharat Card': ['Aadhaar Card', 'Ration Card or Income certificate', 'Family details', 'Mobile number', 'Photo'],
-  'PMJAY Card': ['Aadhaar Card', 'Ration Card or Income certificate', 'Family details', 'Mobile number', 'Photo'],
   'Life Insurance': ['Aadhaar Card', 'Age proof', 'Medical certificate', 'Bank account details', 'Photo'],
-  'Crop Insurance': ['Aadhaar Card', 'Land documents', 'Bank account details', 'Crop details', 'Farmer ID'],
   'PM Awas Yojana': ['Aadhaar Card', 'Income certificate', 'Address proof', 'Bank account details', 'Family details'],
   'Ujjwala Yojana': ['Aadhaar Card', 'BPL card or Income certificate', 'Bank account details', 'Address proof', 'Photo'],
   'PM Kisan Registration': ['Aadhaar Card', 'Bank account details', 'Land documents', 'Mobile number'],
@@ -177,16 +155,12 @@ const serviceDocuments: Record<string, string[]> = {
   'Water Connection': ['Aadhaar Card', 'Address proof', 'Property documents', 'Bank account details'],
   'Mobile Recharge': ['Mobile number', 'Payment method'],
   'DTH Recharge': ['DTH connection details', 'Payment method'],
-  'Gas Booking': ['Aadhaar Card', 'Gas connection details', 'Bank account details'],
   'Tax Deduction': ['PAN Card', 'Aadhaar Card', 'Income proof', 'Bank statements'],
   'Income Tax Filing': ['PAN Card', 'Aadhaar Card', 'Form 16', 'Bank statements', 'Investment proofs'],
   'Withdraw/Payment Withdrawal': ['Aadhaar Card', 'Bank account details', 'Identity proof'],
-  'GST Registration': ['PAN Card', 'Aadhaar Card', 'Business address proof', 'Bank account details', 'Business documents'],
-  'Company Registration': ['PAN Card', 'Aadhaar Card', 'Address proof', 'Business plan', 'Partnership deed (if applicable)'],
-  'Legal Documentation': ['Aadhaar Card', 'Relevant documents', 'Witness details', 'Photo'],
-  'Affidavit Services': ['Aadhaar Card', 'Supporting documents', 'Witness details', 'Photo'],
   'Xerox & Printing': ['Original documents', 'Payment'],
-  'Form Filling Services': ['Aadhaar Card', 'Relevant documents', 'Photo'],
+  'Sarkari Form Online': ['Aadhaar Card', 'Relevant documents', 'Photo', 'Required certificates'],
+  'Challan Jama': ['Challan number', 'Aadhaar Card', 'Payment method', 'Relevant documents'],
   'School Project Writing': ['Project topic', 'Project requirements', 'Content/material', 'Payment'],
   'Project Printing & Binding': ['Project file/content', 'Printing requirements', 'Binding preference', 'Payment'],
   'Project Design & Layout': ['Project content', 'Design requirements', 'Images/photos', 'Payment'],
@@ -200,11 +174,7 @@ const serviceDocuments: Record<string, string[]> = {
   'School Form Filling': ['Aadhaar Card', 'School documents', 'Student details', 'Photo'],
   'School Document Services': ['Aadhaar Card', 'Relevant school documents', 'Payment'],
   'Land Records (Bhulekh)': ['Aadhaar Card', 'Property details', 'Khasra/Khatauni number'],
-  'Property Registration': ['Aadhaar Card', 'Property documents', 'Sale deed', 'Identity proof', 'Address proof'],
   'Property Documents': ['Aadhaar Card', 'Property details', 'Previous documents'],
-  'Train Ticket Booking': ['Aadhaar Card', 'Mobile number', 'Payment method'],
-  'Bus Ticket Booking': ['Aadhaar Card', 'Mobile number', 'Payment method'],
-  'Insurance Premium Payment': ['Policy number', 'Aadhaar Card', 'Payment method'],
   'Banking Services': ['Aadhaar Card', 'Bank account details', 'Identity proof'],
   'Money Transfer': ['Aadhaar Card', 'Beneficiary details', 'Payment method'],
   'Aadhaar Enabled Payment': ['Aadhaar Card', 'Bank account linked with Aadhaar', 'Biometric verification'],
@@ -213,10 +183,16 @@ const serviceDocuments: Record<string, string[]> = {
   'Digital Literacy': ['Aadhaar Card', 'Photo', 'Basic information'],
   'Court Case Status': ['Case number', 'Court details', 'Aadhaar Card'],
   'Legal Aid Services': ['Aadhaar Card', 'Case details', 'Supporting documents'],
-  'Court Fee Payment': ['Case details', 'Court information', 'Payment method'],
-  'RTI Application': ['Aadhaar Card', 'RTI application form', 'Fee payment'],
-  'Family Card Services': ['Aadhaar Card of all family members', 'Family details', 'Address proof'],
-  'E-Stamp Services': ['Aadhaar Card', 'Document details', 'Payment method'],
+  'IT Services': [
+    'Website Development - Business details, Requirements, Content/material',
+    'Software Development - Project requirements, Business details, Technical specifications',
+    'Mobile App Development - App requirements, Features list, Platform (Android/iOS)',
+    'Graphic Design - Design requirements, Content/text, Images/photos',
+    'Post Design - Post content, Design requirements, Images/photos',
+    'Banner Design - Banner content, Size specifications, Design requirements',
+    'Logo Design - Company/business name, Design preferences, Color scheme',
+    'Payment method'
+  ],
 };
 
 type Service = {
@@ -381,7 +357,9 @@ export default function Services() {
   };
 
   const getDocumentsForService = (serviceName: string): string[] => {
-    return serviceDocuments[serviceName] || ['Aadhaar Card', 'Address Proof', 'Photo', 'Relevant supporting documents'];
+    const docs = serviceDocuments[serviceName];
+    console.log('Service Name:', serviceName, 'Documents:', docs);
+    return docs || ['Aadhaar Card', 'Address Proof', 'Photo', 'Relevant supporting documents'];
   };
 
   return (
