@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { contactFormTemplate, userConfirmationTemplate } from '@/lib/emailTemplates';
 import { sendEmail, getRecipients, isEmailConfigured } from '@/lib/emailService';
+import { connectDB, isDBConnected } from '@/lib/db';
+import Subscriber from '@/models/Subscriber';
 
 const RECIPIENTS = getRecipients();
 
