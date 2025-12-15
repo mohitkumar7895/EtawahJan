@@ -1,6 +1,6 @@
 'use client';
 
-import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, FileCheck, Zap, Receipt, Wallet, PiggyBank, Smartphone, GraduationCap, Shield, Users, Phone, Droplets, Flame, IndianRupee, FileEdit, CheckCircle, X, CheckCircle2, ChevronLeft, Scale, BookOpen, Laptop, MapPin, Banknote, Book, Scissors, FileImage, ClipboardList, PenTool, Globe, Code, Palette, Image, Layout, Monitor, Video, Instagram, Camera, Film, Music, Youtube } from 'lucide-react';
+import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, FileCheck, Zap, Receipt, Wallet, PiggyBank, Smartphone, GraduationCap, Shield, Users, Phone, Droplets, Flame, IndianRupee, FileEdit, CheckCircle, X, CheckCircle2, ChevronLeft, Scale, BookOpen, Laptop, MapPin, Banknote, Book, Scissors, FileImage, ClipboardList, PenTool, Globe, Code, Palette, Image, Layout, Monitor, Video, Instagram, Camera, Film, Music, Youtube, Search } from 'lucide-react';
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getVacancies, submitServiceApplication } from '@/lib/api';
@@ -238,6 +238,7 @@ type Service = {
 export default function ServicesPageComponent() {
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
   const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [searchQuery, setSearchQuery] = useState<string>('');
   const [selectedService, setSelectedService] = useState<Service | null>(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [showForm, setShowForm] = useState(false);
@@ -282,9 +283,23 @@ export default function ServicesPageComponent() {
   }, []);
 
   const categories = ['All', ...Array.from(new Set(services.map(s => s.category)))];
-  const filteredServices = selectedCategory === 'All' 
-    ? services.filter(s => !s.parentService) 
-    : services.filter(s => s.category === selectedCategory && !s.parentService);
+  
+  // Filter services based on category and search query
+  const filteredServices = services.filter(s => {
+    // Exclude parent services (like IT Services sub-services)
+    if (s.parentService) return false;
+    
+    // Filter by category
+    const categoryMatch = selectedCategory === 'All' || s.category === selectedCategory;
+    
+    // Filter by search query (case-insensitive search in name, description, and category)
+    const searchMatch = searchQuery.trim() === '' || 
+      s.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      s.category.toLowerCase().includes(searchQuery.toLowerCase());
+    
+    return categoryMatch && searchMatch;
+  });
 
   const handleServiceClick = (service: Service) => {
     console.log('Service clicked:', service.name);
@@ -434,9 +449,39 @@ export default function ServicesPageComponent() {
       <section className="py-12 sm:py-16 md:py-20">
         <div className="container mx-auto px-4 sm:px-6">
           {/* Header */}
-          <div className="text-center mb-8 sm:mb-10 md:mb-12">
+          <div className="text-center mb-6 sm:mb-8 md:mb-10">
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold text-gray-900 mb-3 sm:mb-4">Our Services</h1>
             <p className="text-base sm:text-lg md:text-xl text-gray-600">हमारी सेवाएं - All Government & Private Services Under One Roof</p>
+          </div>
+
+          {/* Search Bar */}
+          <div className="mb-6 sm:mb-8 max-w-2xl mx-auto">
+            <div className="relative">
+              <div className="absolute inset-y-0 left-0 pl-3 sm:pl-4 flex items-center pointer-events-none">
+                <Search className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400" />
+              </div>
+              <input
+                type="text"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                placeholder="Search services... (e.g., Aadhaar, PAN, Certificate)"
+                className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 text-base sm:text-lg border-2 border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-all shadow-sm hover:shadow-md"
+              />
+              {searchQuery && (
+                <button
+                  onClick={() => setSearchQuery('')}
+                  className="absolute inset-y-0 right-0 pr-3 sm:pr-4 flex items-center"
+                  aria-label="Clear search"
+                >
+                  <X className="h-5 w-5 sm:h-6 sm:w-6 text-gray-400 hover:text-gray-600 transition" />
+                </button>
+              )}
+            </div>
+            {searchQuery && (
+              <p className="mt-2 text-sm text-gray-600 text-center">
+                Found {filteredServices.length} service{filteredServices.length !== 1 ? 's' : ''} matching "{searchQuery}"
+              </p>
+            )}
           </div>
 
           {/* Category Filter */}
