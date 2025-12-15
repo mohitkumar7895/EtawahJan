@@ -280,4 +280,279 @@ export const contactFormTemplate = (data: any) => `
 </html>
 `;
 
+// User Confirmation Email Template
+export const userConfirmationTemplate = (data: any) => `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(to right, #059669, #10b981);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 30px;
+        }
+        .success-badge {
+            background-color: #d1fae5;
+            border-left: 4px solid #10b981;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+            text-align: center;
+        }
+        .success-badge strong {
+            color: #059669;
+            font-size: 18px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .info-box {
+            background-color: #f0f9ff;
+            border: 1px solid #bae6fd;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+        }
+        .info-box h3 {
+            color: #0369a1;
+            margin-top: 0;
+        }
+        .field {
+            margin-bottom: 15px;
+            padding: 12px;
+            background-color: #f9fafb;
+            border-radius: 6px;
+        }
+        .field-label {
+            font-weight: bold;
+            color: #1e40af;
+            display: block;
+            margin-bottom: 5px;
+            font-size: 12px;
+            text-transform: uppercase;
+        }
+        .field-value {
+            font-size: 16px;
+            color: #1f2937;
+        }
+        .footer {
+            background-color: #f9fafb;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>✅ आवेदन प्राप्त हुआ</h1>
+            <p>Application Received - Jan Seva Kendra</p>
+        </div>
+        <div class="content">
+            <div class="success-badge">
+                <strong>🎉 आपका आवेदन सफलतापूर्वक प्राप्त हो गया है!</strong>
+                <p style="margin: 5px 0 0 0; color: #065f46;">Your application has been received successfully!</p>
+            </div>
+            
+            <div class="info-box">
+                <h3>📋 आवेदन विवरण / Application Details</h3>
+                <div class="field">
+                    <span class="field-label">👤 नाम / Name</span>
+                    <div class="field-value">${data.name}</div>
+                </div>
+                <div class="field">
+                    <span class="field-label">📱 मोबाइल / Mobile</span>
+                    <div class="field-value">${data.phone}</div>
+                </div>
+                <div class="field">
+                    <span class="field-label">🛠️ सेवा / Service</span>
+                    <div class="field-value">${data.service}</div>
+                </div>
+            </div>
+
+            <div class="info-box">
+                <h3>📞 अगले कदम / Next Steps</h3>
+                <p style="margin: 0; color: #1f2937;">
+                    हमारी टीम जल्द ही आपसे संपर्क करेगी। कृपया अपना मोबाइल नंबर सक्रिय रखें।<br/>
+                    Our team will contact you soon. Please keep your mobile number active.
+                </p>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="https://www.jan-seva.site/track" class="button">Track Application Status</a>
+            </div>
+
+            <div class="footer">
+                <p><strong>Jan Seva Kendra - Etawah</strong></p>
+                <p>📞 Contact: <strong>9193898182</strong></p>
+                <p>📍 Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP</p>
+                <p style="margin-top: 15px; font-size: 12px; color: #9ca3af;">
+                    यह एक स्वचालित ईमेल है। कृपया इस ईमेल का जवाब न दें।<br/>
+                    This is an automated email. Please do not reply to this email.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
+// Website Update Notification Template
+export const websiteUpdateTemplate = (data: any) => `
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            margin: 0;
+            padding: 0;
+            background-color: #f5f5f5;
+        }
+        .container {
+            max-width: 600px;
+            margin: 20px auto;
+            background-color: #ffffff;
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        }
+        .header {
+            background: linear-gradient(to right, #7c3aed, #a855f7);
+            color: white;
+            padding: 30px 20px;
+            text-align: center;
+        }
+        .header h1 {
+            margin: 0;
+            font-size: 28px;
+            font-weight: bold;
+        }
+        .content {
+            padding: 30px;
+        }
+        .update-badge {
+            background-color: #f3e8ff;
+            border-left: 4px solid #a855f7;
+            padding: 15px;
+            margin-bottom: 20px;
+            border-radius: 4px;
+        }
+        .update-badge strong {
+            color: #7c3aed;
+            font-size: 18px;
+            display: block;
+            margin-bottom: 5px;
+        }
+        .update-content {
+            background-color: #f9fafb;
+            padding: 20px;
+            border-radius: 6px;
+            margin: 20px 0;
+            border: 1px solid #e5e7eb;
+        }
+        .update-content h3 {
+            color: #1e40af;
+            margin-top: 0;
+        }
+        .footer {
+            background-color: #f9fafb;
+            padding: 20px;
+            text-align: center;
+            border-top: 1px solid #e5e7eb;
+            color: #6b7280;
+            font-size: 14px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #3b82f6;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 6px;
+            margin: 10px 5px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🔔 नई अपडेट</h1>
+            <p>New Update - Jan Seva Kendra</p>
+        </div>
+        <div class="content">
+            <div class="update-badge">
+                <strong>${data.title || 'Website Update'}</strong>
+            </div>
+            
+            <div class="update-content">
+                <h3>📢 अपडेट विवरण / Update Details</h3>
+                <p style="color: #1f2937; line-height: 1.8;">
+                    ${data.message || data.description || 'We have an important update for you.'}
+                </p>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="https://www.jan-seva.site" class="button">Visit Website</a>
+            </div>
+
+            <div class="footer">
+                <p><strong>Jan Seva Kendra - Etawah</strong></p>
+                <p>📞 Contact: <strong>9193898182</strong></p>
+                <p>📍 Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP</p>
+                <p style="margin-top: 15px; font-size: 12px; color: #9ca3af;">
+                    यह एक स्वचालित नोटिफिकेशन है।<br/>
+                    This is an automated notification.
+                </p>
+            </div>
+        </div>
+    </div>
+</body>
+</html>
+`;
+
 

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { serviceApplicationTemplate } from '@/lib/emailTemplates';
+import { serviceApplicationTemplate, userConfirmationTemplate } from '@/lib/emailTemplates';
 import { sendEmail, getRecipients, isEmailConfigured } from '@/lib/emailService';
+import { connectDB, isDBConnected } from '@/lib/db';
+import Subscriber from '@/models/Subscriber';
 
 const RECIPIENTS = getRecipients();
 
@@ -66,12 +68,74 @@ export async function POST(request: NextRequest) {
       address,
     });
 
-    // Send emails sequentially
+    // Send emails sequentially to admin recipients
     const results = [];
     for (const to of RECIPIENTS) {
       const result = await sendEmail({ to, subject, html });
       results.push({ to, ...result });
       await new Promise((r) => setTimeout(r, 1000)); // wait 1s between sends
+    }
+
+    // Save user as subscriber for future notifications
+    try {
+      if (!isDBConnected()) {
+        await connectDB();
+      }
+      
+      if (email && email.trim()) {
+        // Save or update subscriber with email
+        await Subscriber.findOneAndUpdate(
+          { email: email.trim().toLowerCase() },
+          {
+            email: email.trim().toLowerCase(),
+            mobile: phone.trim(),
+            name: name.trim(),
+            isActive: true,
+            $inc: { notificationCount: 0 }, // Don't increment on subscription
+          },
+          { upsert: true, new: true }
+        );
+        console.log(`✅ User saved as subscriber: ${email}`);
+      } else if (phone && phone.trim()) {
+        // Save subscriber with mobile only
+        await Subscriber.findOneAndUpdate(
+          { mobile: phone.trim() },
+          {
+            mobile: phone.trim(),
+            name: name.trim(),
+            isActive: true,
+          },
+          { upsert: true, new: true }
+        );
+        console.log(`✅ User saved as subscriber: ${phone}`);
+      }
+    } catch (subscriberError: any) {
+      console.error('❌ Error saving subscriber:', subscriberError);
+      // Don't fail the request if subscriber save fails
+    }
+
+    // Send confirmation email to user if email is provided
+    let userEmailSent = false;
+    if (email && email.trim()) {
+      try {
+        const userSubject = `✅ आवेदन प्राप्त - ${cleanService} | Application Received - ${cleanService}`;
+        const userHtml = userConfirmationTemplate({
+          name,
+          phone,
+          service,
+          email,
+        });
+        const userResult = await sendEmail({ to: email.trim(), subject: userSubject, html: userHtml });
+        userEmailSent = userResult.success;
+        if (userEmailSent) {
+          console.log(`✅ Confirmation email sent to user: ${email}`);
+        } else {
+          console.warn(`⚠️ Failed to send confirmation email to user: ${email}`);
+        }
+      } catch (userEmailError: any) {
+        console.error('❌ Error sending user confirmation email:', userEmailError);
+        // Don't fail the request if user email fails
+      }
     }
 
     const successCount = results.filter((r) => r.success).length;
@@ -91,7 +155,8 @@ export async function POST(request: NextRequest) {
       message: successCount > 0 
         ? "✅ Application submitted and emails sent successfully" 
         : "⚠️ Application submitted but emails failed",
-      emailStatus: `${successCount}/${RECIPIENTS.length} emails sent`,
+      emailStatus: `${successCount}/${RECIPIENTS.length} admin emails sent${userEmailSent ? ' + user confirmation sent' : ''}`,
+      userNotificationSent: userEmailSent,
       results: results.map(r => ({
         to: r.to,
         success: r.success,

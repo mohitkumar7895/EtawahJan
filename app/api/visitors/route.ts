@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Visitor from '@/models/Visitor';
+import Subscriber from '@/models/Subscriber';
 // Email sending completely removed - NO emails sent for visitors
 
 // Track visitor
@@ -31,6 +32,24 @@ export async function POST(request: NextRequest) {
       if (email) existingVisitor.email = email;
       await existingVisitor.save();
       
+      // Add visitor to subscribers list if they have email or name
+      if (email && email.trim()) {
+        try {
+          await Subscriber.findOneAndUpdate(
+            { email: email.trim().toLowerCase() },
+            {
+              email: email.trim().toLowerCase(),
+              name: name || existingVisitor.name || '',
+              isActive: true,
+            },
+            { upsert: true, new: true }
+          );
+          console.log(`✅ Visitor added to subscribers: ${email}`);
+        } catch (subError: any) {
+          console.error('❌ Error adding visitor to subscribers:', subError);
+        }
+      }
+      
       // NO EMAILS SENT - Email notifications completely disabled
       
       return NextResponse.json({ 
@@ -60,6 +79,24 @@ export async function POST(request: NextRequest) {
       });
       
       await visitor.save();
+      
+      // Add visitor to subscribers list if they have email or name
+      if (email && email.trim()) {
+        try {
+          await Subscriber.findOneAndUpdate(
+            { email: email.trim().toLowerCase() },
+            {
+              email: email.trim().toLowerCase(),
+              name: name || '',
+              isActive: true,
+            },
+            { upsert: true, new: true }
+          );
+          console.log(`✅ New visitor added to subscribers: ${email}`);
+        } catch (subError: any) {
+          console.error('❌ Error adding visitor to subscribers:', subError);
+        }
+      }
       
       // NO EMAILS SENT - Email notifications completely disabled
       

@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB, isDBConnected } from '@/lib/db';
 import Announcement from '@/models/Announcement';
+import User from '@/models/User';
+import { sendEmail, isEmailConfigured } from '@/lib/emailService';
+import { websiteUpdateTemplate } from '@/lib/emailTemplates';
 
 /**
  * GET /api/admin/announcements
@@ -118,6 +121,59 @@ export async function POST(request: NextRequest) {
 
     const savedAnnouncement = await announcement.save();
     console.log("✅ Announcement created successfully:", savedAnnouncement._id);
+
+    // Send notifications to all subscribers if announcement is active
+    if (savedAnnouncement.isActive && isEmailConfigured()) {
+      try {
+        const Subscriber = (await import('@/models/Subscriber')).default;
+        const subscribers = await Subscriber.find({ 
+          isActive: true,
+          email: { $exists: true, $ne: '' }
+        }).limit(100); // Limit to prevent too many emails at once
+
+        console.log(`📧 Sending notifications to ${subscribers.length} subscribers...`);
+
+        let notificationCount = 0;
+        for (const subscriber of subscribers) {
+          if (subscriber.email && subscriber.email.trim()) {
+            try {
+              const subject = `🔔 नई अपडेट: ${savedAnnouncement.title} | New Update: ${savedAnnouncement.title}`;
+              const html = websiteUpdateTemplate({
+                title: savedAnnouncement.title,
+                description: savedAnnouncement.description,
+                message: savedAnnouncement.description,
+              });
+              
+              const result = await sendEmail({ 
+                to: subscriber.email.trim(), 
+                subject, 
+                html 
+              });
+              
+              if (result.success) {
+                notificationCount++;
+                // Update subscriber's last notified time
+                await Subscriber.findByIdAndUpdate(subscriber._id, {
+                  lastNotifiedAt: new Date(),
+                  $inc: { notificationCount: 1 },
+                });
+              }
+              
+              // Small delay to avoid rate limiting
+              await new Promise((r) => setTimeout(r, 500));
+            } catch (emailError: any) {
+              console.error(`❌ Failed to send notification to ${subscriber.email}:`, emailError);
+              // Continue with other subscribers
+            }
+          }
+        }
+
+        console.log(`✅ Notifications sent to ${notificationCount}/${subscribers.length} subscribers`);
+      } catch (notificationError: any) {
+        console.error('❌ Error sending notifications:', notificationError);
+        // Don't fail announcement creation if notifications fail
+      }
+    }
 
     return NextResponse.json(
       {

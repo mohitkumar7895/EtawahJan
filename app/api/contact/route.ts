@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import { contactFormTemplate } from '@/lib/emailTemplates';
+import { contactFormTemplate, userConfirmationTemplate } from '@/lib/emailTemplates';
 import { sendEmail, getRecipients, isEmailConfigured } from '@/lib/emailService';
 
 const RECIPIENTS = getRecipients();
@@ -55,6 +55,49 @@ export async function POST(request: NextRequest) {
       await new Promise((r) => setTimeout(r, 1000));
     }
 
+    // Save user as subscriber for future notifications
+    try {
+      if (!isDBConnected()) {
+        await connectDB();
+      }
+      
+      if (email && email.trim()) {
+        await Subscriber.findOneAndUpdate(
+          { email: email.trim().toLowerCase() },
+          {
+            email: email.trim().toLowerCase(),
+            name: name.trim(),
+            isActive: true,
+          },
+          { upsert: true, new: true }
+        );
+        console.log(`✅ User saved as subscriber: ${email}`);
+      }
+    } catch (subscriberError: any) {
+      console.error('❌ Error saving subscriber:', subscriberError);
+    }
+
+    // Send confirmation email to user
+    let userEmailSent = false;
+    if (email && email.trim()) {
+      try {
+        const userSubject = `✅ संदेश प्राप्त हुआ | Message Received - Jan Seva Kendra`;
+        const userHtml = userConfirmationTemplate({
+          name,
+          email,
+          phone: email, // For contact form, we use email as identifier
+          service: 'Contact Form Submission',
+        });
+        const userResult = await sendEmail({ to: email.trim(), subject: userSubject, html: userHtml });
+        userEmailSent = userResult.success;
+        if (userEmailSent) {
+          console.log(`✅ Confirmation email sent to user: ${email}`);
+        }
+      } catch (userEmailError: any) {
+        console.error('❌ Error sending user confirmation email:', userEmailError);
+      }
+    }
+
     const successCount = results.filter((r) => r.success).length;
 
     console.log(`\n📊 Email sending results: ${successCount}/${RECIPIENTS.length} successful`);
@@ -70,7 +113,8 @@ export async function POST(request: NextRequest) {
       return NextResponse.json({
         success: true,
         message: "✅ Message sent successfully",
-        emailStatus: `${successCount}/${RECIPIENTS.length} emails sent successfully`,
+        emailStatus: `${successCount}/${RECIPIENTS.length} admin emails sent${userEmailSent ? ' + user confirmation sent' : ''}`,
+        userNotificationSent: userEmailSent,
         results: results.map(r => ({
           to: r.to,
           success: r.success,
@@ -84,7 +128,8 @@ export async function POST(request: NextRequest) {
           success: true,
           message: "✅ Message submitted successfully",
           warning: "⚠️ Emails could not be sent",
-          emailStatus: `0/${RECIPIENTS.length} emails sent`,
+          emailStatus: `0/${RECIPIENTS.length} emails sent${userEmailSent ? ' + user confirmation sent' : ''}`,
+          userNotificationSent: userEmailSent,
           results: results.map(r => ({
             to: r.to,
             success: r.success,

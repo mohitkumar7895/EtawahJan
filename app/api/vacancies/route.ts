@@ -1,6 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB, isDBConnected } from '@/lib/db';
 import Vacancy from '@/models/Vacancy';
+import Subscriber from '@/models/Subscriber';
+import { sendEmail, isEmailConfigured } from '@/lib/emailService';
+import { websiteUpdateTemplate } from '@/lib/emailTemplates';
 
 export async function GET() {
   try {
@@ -157,6 +160,60 @@ export async function POST(request: NextRequest) {
         ]) as any;
         
         console.log("✅ Vacancy created successfully:", savedVacancy._id);
+
+        // Send notifications to all subscribers if email service is configured
+        if (isEmailConfigured()) {
+          // Run notification sending in background (don't wait for it)
+          (async () => {
+            try {
+              const subscribers = await Subscriber.find({ 
+                isActive: true,
+                email: { $exists: true, $ne: '' }
+              }).limit(200); // Limit to prevent too many emails
+
+              console.log(`📧 Sending vacancy notifications to ${subscribers.length} subscribers...`);
+
+              let notificationCount = 0;
+              for (const subscriber of subscribers) {
+                if (subscriber.email && subscriber.email.trim()) {
+                  try {
+                    const subject = `🔔 नई नौकरी: ${savedVacancy.title} | New Job: ${savedVacancy.title} - Jan Seva Kendra`;
+                    const message = `नई नौकरी की जानकारी:\n\n${savedVacancy.title}\n${savedVacancy.tag ? `Tag: ${savedVacancy.tag}\n` : ''}${savedVacancy.info ? `Details: ${savedVacancy.info}\n` : ''}${savedVacancy.lastDate ? `Last Date: ${savedVacancy.lastDate}\n` : ''}${savedVacancy.link ? `Apply: ${savedVacancy.link}` : ''}`;
+                    
+                    const html = websiteUpdateTemplate({
+                      title: `नई नौकरी: ${savedVacancy.title}`,
+                      description: message,
+                      message: message,
+                    });
+                    
+                    const result = await sendEmail({ 
+                      to: subscriber.email.trim(), 
+                      subject, 
+                      html 
+                    });
+                    
+                    if (result.success) {
+                      notificationCount++;
+                      await Subscriber.findByIdAndUpdate(subscriber._id, {
+                        lastNotifiedAt: new Date(),
+                        $inc: { notificationCount: 1 },
+                      });
+                    }
+                    
+                    // Small delay to avoid rate limiting
+                    await new Promise((r) => setTimeout(r, 500));
+                  } catch (emailError: any) {
+                    console.error(`❌ Failed to send notification to ${subscriber.email}:`, emailError);
+                  }
+                }
+              }
+
+              console.log(`✅ Vacancy notifications sent to ${notificationCount}/${subscribers.length} subscribers`);
+            } catch (notificationError: any) {
+              console.error('❌ Error sending vacancy notifications:', notificationError);
+            }
+          })();
+        }
 
         return NextResponse.json({
           ...savedVacancy.toObject(),
