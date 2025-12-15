@@ -1,16 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Visitor from '@/models/Visitor';
-// Email sending disabled - no emails sent for visitors
-// import { sendEmail, getRecipients } from '@/lib/emailService';
-
-// Email notifications DISABLED - no emails will be sent
-// Function disabled completely - returns immediately without sending any emails
-async function sendVisitorNotificationEmail(visitor: any) {
-  // Email sending completely disabled - function returns immediately
-  console.log('📧 Email notifications disabled - no email sent for visitor');
-  return;
-}
+// Email sending completely removed - NO emails sent for visitors
 
 // Track visitor
 export async function POST(request: NextRequest) {
@@ -29,10 +20,6 @@ export async function POST(request: NextRequest) {
     const existingVisitor = await Visitor.findOne({ sessionId });
     
     if (existingVisitor) {
-      // Check if email is being added for the first time
-      const hadEmailBefore = !!existingVisitor.email;
-      const isAddingEmail = email && !hadEmailBefore;
-      
       // Update existing visitor
       existingVisitor.lastActivity = new Date();
       existingVisitor.page = page;
@@ -44,12 +31,7 @@ export async function POST(request: NextRequest) {
       if (email) existingVisitor.email = email;
       await existingVisitor.save();
       
-      // Email notifications disabled - no emails sent
-      // if (isAddingEmail) {
-      //   sendVisitorNotificationEmail(existingVisitor).catch((err: any) => {
-      //     console.error('Failed to send visitor email notification:', err);
-      //   });
-      // }
+      // NO EMAILS SENT - Email notifications completely disabled
       
       return NextResponse.json({ 
         success: true, 
@@ -79,10 +61,7 @@ export async function POST(request: NextRequest) {
       
       await visitor.save();
       
-      // Email notifications disabled - no emails sent
-      // sendVisitorNotificationEmail(visitor).catch((err: any) => {
-      //   console.error('Failed to send visitor notification email:', err);
-      // });
+      // NO EMAILS SENT - Email notifications completely disabled
       
       return NextResponse.json({ 
         success: true, 
