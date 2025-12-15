@@ -479,7 +479,7 @@ export default function ServicesPageComponent() {
             </div>
             {searchQuery && (
               <p className="mt-2 text-sm text-gray-600 text-center">
-                Found {filteredServices.length} service{filteredServices.length !== 1 ? 's' : ''} matching "{searchQuery}"
+                Found {filteredServices.length} service{filteredServices.length !== 1 ? 's' : ''} matching &quot;{searchQuery}&quot;
               </p>
             )}
           </div>
