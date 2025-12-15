@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB } from '@/lib/db';
 import Visitor from '@/models/Visitor';
-import { sendEmail, getRecipients } from '@/lib/emailService';
+// Email sending disabled - no emails sent for visitors
+// import { sendEmail, getRecipients } from '@/lib/emailService';
 
 // Function to send email notification when new visitor arrives
 // IMPORTANT: This function ONLY sends emails to ADMIN, NEVER to visitors
@@ -149,12 +150,12 @@ export async function POST(request: NextRequest) {
       if (email) existingVisitor.email = email;
       await existingVisitor.save();
       
-      // Send email notification if email was just added
-      if (isAddingEmail) {
-        sendVisitorNotificationEmail(existingVisitor).catch((err: any) => {
-          console.error('Failed to send visitor email notification:', err);
-        });
-      }
+      // Email notifications disabled - no emails sent
+      // if (isAddingEmail) {
+      //   sendVisitorNotificationEmail(existingVisitor).catch((err: any) => {
+      //     console.error('Failed to send visitor email notification:', err);
+      //   });
+      // }
       
       return NextResponse.json({ 
         success: true, 
@@ -184,10 +185,10 @@ export async function POST(request: NextRequest) {
       
       await visitor.save();
       
-      // Send email notification for new visitor (don't await - send in background)
-      sendVisitorNotificationEmail(visitor).catch((err: any) => {
-        console.error('Failed to send visitor notification email:', err);
-      });
+      // Email notifications disabled - no emails sent
+      // sendVisitorNotificationEmail(visitor).catch((err: any) => {
+      //   console.error('Failed to send visitor notification email:', err);
+      // });
       
       return NextResponse.json({ 
         success: true, 
