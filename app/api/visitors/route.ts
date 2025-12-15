@@ -4,8 +4,12 @@ import Visitor from '@/models/Visitor';
 import { sendEmail, getRecipients } from '@/lib/emailService';
 
 // Function to send email notification when new visitor arrives
+// IMPORTANT: This function ONLY sends emails to ADMIN, NEVER to visitors
+// Visitor emails are collected and sent to admin, but NO emails are sent TO visitors
 async function sendVisitorNotificationEmail(visitor: any) {
   try {
+    // Get admin recipients - these are the only people who receive emails
+    // NEVER send emails to visitor.email - visitors should NOT receive any emails
     const recipients = getRecipients();
     if (recipients.length === 0) {
       console.log('No email recipients configured');
@@ -91,10 +95,12 @@ async function sendVisitorNotificationEmail(visitor: any) {
       </html>
     `;
 
-    // Send email to all recipients
+    // Send email to admin recipients ONLY (never to visitors)
+    // recipients = admin emails from getRecipients()
+    // visitor.email is NEVER used as a recipient - it's only included in the email content
     const emailPromises = recipients.map(recipient => 
       sendEmail({
-        to: recipient,
+        to: recipient, // This is admin email, NOT visitor email
         subject: emailSubject,
         html: emailHTML,
       })
