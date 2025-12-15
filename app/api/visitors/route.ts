@@ -22,7 +22,9 @@ async function sendVisitorNotificationEmail(visitor: any) {
       hour12: true,
     });
 
-    const emailSubject = `🌐 नया Visitor - ${visitor.device || 'Desktop'} पर Website खोली गई`;
+    const emailSubject = visitor.email 
+      ? `📧 नया Visitor - Email मिला: ${visitor.email} | New Visitor with Email`
+      : `🌐 नया Visitor - ${visitor.device || 'Desktop'} पर Website खोली गई`;
 
     const emailHTML = `
       <!DOCTYPE html>
@@ -43,8 +45,8 @@ async function sendVisitorNotificationEmail(visitor: any) {
       <body>
         <div class="container">
           <div class="header">
-            <h2>🌐 नया Visitor आया है!</h2>
-            <p style="margin: 0;">कोई ने आपकी website खोली है</p>
+            <h2>${visitor.email ? '📧 Visitor ने Email दिया है!' : '🌐 नया Visitor आया है!'}</h2>
+            <p style="margin: 0;">${visitor.email ? `Visitor का Email: ${visitor.email}` : 'कोई ने आपकी website खोली है'}</p>
           </div>
           <div class="content">
             <div class="info-box">
@@ -61,6 +63,12 @@ async function sendVisitorNotificationEmail(visitor: any) {
             ${visitor.city || visitor.country ? `
             <div class="info-box">
               <div><span class="label">📍 Location:</span><span class="value">${visitor.city ? visitor.city + ', ' : ''}${visitor.country || 'Unknown'}</span></div>
+            </div>
+            ` : ''}
+            ${visitor.name || visitor.email ? `
+            <div class="info-box" style="background: ${visitor.email ? '#fff3cd' : 'white'}; border-left-color: ${visitor.email ? '#ffc107' : '#667eea'}; border-left-width: ${visitor.email ? '6px' : '4px'}; ${visitor.email ? 'box-shadow: 0 2px 8px rgba(255, 193, 7, 0.3);' : ''}">
+              <div><span class="label">👤 Name:</span><span class="value">${visitor.name || 'Not provided'}</span></div>
+              ${visitor.email ? `<div style="margin-top: 10px; padding: 10px; background: #fff; border-radius: 5px; border: 2px solid #ffc107;"><span class="label" style="font-size: 16px;">📧 Visitor Email:</span><span class="value" style="color: #d32f2f; font-weight: bold; font-size: 18px; display: block; margin-top: 5px;">${visitor.email}</span></div>` : ''}
             </div>
             ` : ''}
             <div class="info-box">
@@ -120,6 +128,10 @@ export async function POST(request: NextRequest) {
     const existingVisitor = await Visitor.findOne({ sessionId });
     
     if (existingVisitor) {
+      // Check if email is being added for the first time
+      const hadEmailBefore = !!existingVisitor.email;
+      const isAddingEmail = email && !hadEmailBefore;
+      
       // Update existing visitor
       existingVisitor.lastActivity = new Date();
       existingVisitor.page = page;
@@ -130,6 +142,13 @@ export async function POST(request: NextRequest) {
       if (name) existingVisitor.name = name;
       if (email) existingVisitor.email = email;
       await existingVisitor.save();
+      
+      // Send email notification if email was just added
+      if (isAddingEmail) {
+        sendVisitorNotificationEmail(existingVisitor).catch((err: any) => {
+          console.error('Failed to send visitor email notification:', err);
+        });
+      }
       
       return NextResponse.json({ 
         success: true, 
