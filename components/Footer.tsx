@@ -32,7 +32,7 @@ export default function Footer() {
               <a href="https://twitter.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition p-1.5 hover:bg-white/10 rounded-lg">
                 <Twitter className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
-              <a href="https://instagram.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-pink-400 transition p-1.5 hover:bg-white/10 rounded-lg">
+              <a href="https://www.instagram.com/janseva.kendra.ap" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-pink-400 transition p-1.5 hover:bg-white/10 rounded-lg">
                 <Instagram className="w-4 h-4 sm:w-5 sm:h-5" />
               </a>
               <a href="https://linkedin.com" target="_blank" rel="noopener noreferrer" className="text-gray-400 hover:text-blue-400 transition p-1.5 hover:bg-white/10 rounded-lg">
