@@ -268,7 +268,7 @@ export default function NotificationBell() {
   // When dropdown opens, mark ALL notifications as read and remove them IMMEDIATELY
   useEffect(() => {
     if (isOpen && notifications.length > 0) {
-      // User opened dropdown - mark all as viewed and remove IMMEDIATELY (500ms delay for smooth UX)
+      // User opened dropdown - ek baar dekh liya to immediately khali kar do
       const timer = setTimeout(() => {
         // Mark all notifications as viewed - ek baar dikha to phir kabhi nahi dikhega
         notifications.forEach((notification) => {
@@ -276,13 +276,13 @@ export default function NotificationBell() {
           viewedNotificationsRef.current.add(notificationId);
         });
         
-        // Remove ALL from UI immediately - pura khali kar do
+        // Remove ALL from UI immediately - pura khali kar do (ek baar dekh liya to)
         setNotifications([]);
         setUnreadCount(0);
         
         // Mark all as read in backend
         markAllAsRead();
-      }, 500); // 500ms - WhatsApp style: user ne dekh liya, ab immediately hata do
+      }, 100); // 100ms - ek baar dekh liya to immediately khali ho jaye (pura notification clear)
 
       return () => clearTimeout(timer);
     }
