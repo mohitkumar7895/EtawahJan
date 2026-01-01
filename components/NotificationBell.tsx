@@ -89,7 +89,7 @@ export default function NotificationBell() {
     }
   };
 
-  // Fetch notifications - only unread ones
+  // Fetch notifications - only unread ones with live updates
   const fetchNotifications = async () => {
     try {
       setLoading(true);
@@ -118,18 +118,56 @@ export default function NotificationBell() {
         // Update last seen IDs - track all current notification IDs
         lastNotificationIdsRef.current = currentIds;
 
-        // Filter out already viewed notifications - only show new ones
+        // Filter out already viewed notifications - ek baar dikha to phir kabhi nahi dikhega
         const unviewedNotifications = newNotifications.filter((n: Notification) => {
           const id = (n._id || n.id || '').toString();
-          // Only show if not viewed and not read
-          return !viewedNotificationsRef.current.has(id) && !n.isRead;
+          // Sirf naye notifications dikhao - jo pehle se viewed hain wo kabhi nahi dikhenge
+          const isViewed = viewedNotificationsRef.current.has(id);
+          const isRead = n.isRead;
+          
+          // Only show if NOT viewed AND NOT read
+          return !isViewed && !isRead;
         });
 
-        // Set only unviewed unread notifications
-        setNotifications(unviewedNotifications);
+        // LIVE UPDATE: Sync with backend - remove deleted, add new, keep existing
+        setNotifications(prev => {
+          const prevIds = new Set(prev.map(n => (n._id || n.id || '').toString()));
+          const backendIds = new Set(unviewedNotifications.map(n => (n._id || n.id || '').toString()));
+          
+          // Find deleted notifications (in prev but not in backend)
+          const deletedIds = Array.from(prevIds).filter(id => !backendIds.has(id));
+          
+          // Remove deleted notifications from tracking
+          deletedIds.forEach(id => {
+            viewedNotificationsRef.current.delete(id);
+            lastNotificationIdsRef.current.delete(id);
+            notificationRefs.current.delete(id);
+          });
+          
+          // Keep existing notifications that still exist in backend
+          const existing = prev.filter(n => {
+            const id = (n._id || n.id || '').toString();
+            return backendIds.has(id);
+          });
+          
+          // Find new notifications (in backend but not in prev)
+          const existingIds = new Set(existing.map(n => (n._id || n.id || '').toString()));
+          const toAdd = unviewedNotifications.filter(n => {
+            const id = (n._id || n.id || '').toString();
+            return !existingIds.has(id);
+          });
+          
+          // Merge: existing (still in backend) + new, sorted by date
+          const merged = [...existing, ...toAdd].sort((a, b) => {
+            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
+          });
+          
+          return merged;
+        });
+        
         setUnreadCount(data.unreadCount || 0);
       } else {
-        // No notifications
+        // No notifications - clear everything
         setNotifications([]);
         setUnreadCount(0);
       }
@@ -209,22 +247,22 @@ export default function NotificationBell() {
     }
   }, []);
 
-  // Initial fetch and polling
+  // Initial fetch and polling - LIVE UPDATES
   useEffect(() => {
     fetchNotifications();
     
-    // Poll for new notifications every 10 seconds (more frequent for real-time feel)
-    const interval = setInterval(fetchNotifications, 10000);
+    // Poll for new notifications every 5 seconds (LIVE updates - delete ho to immediately remove)
+    const interval = setInterval(fetchNotifications, 5000);
     
     return () => clearInterval(interval);
   }, [notificationPermission]);
 
-  // When dropdown opens, mark ALL notifications as read and remove them after user sees them
+  // When dropdown opens, mark ALL notifications as read and remove them IMMEDIATELY
   useEffect(() => {
     if (isOpen && notifications.length > 0) {
-      // User opened dropdown - mark all as viewed and remove after 1 second
+      // User opened dropdown - mark all as viewed and remove IMMEDIATELY (500ms delay for smooth UX)
       const timer = setTimeout(() => {
-        // Mark all notifications as viewed
+        // Mark all notifications as viewed - ek baar dikha to phir kabhi nahi dikhega
         notifications.forEach((notification) => {
           const notificationId = (notification._id || notification.id || '').toString();
           viewedNotificationsRef.current.add(notificationId);
@@ -236,7 +274,7 @@ export default function NotificationBell() {
         
         // Mark all as read in backend
         markAllAsRead();
-      }, 1000); // 1 second - user ne dekh liya, ab hata do
+      }, 300); // 300ms - user ne dekh liya, ab immediately hata do (ek baar dikha to phir kabhi nahi)
 
       return () => clearTimeout(timer);
     }
@@ -384,7 +422,7 @@ export default function NotificationBell() {
                           isUnread ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
                         }`}
                         onClick={() => {
-                          // Immediately remove from list
+                          // Immediately remove from list - ek baar click kiya to hata do
                           markAsRead(notificationId);
                           
                           // Open link if available
