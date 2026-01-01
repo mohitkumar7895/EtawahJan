@@ -23,6 +23,8 @@ export default function NotificationBell() {
   const dropdownRef = useRef<HTMLDivElement>(null);
   const lastNotificationIdsRef = useRef<Set<string>>(new Set());
   const hasRequestedPermissionRef = useRef(false);
+  const viewedNotificationsRef = useRef<Set<string>>(new Set());
+  const notificationRefs = useRef<Map<string, HTMLDivElement>>(new Map());
 
   // Request browser notification permission
   const requestNotificationPermission = async () => {
@@ -87,22 +89,23 @@ export default function NotificationBell() {
     }
   };
 
-  // Fetch notifications
+  // Fetch notifications - only unread ones
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      const response = await fetch('/api/notifications?unreadOnly=false&limit=20');
+      // Fetch only unread notifications
+      const response = await fetch('/api/notifications?unreadOnly=true&limit=20');
       const data = await response.json();
       
       if (data.notifications) {
         const newNotifications = data.notifications;
-        const currentIds = new Set(newNotifications.map((n: Notification) => n._id || n.id));
+        const currentIds = new Set(newNotifications.map((n: Notification) => (n._id || n.id || '').toString()));
         const lastIds = lastNotificationIdsRef.current;
 
-        // Find new notifications (not in last seen list)
+        // Find new notifications (not in last seen list) - these are brand new
         const newNotificationsList = newNotifications.filter((n: Notification) => {
-          const id = n._id || n.id || '';
-          return !lastIds.has(id) && !n.isRead;
+          const id = (n._id || n.id || '').toString();
+          return !lastIds.has(id);
         });
 
         // Show browser notifications for new unread notifications
@@ -112,14 +115,22 @@ export default function NotificationBell() {
           });
         }
 
-        // Update last seen IDs
+        // Update last seen IDs - track all current notification IDs
         lastNotificationIdsRef.current = currentIds;
 
-        // Filter out read notifications (auto-hide after read)
-        const visibleNotifications = newNotifications.filter((n: Notification) => !n.isRead);
-        
-        setNotifications(visibleNotifications);
+        // Filter out already viewed notifications
+        const unviewedNotifications = newNotifications.filter((n: Notification) => {
+          const id = (n._id || n.id || '').toString();
+          return !viewedNotificationsRef.current.has(id);
+        });
+
+        // Set only unviewed unread notifications (they will disappear after being viewed)
+        setNotifications(unviewedNotifications);
         setUnreadCount(data.unreadCount || 0);
+      } else {
+        // No notifications
+        setNotifications([]);
+        setUnreadCount(0);
       }
     } catch (error) {
       console.error('Error fetching notifications:', error);
@@ -128,31 +139,54 @@ export default function NotificationBell() {
     }
   };
 
-  // Mark notification as read
+  // Mark notification as read and remove from list immediately
   const markAsRead = async (notificationId: string) => {
+    // Skip if already marked as viewed
+    if (viewedNotificationsRef.current.has(notificationId)) {
+      return;
+    }
+
     try {
-      const response = await fetch(`/api/notifications/${notificationId}`, {
-        method: 'PUT',
-      });
+      // Mark as viewed
+      viewedNotificationsRef.current.add(notificationId);
       
-      if (response.ok) {
-        // Remove notification from list (auto-hide after read)
-        setNotifications(prev => 
-          prev.filter(n => n._id !== notificationId && n.id !== notificationId)
-        );
-        setUnreadCount(prev => Math.max(0, prev - 1));
-        
-        // Remove from last seen IDs so it won't show browser notification again
-        lastNotificationIdsRef.current.delete(notificationId);
-      }
+      // Immediately remove from UI (optimistic update)
+      setNotifications(prev => 
+        prev.filter(n => {
+          const id = (n._id || n.id || '').toString();
+          return id !== notificationId;
+        })
+      );
+      setUnreadCount(prev => Math.max(0, prev - 1));
+      
+      // Remove from last seen IDs
+      lastNotificationIdsRef.current.delete(notificationId);
+      
+      // Remove from refs
+      notificationRefs.current.delete(notificationId);
+      
+      // Mark as read in backend (fire and forget)
+      fetch(`/api/notifications/${notificationId}`, {
+        method: 'PUT',
+      }).catch(error => {
+        console.error('Error marking notification as read:', error);
+      });
     } catch (error) {
       console.error('Error marking notification as read:', error);
     }
   };
 
-  // Mark all as read
+  // Mark all as read - clear everything immediately
   const markAllAsRead = async () => {
     try {
+      // Immediately clear from UI (optimistic update)
+      setNotifications([]);
+      setUnreadCount(0);
+      
+      // Clear last seen IDs
+      lastNotificationIdsRef.current.clear();
+      
+      // Mark all as read in backend
       const response = await fetch('/api/notifications', {
         method: 'PUT',
         headers: {
@@ -161,16 +195,14 @@ export default function NotificationBell() {
         body: JSON.stringify({ markAllAsRead: true }),
       });
       
-      if (response.ok) {
-        // Clear all notifications from list (auto-hide after read)
-        setNotifications([]);
-        setUnreadCount(0);
-        
-        // Clear last seen IDs
-        lastNotificationIdsRef.current.clear();
+      if (!response.ok) {
+        // If failed, refresh notifications
+        fetchNotifications();
       }
     } catch (error) {
       console.error('Error marking all as read:', error);
+      // Refresh on error
+      fetchNotifications();
     }
   };
 
@@ -194,11 +226,73 @@ export default function NotificationBell() {
   useEffect(() => {
     fetchNotifications();
     
-    // Poll for new notifications every 15 seconds (more frequent for better real-time feel)
-    const interval = setInterval(fetchNotifications, 15000);
+    // Poll for new notifications every 10 seconds (more frequent for real-time feel)
+    const interval = setInterval(fetchNotifications, 10000);
     
     return () => clearInterval(interval);
   }, [notificationPermission]);
+
+  // Auto-mark notifications as read when they become visible (user sees them)
+  useEffect(() => {
+    if (!isOpen || notifications.length === 0) return;
+
+    // Use Intersection Observer to detect when notifications are visible
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            const notificationElement = entry.target as HTMLDivElement;
+            const notificationId = notificationElement.dataset.notificationId;
+            
+            if (notificationId && !viewedNotificationsRef.current.has(notificationId)) {
+              // Mark as viewed
+              viewedNotificationsRef.current.add(notificationId);
+              
+              // Auto-mark as read after 1 second (user has seen it)
+              setTimeout(() => {
+                markAsRead(notificationId);
+              }, 1000);
+            }
+          }
+        });
+      },
+      {
+        threshold: 0.5, // Notification is 50% visible
+        rootMargin: '0px',
+      }
+    );
+
+    // Observe all notification elements
+    notificationRefs.current.forEach((element) => {
+      if (element) {
+        observer.observe(element);
+      }
+    });
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [isOpen, notifications]);
+
+  // When dropdown opens, mark all visible notifications as viewed after a delay
+  useEffect(() => {
+    if (isOpen && notifications.length > 0) {
+      // After dropdown opens, wait 2 seconds and mark all visible notifications as read
+      // This ensures user has seen them
+      const timer = setTimeout(() => {
+        notifications.forEach((notification) => {
+          const notificationId = (notification._id || notification.id || '').toString();
+          if (!viewedNotificationsRef.current.has(notificationId) && !notification.isRead) {
+            viewedNotificationsRef.current.add(notificationId);
+            // Mark as read - will disappear
+            markAsRead(notificationId);
+          }
+        });
+      }, 2000); // 2 seconds after opening dropdown - user has seen them
+
+      return () => clearTimeout(timer);
+    }
+  }, [isOpen, notifications]);
 
   // Close dropdown when clicking outside
   useEffect(() => {
@@ -237,10 +331,19 @@ export default function NotificationBell() {
       {/* Bell Icon Button */}
       <button
         onClick={() => {
+          const wasOpen = isOpen;
           setIsOpen(!isOpen);
-          if (!isOpen) {
+          
+          if (!wasOpen) {
+            // Opening dropdown - fetch fresh notifications
             fetchNotifications();
+          } else {
+            // Closing dropdown - clear viewed notifications ref if all are read
+            if (notifications.length === 0) {
+              viewedNotificationsRef.current.clear();
+            }
           }
+          
           // Request permission if not granted when user clicks bell
           if (notificationPermission === 'default' && 'Notification' in window) {
             requestNotificationPermission();
@@ -315,21 +418,33 @@ export default function NotificationBell() {
                   </div>
                 ) : (
                   notifications.map((notification) => {
-                    const notificationId = notification._id || notification.id || '';
+                    const notificationId = (notification._id || notification.id || '').toString();
                     const isUnread = !notification.isRead;
                     
                     return (
                       <div
                         key={notificationId}
+                        ref={(el) => {
+                          if (el) {
+                            notificationRefs.current.set(notificationId, el);
+                          } else {
+                            notificationRefs.current.delete(notificationId);
+                          }
+                        }}
+                        data-notification-id={notificationId}
                         className={`p-4 hover:bg-gray-50 transition cursor-pointer animate-in slide-in-from-right ${
                           isUnread ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
                         }`}
                         onClick={() => {
-                          if (isUnread) {
-                            markAsRead(notificationId);
-                          }
+                          // Mark as read immediately (will disappear from list)
+                          markAsRead(notificationId);
+                          
+                          // Open link if available
                           if (notification.link) {
-                            window.open(notification.link, '_blank');
+                            // Small delay to let the remove animation happen
+                            setTimeout(() => {
+                              window.open(notification.link, '_blank');
+                            }, 100);
                           }
                         }}
                       >
