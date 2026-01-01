@@ -226,6 +226,7 @@ export default function NotificationBell() {
     // Clear all tracking
     lastNotificationIdsRef.current.clear();
     notificationRefs.current.clear();
+    viewedNotificationsRef.current.clear();
     
     // Mark all as read in backend (fire and forget)
     fetch('/api/notifications', {
@@ -237,6 +238,21 @@ export default function NotificationBell() {
     }).catch(() => {
       // Silent fail
     });
+  };
+
+  // Clear all notifications - pura khali kar do
+  const clearAllNotifications = () => {
+    // Immediately clear everything
+    setNotifications([]);
+    setUnreadCount(0);
+    
+    // Clear all tracking
+    lastNotificationIdsRef.current.clear();
+    notificationRefs.current.clear();
+    viewedNotificationsRef.current.clear();
+    
+    // Mark all as read in backend
+    markAllAsRead();
   };
 
   // Check notification permission on mount
@@ -376,13 +392,13 @@ export default function NotificationBell() {
               )}
             </div>
             <div className="flex items-center space-x-2">
-              {unreadCount > 0 && (
+              {notifications.length > 0 && (
                 <button
-                  onClick={markAllAsRead}
+                  onClick={clearAllNotifications}
                   className="text-xs px-2 py-1 bg-white/20 hover:bg-white/30 rounded transition"
-                  title="Mark all as read"
+                  title="Clear all notifications"
                 >
-                  <Check className="w-4 h-4" />
+                  <X className="w-4 h-4" />
                 </button>
               )}
               <button
