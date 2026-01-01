@@ -42,3 +42,4 @@ subscriberSchema.index({ isActive: 1 });
 
 export default mongoose.models.Subscriber || mongoose.model('Subscriber', subscriberSchema);
 
+

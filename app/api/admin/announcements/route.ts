@@ -122,6 +122,30 @@ export async function POST(request: NextRequest) {
     const savedAnnouncement = await announcement.save();
     console.log("✅ Announcement created successfully:", savedAnnouncement._id);
 
+    // Create notification for all users
+    if (savedAnnouncement.isActive) {
+      try {
+        const Notification = (await import('@/models/Notification')).default;
+        
+        const notification = new Notification({
+          type: 'announcement',
+          title: savedAnnouncement.title,
+          message: savedAnnouncement.description,
+          link: '/',
+          relatedId: savedAnnouncement._id,
+          relatedModel: 'Announcement',
+          isGlobal: true,
+          isRead: false,
+        });
+        
+        await notification.save();
+        console.log("✅ Notification created for announcement:", savedAnnouncement._id);
+      } catch (notificationError: any) {
+        console.error('❌ Error creating notification:', notificationError);
+        // Don't fail announcement creation if notification creation fails
+      }
+    }
+
     // Send notifications to all subscribers if announcement is active
     if (savedAnnouncement.isActive && isEmailConfigured()) {
       try {

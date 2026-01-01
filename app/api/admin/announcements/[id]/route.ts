@@ -92,6 +92,31 @@ export async function PUT(
     }
 
     console.log("✅ Announcement updated successfully:", announcement._id);
+
+    // Create notification for all users if announcement is active
+    if (announcement.isActive) {
+      try {
+        const Notification = (await import('@/models/Notification')).default;
+        
+        const notification = new Notification({
+          type: 'announcement',
+          title: `अपडेट: ${announcement.title}`,
+          message: announcement.description,
+          link: '/',
+          relatedId: announcement._id,
+          relatedModel: 'Announcement',
+          isGlobal: true,
+          isRead: false,
+        });
+        
+        await notification.save();
+        console.log("✅ Notification created for announcement update:", announcement._id);
+      } catch (notificationError: any) {
+        console.error('❌ Error creating notification:', notificationError);
+        // Don't fail announcement update if notification creation fails
+      }
+    }
+
     return NextResponse.json({
       message: "Announcement updated successfully",
       announcement: announcement
