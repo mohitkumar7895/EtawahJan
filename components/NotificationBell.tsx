@@ -97,11 +97,10 @@ export default function NotificationBell() {
     }
   };
 
-  // Fetch notifications - only unread ones with live updates
+  // Fetch notifications - SIMPLE: just get unread ones
   const fetchNotifications = async () => {
     try {
       setLoading(true);
-      // Fetch only unread notifications
       const response = await fetch('/api/notifications?unreadOnly=true&limit=20');
       const data = await response.json();
       
@@ -110,72 +109,32 @@ export default function NotificationBell() {
         const currentIds = new Set(newNotifications.map((n: Notification) => (n._id || n.id || '').toString()));
         const lastIds = lastNotificationIdsRef.current;
 
-        // Find new notifications (not in last seen list) - these are brand new
+        // Find NEW notifications (for browser popup)
         const newNotificationsList = newNotifications.filter((n: Notification) => {
           const id = (n._id || n.id || '').toString();
           return !lastIds.has(id);
         });
 
-        // Show browser notifications for new unread notifications
+        // Show browser notifications for NEW ones
         if (newNotificationsList.length > 0 && notificationPermission === 'granted') {
           newNotificationsList.forEach((notification: Notification) => {
             showBrowserNotification(notification);
           });
         }
 
-        // Update last seen IDs - track all current notification IDs
+        // Update last seen IDs
         lastNotificationIdsRef.current = currentIds;
 
-        // Filter out already viewed notifications - ek baar dikha to phir kabhi nahi dikhega
+        // SIMPLE: Filter out already viewed notifications
         const unviewedNotifications = newNotifications.filter((n: Notification) => {
           const id = (n._id || n.id || '').toString();
-          // Sirf naye notifications dikhao - jo pehle se viewed hain wo kabhi nahi dikhenge
-          const isViewed = viewedNotificationsRef.current.has(id);
-          const isRead = n.isRead;
-          
-          // Only show if NOT viewed AND NOT read
-          return !isViewed && !isRead;
+          return !viewedNotificationsRef.current.has(id) && !n.isRead;
         });
 
-        // LIVE UPDATE: Sync with backend - remove deleted, add new, keep existing
-        setNotifications(prev => {
-          const prevIds = new Set(prev.map(n => (n._id || n.id || '').toString()));
-          const backendIds = new Set(unviewedNotifications.map(n => (n._id || n.id || '').toString()));
-          
-          // Find deleted notifications (in prev but not in backend)
-          const deletedIds = Array.from(prevIds).filter(id => !backendIds.has(id));
-          
-          // Remove deleted notifications from tracking
-          deletedIds.forEach(id => {
-            viewedNotificationsRef.current.delete(id);
-            lastNotificationIdsRef.current.delete(id);
-            notificationRefs.current.delete(id);
-          });
-          
-          // Keep existing notifications that still exist in backend
-          const existing = prev.filter(n => {
-            const id = (n._id || n.id || '').toString();
-            return backendIds.has(id);
-          });
-          
-          // Find new notifications (in backend but not in prev)
-          const existingIds = new Set(existing.map(n => (n._id || n.id || '').toString()));
-          const toAdd = unviewedNotifications.filter(n => {
-            const id = (n._id || n.id || '').toString();
-            return !existingIds.has(id);
-          });
-          
-          // Merge: existing (still in backend) + new, sorted by date
-          const merged = [...existing, ...toAdd].sort((a, b) => {
-            return new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime();
-          });
-          
-          return merged;
-        });
-        
+        // SIMPLE: Just set the notifications (no complex merging)
+        setNotifications(unviewedNotifications);
         setUnreadCount(data.unreadCount || 0);
       } else {
-        // No notifications - clear everything
         setNotifications([]);
         setUnreadCount(0);
       }
@@ -271,34 +230,34 @@ export default function NotificationBell() {
     }
   }, []);
 
-  // Initial fetch and polling - WhatsApp style real-time updates
+  // Initial fetch and polling
   useEffect(() => {
     fetchNotifications();
     
-    // Poll for new notifications every 3 seconds (WhatsApp style - fast real-time updates)
-    const interval = setInterval(fetchNotifications, 3000);
+    // Poll every 5 seconds (simple and efficient)
+    const interval = setInterval(fetchNotifications, 5000);
     
     return () => clearInterval(interval);
   }, [notificationPermission]);
 
-  // When dropdown opens, mark ALL notifications as read and remove them IMMEDIATELY
+  // SIMPLE: When dropdown opens, mark all as read after user sees them
   useEffect(() => {
     if (isOpen && notifications.length > 0) {
-      // User opened dropdown - ek baar dekh liya to immediately khali kar do
+      // User opened dropdown - ek baar dekh liya to mark as read
       const timer = setTimeout(() => {
-        // Mark all notifications as viewed - ek baar dikha to phir kabhi nahi dikhega
+        // Mark all as viewed
         notifications.forEach((notification) => {
           const notificationId = (notification._id || notification.id || '').toString();
           viewedNotificationsRef.current.add(notificationId);
         });
         
-        // Remove ALL from UI immediately - pura khali kar do (ek baar dekh liya to)
+        // Clear from UI
         setNotifications([]);
         setUnreadCount(0);
         
         // Mark all as read in backend
         markAllAsRead();
-      }, 100); // 100ms - ek baar dekh liya to immediately khali ho jaye (pura notification clear)
+      }, 500); // 500ms - user ne dekh liya
 
       return () => clearTimeout(timer);
     }
