@@ -56,34 +56,42 @@ export default function NotificationBell() {
     }
   };
 
-  // Show browser notification
+  // Show browser notification - WhatsApp style
   const showBrowserNotification = (notification: Notification) => {
     if (notificationPermission !== 'granted' || !('Notification' in window)) {
       return;
     }
 
     try {
+      // WhatsApp style notification - with sound and vibration
       const browserNotification = new Notification(notification.title, {
         body: notification.message,
         icon: '/jan-seva-logo-1.png',
         badge: '/jan-seva-logo-1.png',
         tag: notification._id || notification.id,
         requireInteraction: false,
-        silent: false,
+        silent: false, // Sound enabled
+        vibrate: [200, 100, 200], // Vibration pattern (if supported)
       });
+
+      // WhatsApp style: Notification with sound enabled (browser handles sound)
 
       browserNotification.onclick = () => {
         window.focus();
+        // Mark as read when clicked
+        const notificationId = (notification._id || notification.id || '').toString();
+        markAsRead(notificationId);
+        
         if (notification.link) {
           window.open(notification.link, '_blank');
         }
         browserNotification.close();
       };
 
-      // Auto close after 5 seconds
+      // Auto close after 7 seconds (WhatsApp style)
       setTimeout(() => {
         browserNotification.close();
-      }, 5000);
+      }, 7000);
     } catch (error) {
       console.error('Error showing browser notification:', error);
     }
@@ -247,12 +255,12 @@ export default function NotificationBell() {
     }
   }, []);
 
-  // Initial fetch and polling - LIVE UPDATES
+  // Initial fetch and polling - WhatsApp style real-time updates
   useEffect(() => {
     fetchNotifications();
     
-    // Poll for new notifications every 5 seconds (LIVE updates - delete ho to immediately remove)
-    const interval = setInterval(fetchNotifications, 5000);
+    // Poll for new notifications every 3 seconds (WhatsApp style - fast real-time updates)
+    const interval = setInterval(fetchNotifications, 3000);
     
     return () => clearInterval(interval);
   }, [notificationPermission]);
@@ -274,7 +282,7 @@ export default function NotificationBell() {
         
         // Mark all as read in backend
         markAllAsRead();
-      }, 300); // 300ms - user ne dekh liya, ab immediately hata do (ek baar dikha to phir kabhi nahi)
+      }, 500); // 500ms - WhatsApp style: user ne dekh liya, ab immediately hata do
 
       return () => clearTimeout(timer);
     }
@@ -341,7 +349,7 @@ export default function NotificationBell() {
       >
         <Bell className="w-5 h-5 sm:w-6 sm:h-6 group-hover:scale-110 transition" />
         {unreadCount > 0 && (
-          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse">
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center animate-pulse shadow-lg">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -418,11 +426,11 @@ export default function NotificationBell() {
                           }
                         }}
                         data-notification-id={notificationId}
-                        className={`p-4 hover:bg-gray-50 transition cursor-pointer animate-in slide-in-from-right ${
-                          isUnread ? 'bg-blue-50 border-l-4 border-l-blue-500' : ''
+                        className={`p-4 hover:bg-gray-50 transition-all cursor-pointer animate-in slide-in-from-right ${
+                          isUnread ? 'bg-blue-50 border-l-4 border-l-blue-500 shadow-sm' : ''
                         }`}
                         onClick={() => {
-                          // Immediately remove from list - ek baar click kiya to hata do
+                          // WhatsApp style: Click = mark as read and remove immediately
                           markAsRead(notificationId);
                           
                           // Open link if available
