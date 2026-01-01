@@ -224,3 +224,54 @@ export async function PUT(request: NextRequest) {
   }
 }
 
+/**
+ * DELETE /api/notifications
+ * Delete all notifications (clear database)
+ */
+export async function DELETE(request: NextRequest) {
+  try {
+    if (!isDBConnected()) {
+      const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URL || process.env.MONGODB_URL;
+      if (!mongoUri || mongoUri.trim() === '') {
+        return NextResponse.json(
+          { error: "Database not configured" },
+          { status: 503 }
+        );
+      }
+      
+      try {
+        await connectDB();
+      } catch (connError: any) {
+        console.error("❌ Connection failed:", connError.message);
+        return NextResponse.json(
+          { error: "Database connection error" },
+          { status: 503 }
+        );
+      }
+
+      if (!isDBConnected()) {
+        return NextResponse.json(
+          { error: "Database not available" },
+          { status: 503 }
+        );
+      }
+    }
+
+    // Delete ALL notifications from database
+    const result = await Notification.deleteMany({});
+    
+    console.log(`🗑️ Deleted ${result.deletedCount} notifications from database`);
+
+    return NextResponse.json({ 
+      message: "All notifications deleted successfully",
+      deletedCount: result.deletedCount
+    });
+  } catch (error: any) {
+    console.error("❌ Error deleting notifications:", error);
+    return NextResponse.json(
+      { error: "Failed to delete notifications", message: error.message },
+      { status: 500 }
+    );
+  }
+}
+

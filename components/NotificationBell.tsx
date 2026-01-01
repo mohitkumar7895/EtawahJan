@@ -199,9 +199,9 @@ export default function NotificationBell() {
     });
   };
 
-  // Clear all notifications - pura khali kar do
-  const clearAllNotifications = () => {
-    // Immediately clear everything
+  // Clear all notifications - pura khali kar do (database se bhi delete)
+  const clearAllNotifications = async () => {
+    // Immediately clear from UI
     setNotifications([]);
     setUnreadCount(0);
     
@@ -210,8 +210,20 @@ export default function NotificationBell() {
     notificationRefs.current.clear();
     viewedNotificationsRef.current.clear();
     
-    // Mark all as read in backend
-    markAllAsRead();
+    // Delete ALL notifications from database
+    try {
+      const response = await fetch('/api/notifications', {
+        method: 'DELETE',
+      });
+      
+      if (response.ok) {
+        console.log('✅ All notifications deleted from database');
+      }
+    } catch (error) {
+      console.error('Error deleting notifications:', error);
+      // Still mark as read if delete fails
+      markAllAsRead();
+    }
   };
 
   // Check notification permission on mount
