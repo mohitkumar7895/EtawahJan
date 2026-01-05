@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle, Eye, Globe, Monitor, Smartphone, Tablet } from 'lucide-react';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats } from '@/lib/api';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'adminmohit1234';
@@ -21,11 +21,7 @@ export default function AdminPage() {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [adminForm, setAdminForm] = useState({ username: '', password: '' });
   
-  const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [announcementForm, setAnnouncementForm] = useState({ title: '', description: '', isActive: true });
-  const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
-  
-  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins' | 'announcements' | 'chats' | 'payments' | 'visitors'>('vacancies');
+  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins' | 'chats' | 'payments' | 'visitors'>('vacancies');
   
   // Payment state
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -49,7 +45,6 @@ export default function AdminPage() {
     if (isAuthed) {
       loadVacanciesFromAPI();
       loadAdminsFromAPI();
-      loadAnnouncementsFromAPI();
       if (activeTab === 'chats') {
         loadChatsFromAPI();
       }
@@ -251,98 +246,6 @@ export default function AdminPage() {
     } catch (err) {
       setError('Failed to delete admin');
       console.error('Error deleting admin:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  // Announcements handlers
-  const loadAnnouncementsFromAPI = async () => {
-    setLoading(true);
-    setError(null);
-    try {
-      const data = await getAnnouncements();
-      setAnnouncements(data);
-    } catch (err) {
-      setError('Failed to load announcements. Please try again.');
-      console.error('Error loading announcements:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleAnnouncementChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-    const { name, value, type } = e.target;
-    setAnnouncementForm({
-      ...announcementForm,
-      [name]: type === 'checkbox' ? (e.target as HTMLInputElement).checked : value,
-    });
-  };
-
-  const handleAddAnnouncement = async () => {
-    if (!announcementForm.title.trim() || !announcementForm.description.trim()) {
-      alert('Title and Description are required');
-      return;
-    }
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      const announcementData = {
-        title: announcementForm.title.trim(),
-        description: announcementForm.description.trim(),
-        isActive: announcementForm.isActive,
-      };
-
-      if (editingAnnouncementId) {
-        await updateAnnouncement(editingAnnouncementId, announcementData);
-      } else {
-        await createAnnouncement(announcementData);
-      }
-
-      await loadAnnouncementsFromAPI();
-      setAnnouncementForm({ title: '', description: '', isActive: true });
-      setEditingAnnouncementId(null);
-      
-      // Dispatch event to refresh home page announcements
-      window.dispatchEvent(new CustomEvent('janseva:announcements:updated'));
-    } catch (err: any) {
-      const errorMsg = err?.message || (editingAnnouncementId ? 'Failed to update announcement' : 'Failed to create announcement');
-      setError(errorMsg);
-      console.error('Error saving announcement:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const handleEditAnnouncement = (id: string) => {
-    const a = announcements.find((x) => (x.id || x._id) === id);
-    if (!a) return;
-    setEditingAnnouncementId(id);
-    setAnnouncementForm({ 
-      title: a.title || '', 
-      description: a.description || '', 
-      isActive: a.isActive !== undefined ? a.isActive : true 
-    });
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const handleDeleteAnnouncement = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this announcement?')) return;
-
-    setLoading(true);
-    setError(null);
-
-    try {
-      await deleteAnnouncement(id);
-      await loadAnnouncementsFromAPI();
-      
-      // Dispatch event to refresh home page announcements
-      window.dispatchEvent(new CustomEvent('janseva:announcements:updated'));
-    } catch (err) {
-      setError('Failed to delete announcement');
-      console.error('Error deleting announcement:', err);
     } finally {
       setLoading(false);
     }
@@ -576,16 +479,6 @@ export default function AdminPage() {
                   }`}
                 >
                   Vacancies
-                </button>
-                <button
-                  onClick={() => setActiveTab('announcements')}
-                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
-                    activeTab === 'announcements'
-                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
-                  }`}
-                >
-                  Announcements
                 </button>
                 <button
                   onClick={() => setActiveTab('admins')}
@@ -952,129 +845,6 @@ export default function AdminPage() {
             </div>
           </div>
           )}
-
-            {/* Announcements Tab */}
-            {activeTab === 'announcements' && (
-            <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-              <div className="lg:col-span-1 order-2 lg:order-1">
-                <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 md:p-6">
-                  <h3 className="font-semibold mb-4 text-base sm:text-lg md:text-xl">Add / Edit Announcement</h3>
-                    <div className="space-y-3 sm:space-y-4">
-                    <input 
-                      name="title" 
-                      value={announcementForm.title} 
-                      onChange={handleAnnouncementChange} 
-                      placeholder="Title *" 
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
-                    />
-                    <textarea 
-                      name="description" 
-                      value={announcementForm.description} 
-                      onChange={handleAnnouncementChange} 
-                      placeholder="Description *" 
-                      rows={5} 
-                      className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 resize-none focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
-                    />
-                    <label className="flex items-center gap-2 cursor-pointer p-2 hover:bg-gray-50 rounded-lg transition-colors">
-                      <input
-                        type="checkbox"
-                        name="isActive"
-                        checked={announcementForm.isActive}
-                        onChange={handleAnnouncementChange}
-                        className="w-5 h-5 text-blue-600 border-2 border-gray-300 rounded focus:ring-2 focus:ring-blue-500"
-                      />
-                      <span className="text-sm sm:text-base text-gray-700 font-medium">Active (visible on home page)</span>
-                    </label>
-
-                    <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
-                      <button 
-                        onClick={handleAddAnnouncement} 
-                        disabled={loading}
-                        className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-blue-600 hover:bg-blue-700 text-white px-4 sm:px-6 py-3 rounded-lg disabled:opacity-50 text-sm sm:text-base font-medium transition-colors shadow-md hover:shadow-lg"
-                      >
-                        {loading ? (
-                          <Loader2 className="w-4 h-4 sm:w-5 sm:h-5 animate-spin" />
-                        ) : (
-                          <Plus className="w-4 h-4 sm:w-5 sm:h-5" />
-                        )}
-                        <span>{editingAnnouncementId ? 'Update' : 'Add'}</span>
-                      </button>
-
-                      {editingAnnouncementId && (
-                        <button 
-                          onClick={() => { 
-                            setEditingAnnouncementId(null); 
-                            setAnnouncementForm({ title: '', description: '', isActive: true }); 
-                          }} 
-                          disabled={loading}
-                          className="w-full sm:w-auto px-4 sm:px-6 py-3 border-2 border-gray-300 hover:border-gray-400 rounded-lg disabled:opacity-50 text-sm sm:text-base font-medium transition-colors"
-                        >
-                          Cancel Edit
-                        </button>
-                      )}
-                    </div>
-                  </div>
-                </div>
-              </div>
-
-              <div className="lg:col-span-2 order-1 lg:order-2">
-                <div className="bg-white rounded-lg shadow-md p-4 sm:p-5 md:p-6">
-                  <div className="flex items-center justify-between mb-4">
-                    <h3 className="font-semibold text-base sm:text-lg md:text-xl">Existing Announcements</h3>
-                    {loading && <Loader2 className="w-5 h-5 animate-spin text-blue-600" />}
-                  </div>
-                  {error && (
-                    <div className="mb-3 p-2 bg-red-100 text-red-700 text-xs sm:text-sm rounded">
-                      {error}
-                    </div>
-                  )}
-                  {loading && announcements.length === 0 ? (
-                    <p className="text-sm text-gray-500">Loading announcements...</p>
-                  ) : announcements.length === 0 ? (
-                    <p className="text-sm text-gray-500">No announcements yet.</p>
-                  ) : (
-                    <div className="space-y-3 sm:space-y-4">
-                      {announcements.map((a) => (
-                        <div key={a.id || a._id} className="p-3 sm:p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all flex flex-col gap-3 sm:gap-4">
-                          <div className="flex-1 min-w-0">
-                            <div className="flex flex-wrap items-center gap-2 mb-2">
-                              <div className="font-semibold text-sm sm:text-base md:text-lg text-gray-900 break-words">{a.title}</div>
-                              {a.isActive ? (
-                                <span className="px-2 py-1 bg-green-100 text-green-800 text-xs font-medium rounded-full">Active</span>
-                              ) : (
-                                <span className="px-2 py-1 bg-gray-100 text-gray-800 text-xs font-medium rounded-full">Inactive</span>
-                              )}
-                            </div>
-                            <div className="text-xs sm:text-sm text-gray-700 mb-2 break-words">{a.description}</div>
-                            <div className="text-xs text-gray-500">
-                              Created: {a.createdAt ? new Date(a.createdAt).toLocaleDateString() : 'N/A'}
-                            </div>
-                          </div>
-
-                          <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-2 pt-2 border-t border-gray-100">
-                            <button 
-                              onClick={() => handleEditAnnouncement(a.id || a._id || '')} 
-                              disabled={loading}
-                              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 border-2 border-blue-500 text-blue-600 hover:bg-blue-50 rounded-lg text-xs sm:text-sm font-medium inline-flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
-                            >
-                              <Edit className="w-4 h-4"/> Edit
-                            </button>
-                            <button 
-                              onClick={() => handleDeleteAnnouncement(a.id || a._id || '')} 
-                              disabled={loading}
-                              className="flex-1 sm:flex-none px-3 sm:px-4 py-2 bg-red-600 hover:bg-red-700 text-white rounded-lg text-xs sm:text-sm font-medium inline-flex items-center justify-center gap-2 disabled:opacity-50 transition-colors"
-                            >
-                              <Trash2 className="w-4 h-4"/> Delete
-                            </button>
-                          </div>
-                        </div>
-                      ))}
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-            )}
 
             {/* Admins Tab */}
             {activeTab === 'admins' && (

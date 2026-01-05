@@ -6,7 +6,7 @@ import { Bell, X, Check, ExternalLink } from 'lucide-react';
 interface Notification {
   _id: string;
   id?: string;
-  type: 'vacancy' | 'announcement';
+  type: 'vacancy';
   title: string;
   message: string;
   link?: string;
@@ -292,18 +292,16 @@ export default function NotificationBell() {
     };
   }, [isOpen]);
 
-  // Listen for custom events when vacancies/announcements are updated
+  // Listen for custom events when vacancies are updated
   useEffect(() => {
     const handleUpdate = () => {
       fetchNotifications();
     };
 
     window.addEventListener('janseva:vacancies:updated', handleUpdate);
-    window.addEventListener('janseva:announcements:updated', handleUpdate);
 
     return () => {
       window.removeEventListener('janseva:vacancies:updated', handleUpdate);
-      window.removeEventListener('janseva:announcements:updated', handleUpdate);
     };
   }, []);
 
@@ -460,7 +458,7 @@ export default function NotificationBell() {
                                 ? 'bg-green-100 text-green-700'
                                 : 'bg-purple-100 text-purple-700'
                             }`}>
-                              {notification.type === 'vacancy' ? 'Vacancy' : 'Announcement'}
+                              Vacancy
                             </span>
                           </div>
                         </div>

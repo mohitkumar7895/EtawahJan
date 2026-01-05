@@ -73,7 +73,7 @@ export async function GET(request: NextRequest) {
 
 /**
  * POST /api/notifications
- * Create a new notification (admin only - called when vacancy/announcement is created)
+ * Create a new notification (admin only - called when vacancy is created)
  */
 export async function POST(request: NextRequest) {
   try {
@@ -114,7 +114,7 @@ export async function POST(request: NextRequest) {
       );
     }
 
-    if (!['vacancy', 'announcement'].includes(type)) {
+    if (type !== 'vacancy') {
       return NextResponse.json(
         { error: "Invalid notification type" },
         { status: 400 }
@@ -129,7 +129,7 @@ export async function POST(request: NextRequest) {
       message: message.trim(),
       link: link ? link.trim() : undefined,
       relatedId: relatedId || undefined,
-      relatedModel: relatedModel || (type === 'vacancy' ? 'Vacancy' : 'Announcement'),
+      relatedModel: relatedModel || 'Vacancy',
       isGlobal: true, // Notifications are global for all users
       isRead: false,
     });

@@ -4,7 +4,7 @@ const notificationSchema = new mongoose.Schema({
   type: {
     type: String,
     required: true,
-    enum: ['vacancy', 'announcement'],
+    enum: ['vacancy'],
     index: true,
   },
   title: {
@@ -28,7 +28,7 @@ const notificationSchema = new mongoose.Schema({
   },
   relatedModel: {
     type: String,
-    enum: ['Vacancy', 'Announcement'],
+    enum: ['Vacancy'],
   },
   isRead: {
     type: Boolean,
