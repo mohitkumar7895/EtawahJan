@@ -407,6 +407,12 @@ export const userConfirmationTemplate = (data: any) => `
                     <span class="field-label">🛠️ सेवा / Service</span>
                     <div class="field-value">${data.service}</div>
                 </div>
+                ${data.trackingId ? `
+                <div class="field" style="background-color: #fef3c7; border: 2px solid #f59e0b;">
+                    <span class="field-label" style="color: #92400e;">🔍 ट्रैकिंग आईडी / Tracking ID</span>
+                    <div class="field-value" style="font-size: 18px; font-weight: bold; color: #92400e; font-family: monospace;">${data.trackingId}</div>
+                </div>
+                ` : ''}
             </div>
 
             <div class="info-box">
@@ -418,7 +424,7 @@ export const userConfirmationTemplate = (data: any) => `
             </div>
 
             <div style="text-align: center; margin: 30px 0;">
-                <a href="https://www.jan-seva.site/track" class="button">Track Application Status</a>
+                <a href="https://www.jan-seva.site/track${data.trackingId ? `?id=${data.trackingId}` : ''}" class="button">Track Application Status</a>
             </div>
 
             <div class="footer">

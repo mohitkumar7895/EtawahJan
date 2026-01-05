@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle, Eye, Globe, Monitor, Smartphone, Tablet } from 'lucide-react';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats } from '@/lib/api';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'adminmohit1234';
@@ -21,7 +21,7 @@ export default function AdminPage() {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [adminForm, setAdminForm] = useState({ username: '', password: '' });
   
-  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins' | 'chats' | 'payments' | 'visitors'>('vacancies');
+  const [activeTab, setActiveTab] = useState<'vacancies' | 'admins' | 'chats' | 'payments' | 'visitors' | 'government-links'>('vacancies');
   
   // Payment state
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -41,6 +41,11 @@ export default function AdminPage() {
   const [lastUpdateTime, setLastUpdateTime] = useState<Date>(new Date());
   const [isLive, setIsLive] = useState(true);
 
+  // Government Links state
+  const [governmentLinks, setGovernmentLinks] = useState<GovernmentLink[]>([]);
+  const [linkForm, setLinkForm] = useState({ name: '', url: '', icon: '🔗', description: '', category: 'General', order: 0 });
+  const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
+
   useEffect(() => {
     if (isAuthed) {
       loadVacanciesFromAPI();
@@ -53,6 +58,9 @@ export default function AdminPage() {
       }
       if (activeTab === 'visitors') {
         loadVisitorsFromAPI();
+      }
+      if (activeTab === 'government-links') {
+        loadGovernmentLinksFromAPI();
       }
     }
   }, [isAuthed, activeTab]);
@@ -440,6 +448,76 @@ export default function AdminPage() {
     }
   };
 
+  // Government Links functions
+  const loadGovernmentLinksFromAPI = async () => {
+    try {
+      const links = await getGovernmentLinks(false);
+      setGovernmentLinks(links);
+    } catch (err) {
+      console.error('Error loading government links:', err);
+      setGovernmentLinks([]);
+    }
+  };
+
+  const handleSubmitLink = async () => {
+    if (!linkForm.name.trim() || !linkForm.url.trim()) {
+      setError('Name and URL are required');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      if (editingLinkId) {
+        await updateGovernmentLink(editingLinkId, linkForm);
+      } else {
+        await createGovernmentLink(linkForm);
+      }
+      await loadGovernmentLinksFromAPI();
+      setLinkForm({ name: '', url: '', icon: '🔗', description: '', category: 'General', order: 0 });
+      setEditingLinkId(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save government link');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditLink = (link: GovernmentLink) => {
+    setLinkForm({
+      name: link.name,
+      url: link.url,
+      icon: link.icon || '🔗',
+      description: link.description || '',
+      category: link.category || 'General',
+      order: link.order || 0,
+    });
+    setEditingLinkId(link.id || link._id || null);
+  };
+
+  const handleDeleteLink = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this government link?')) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await deleteGovernmentLink(id);
+      await loadGovernmentLinksFromAPI();
+      if (editingLinkId === id) {
+        setEditingLinkId(null);
+        setLinkForm({ name: '', url: '', icon: '🔗', description: '', category: 'General', order: 0 });
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete government link');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow sticky top-0 z-50">
@@ -525,6 +603,18 @@ export default function AdminPage() {
                   <Globe className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                   <span className="hidden sm:inline">Visitors</span>
                   <span className="sm:hidden">Visit</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('government-links')}
+                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
+                    activeTab === 'government-links'
+                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <Globe className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="hidden sm:inline">Gov Links</span>
+                  <span className="sm:hidden">Links</span>
                 </button>
               </nav>
             </div>
@@ -1669,6 +1759,163 @@ export default function AdminPage() {
                       </div>
                     </div>
                   )}
+                </div>
+              </div>
+            )}
+
+            {/* Government Links Tab */}
+            {activeTab === 'government-links' && (
+              <div className="space-y-4 sm:space-y-6">
+                {/* Form */}
+                <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 sm:p-6">
+                  <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6">
+                    {editingLinkId ? 'Edit Government Link' : 'Add New Government Link'}
+                  </h2>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Name *</label>
+                      <input
+                        type="text"
+                        value={linkForm.name}
+                        onChange={(e) => setLinkForm({ ...linkForm, name: e.target.value })}
+                        placeholder="e.g., Aadhaar Official"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">URL *</label>
+                      <input
+                        type="url"
+                        value={linkForm.url}
+                        onChange={(e) => setLinkForm({ ...linkForm, url: e.target.value })}
+                        placeholder="https://example.com"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Icon (Emoji)</label>
+                      <input
+                        type="text"
+                        value={linkForm.icon}
+                        onChange={(e) => setLinkForm({ ...linkForm, icon: e.target.value })}
+                        placeholder="🔗"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Category</label>
+                      <input
+                        type="text"
+                        value={linkForm.category}
+                        onChange={(e) => setLinkForm({ ...linkForm, category: e.target.value })}
+                        placeholder="General"
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    <div className="sm:col-span-2">
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Description</label>
+                      <textarea
+                        value={linkForm.description}
+                        onChange={(e) => setLinkForm({ ...linkForm, description: e.target.value })}
+                        placeholder="Optional description"
+                        rows={2}
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-medium text-gray-700 mb-1">Order (for sorting)</label>
+                      <input
+                        type="number"
+                        value={linkForm.order}
+                        onChange={(e) => setLinkForm({ ...linkForm, order: parseInt(e.target.value) || 0 })}
+                        className="w-full px-3 py-2 border-2 border-gray-300 rounded-lg text-sm focus:ring-2 focus:ring-blue-500 focus:border-blue-500"
+                      />
+                    </div>
+                  </div>
+                  <div className="mt-4 flex gap-2">
+                    <button
+                      onClick={handleSubmitLink}
+                      disabled={loading}
+                      className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 text-sm font-medium"
+                    >
+                      {loading ? <Loader2 className="w-4 h-4 animate-spin inline" /> : editingLinkId ? 'Update' : 'Add'} Link
+                    </button>
+                    {editingLinkId && (
+                      <button
+                        onClick={() => {
+                          setEditingLinkId(null);
+                          setLinkForm({ name: '', url: '', icon: '🔗', description: '', category: 'General', order: 0 });
+                        }}
+                        className="px-4 py-2 bg-gray-300 text-gray-700 rounded-lg hover:bg-gray-400 text-sm font-medium"
+                      >
+                        Cancel
+                      </button>
+                    )}
+                  </div>
+                </div>
+
+                {/* Links List */}
+                <div className="bg-white rounded-lg shadow-lg border border-gray-200 overflow-hidden">
+                  <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white px-4 sm:px-6 py-3 sm:py-4">
+                    <h3 className="text-lg sm:text-xl font-bold">Government Links ({governmentLinks.length})</h3>
+                  </div>
+                  <div className="p-4 sm:p-6">
+                    {governmentLinks.length === 0 ? (
+                      <div className="text-center py-8">
+                        <Globe className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <p className="text-gray-600">No government links added yet</p>
+                      </div>
+                    ) : (
+                      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                        {governmentLinks.map((link) => (
+                          <div
+                            key={link.id || link._id}
+                            className="border-2 border-gray-200 rounded-lg p-4 hover:border-blue-400 transition"
+                          >
+                            <div className="flex items-start justify-between mb-2">
+                              <div className="flex items-center gap-2 flex-1">
+                                <span className="text-2xl">{link.icon || '🔗'}</span>
+                                <div className="flex-1 min-w-0">
+                                  <h4 className="font-semibold text-gray-900 text-sm truncate">{link.name}</h4>
+                                  {link.category && (
+                                    <span className="text-xs text-blue-600 bg-blue-50 px-2 py-0.5 rounded-full">
+                                      {link.category}
+                                    </span>
+                                  )}
+                                </div>
+                              </div>
+                            </div>
+                            <a
+                              href={link.url}
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="text-xs text-blue-600 hover:text-blue-700 truncate block mb-2"
+                            >
+                              {link.url}
+                            </a>
+                            {link.description && (
+                              <p className="text-xs text-gray-600 mb-3 line-clamp-2">{link.description}</p>
+                            )}
+                            <div className="flex gap-2 mt-3">
+                              <button
+                                onClick={() => handleEditLink(link)}
+                                className="flex-1 px-2 py-1 bg-blue-50 text-blue-600 rounded text-xs hover:bg-blue-100 transition"
+                              >
+                                <Edit className="w-3 h-3 inline mr-1" />
+                                Edit
+                              </button>
+                              <button
+                                onClick={() => handleDeleteLink(link.id || link._id || '')}
+                                className="px-2 py-1 bg-red-50 text-red-600 rounded text-xs hover:bg-red-100 transition"
+                              >
+                                <Trash2 className="w-3 h-3" />
+                              </button>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
                 </div>
               </div>
             )}

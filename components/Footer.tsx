@@ -78,6 +78,18 @@ export default function Footer() {
                   <span>Contact</span>
                 </Link>
               </li>
+              <li>
+                <Link href="/track" className="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>Track Application</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/faq" className="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>FAQ</span>
+                </Link>
+              </li>
             </ul>
           </div>
 

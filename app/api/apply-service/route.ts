@@ -3,6 +3,7 @@ import { serviceApplicationTemplate, userConfirmationTemplate } from '@/lib/emai
 import { sendEmail, getRecipients, isEmailConfigured } from '@/lib/emailService';
 import { connectDB, isDBConnected } from '@/lib/db';
 import Subscriber from '@/models/Subscriber';
+import Application from '@/models/Application';
 
 const RECIPIENTS = getRecipients();
 
@@ -76,12 +77,27 @@ export async function POST(request: NextRequest) {
       await new Promise((r) => setTimeout(r, 1000)); // wait 1s between sends
     }
 
-    // Save user as subscriber for future notifications
+    // Save application to database and user as subscriber
+    let trackingId = '';
     try {
       if (!isDBConnected()) {
         await connectDB();
       }
       
+      // Save application to database
+      const application = new Application({
+        name: name.trim(),
+        email: email ? email.trim().toLowerCase() : '',
+        mobile: phone.trim(),
+        address: address.trim(),
+        service_type: service.trim(),
+        status: 'pending',
+      });
+      await application.save();
+      trackingId = application.trackingId;
+      console.log(`✅ Application saved with tracking ID: ${trackingId}`);
+      
+      // Save user as subscriber for future notifications
       if (email && email.trim()) {
         // Save or update subscriber with email
         await Subscriber.findOneAndUpdate(
@@ -109,9 +125,9 @@ export async function POST(request: NextRequest) {
         );
         console.log(`✅ User saved as subscriber: ${phone}`);
       }
-    } catch (subscriberError: any) {
-      console.error('❌ Error saving subscriber:', subscriberError);
-      // Don't fail the request if subscriber save fails
+    } catch (dbError: any) {
+      console.error('❌ Error saving application/subscriber:', dbError);
+      // Don't fail the request if database save fails
     }
 
     // Send confirmation email to user if email is provided
@@ -124,6 +140,7 @@ export async function POST(request: NextRequest) {
           phone,
           service,
           email,
+          trackingId: trackingId || 'N/A',
         });
         const userResult = await sendEmail({ to: email.trim(), subject: userSubject, html: userHtml });
         userEmailSent = userResult.success;
@@ -155,6 +172,7 @@ export async function POST(request: NextRequest) {
       message: successCount > 0 
         ? "✅ Application submitted and emails sent successfully" 
         : "⚠️ Application submitted but emails failed",
+      trackingId: trackingId || null,
       emailStatus: `${successCount}/${RECIPIENTS.length} admin emails sent${userEmailSent ? ' + user confirmation sent' : ''}`,
       userNotificationSent: userEmailSent,
       results: results.map(r => ({
