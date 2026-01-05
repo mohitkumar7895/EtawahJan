@@ -161,32 +161,6 @@ export async function POST(request: NextRequest) {
         
         console.log("✅ Vacancy created successfully:", savedVacancy._id);
 
-        // Create notification for all users
-        try {
-          const Notification = (await import('@/models/Notification')).default;
-          const notificationMessage = `${savedVacancy.tag ? `${savedVacancy.tag} - ` : ''}${savedVacancy.info || savedVacancy.title}${savedVacancy.lastDate ? ` (Last Date: ${savedVacancy.lastDate})` : ''}`;
-          
-          const notification = new Notification({
-            type: 'vacancy',
-            title: `नई नौकरी: ${savedVacancy.title}`,
-            message: notificationMessage,
-            link: savedVacancy.link || `/vacancies`,
-            relatedId: savedVacancy._id,
-            relatedModel: 'Vacancy',
-            isGlobal: true,
-            isRead: false,
-          });
-          
-          await notification.save();
-          console.log("✅ Notification created for vacancy:", savedVacancy._id);
-          
-          // Dispatch event to notify frontend
-          // This will be handled by the notification component
-        } catch (notificationError: any) {
-          console.error('❌ Error creating notification:', notificationError);
-          // Don't fail vacancy creation if notification creation fails
-        }
-
         // Send notifications to all subscribers if email service is configured
         if (isEmailConfigured()) {
           // Run notification sending in background (don't wait for it)

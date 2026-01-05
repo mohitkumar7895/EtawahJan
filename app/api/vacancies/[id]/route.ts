@@ -77,30 +77,7 @@ export async function PUT(
 
     console.log("✅ Vacancy updated successfully:", vacancy._id);
 
-    // Create notification for all users about the update
-    try {
-      const Notification = (await import('@/models/Notification')).default;
-      const notificationMessage = `${vacancy.tag ? `${vacancy.tag} - ` : ''}${vacancy.info || vacancy.title}${vacancy.lastDate ? ` (Last Date: ${vacancy.lastDate})` : ''}`;
-      
-      const notification = new Notification({
-        type: 'vacancy',
-        title: `नौकरी अपडेट: ${vacancy.title}`,
-        message: notificationMessage,
-        link: vacancy.link || `/vacancies`,
-        relatedId: vacancy._id,
-        relatedModel: 'Vacancy',
-        isGlobal: true,
-        isRead: false,
-      });
-      
-      await notification.save();
-      console.log("✅ Notification created for vacancy update:", vacancy._id);
-    } catch (notificationError: any) {
-      console.error('❌ Error creating notification:', notificationError);
-      // Don't fail vacancy update if notification creation fails
-    }
-
-    // Send notifications to all subscribers if email service is configured
+    // Send email notifications to all subscribers if email service is configured
     if (isEmailConfigured()) {
       // Run notification sending in background (don't wait for it)
       (async () => {

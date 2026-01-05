@@ -10,7 +10,7 @@ const paymentSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    index: true,
+    // Index defined separately below
   },
   razorpaySignature: {
     type: String,
@@ -53,9 +53,9 @@ const paymentSchema = new mongoose.Schema({
 });
 
 // Indexes for faster queries
+// Note: razorpayPaymentId already has unique: true which creates an index automatically
 paymentSchema.index({ paymentDate: -1 });
 paymentSchema.index({ status: 1 });
-paymentSchema.index({ razorpayPaymentId: 1 });
 
 export default mongoose.models.Payment || mongoose.model('Payment', paymentSchema);
 

@@ -5,12 +5,12 @@ const subscriberSchema = new mongoose.Schema({
     type: String,
     trim: true,
     lowercase: true,
-    index: true,
+    // Index defined separately below
   },
   mobile: {
     type: String,
     trim: true,
-    index: true,
+    // Index defined separately below
   },
   name: {
     type: String,

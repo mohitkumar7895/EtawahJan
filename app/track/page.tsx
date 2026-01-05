@@ -3,7 +3,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Search, FileText, Clock, CheckCircle, XCircle, Loader, AlertCircle } from 'lucide-react';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 
 interface ApplicationStatus {
@@ -17,7 +17,7 @@ interface ApplicationStatus {
   completedAt?: string;
 }
 
-export default function TrackPage() {
+function TrackPageContent() {
   const searchParams = useSearchParams();
   const [trackingId, setTrackingId] = useState('');
   const [mobile, setMobile] = useState('');
@@ -323,6 +323,18 @@ export default function TrackPage() {
       </div>
       <Footer />
     </>
+  );
+}
+
+export default function TrackPage() {
+  return (
+    <Suspense fallback={
+      <div className="min-h-screen flex items-center justify-center">
+        <Loader className="w-8 h-8 animate-spin text-blue-600" />
+      </div>
+    }>
+      <TrackPageContent />
+    </Suspense>
   );
 }
 

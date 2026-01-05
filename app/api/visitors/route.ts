@@ -17,96 +17,99 @@ export async function POST(request: NextRequest) {
                      request.headers.get('x-real-ip') || 
                      'unknown';
     
-    // Check if visitor exists
-    const existingVisitor = await Visitor.findOne({ sessionId });
+    // Use findOneAndUpdate with upsert to handle both create and update
+    const ip = Array.isArray(ipAddress) ? ipAddress[0] : ipAddress;
+    const ua = userAgent || request.headers.get('user-agent') || 'unknown';
     
-    if (existingVisitor) {
-      // Update existing visitor
-      existingVisitor.lastActivity = new Date();
-      existingVisitor.page = page;
-      existingVisitor.referrer = referrer || existingVisitor.referrer;
-      existingVisitor.isActive = true;
-      existingVisitor.visitCount = (existingVisitor.visitCount || 0) + 1;
-      // Update name and email if provided
-      if (name) existingVisitor.name = name;
-      if (email) existingVisitor.email = email;
-      await existingVisitor.save();
-      
-      // Add visitor to subscribers list if they have email or name
-      if (email && email.trim()) {
-        try {
-          await Subscriber.findOneAndUpdate(
-            { email: email.trim().toLowerCase() },
-            {
-              email: email.trim().toLowerCase(),
-              name: name || existingVisitor.name || '',
-              isActive: true,
-            },
-            { upsert: true, new: true }
-          );
-          console.log(`✅ Visitor added to subscribers: ${email}`);
-        } catch (subError: any) {
-          console.error('❌ Error adding visitor to subscribers:', subError);
-        }
+    const visitor = await Visitor.findOneAndUpdate(
+      { sessionId },
+      {
+        $set: {
+          ipAddress: ip,
+          userAgent: ua,
+          page,
+          referrer: referrer || '',
+          country: country || '',
+          city: city || '',
+          device: device || '',
+          browser: browser || '',
+          os: os || '',
+          isActive: true,
+          lastActivity: new Date(),
+          ...(name && { name }),
+          ...(email && { email }),
+        },
+        $inc: { visitCount: 1 },
+        $setOnInsert: {
+          firstVisit: new Date(),
+          visitCount: 1,
+        },
+      },
+      {
+        upsert: true,
+        new: true,
+        runValidators: true,
       }
-      
-      // NO EMAILS SENT - Email notifications completely disabled
-      
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Visitor updated',
-        visitor: existingVisitor 
-      });
-    } else {
-      // Create new visitor
-      const visitor = new Visitor({
-        sessionId,
-        ipAddress: Array.isArray(ipAddress) ? ipAddress[0] : ipAddress,
-        userAgent: userAgent || request.headers.get('user-agent') || 'unknown',
-        page,
-        referrer: referrer || '',
-        country: country || '',
-        city: city || '',
-        device: device || '',
-        browser: browser || '',
-        os: os || '',
-        name: name || '',
-        email: email || '',
-        isActive: true,
-        lastActivity: new Date(),
-        firstVisit: new Date(),
-        visitCount: 1,
-      });
-      
-      await visitor.save();
-      
-      // Add visitor to subscribers list if they have email or name
-      if (email && email.trim()) {
-        try {
-          await Subscriber.findOneAndUpdate(
-            { email: email.trim().toLowerCase() },
-            {
-              email: email.trim().toLowerCase(),
-              name: name || '',
-              isActive: true,
-            },
-            { upsert: true, new: true }
-          );
-          console.log(`✅ New visitor added to subscribers: ${email}`);
-        } catch (subError: any) {
-          console.error('❌ Error adding visitor to subscribers:', subError);
-        }
+    );
+    
+    // Add visitor to subscribers list if they have email
+    if (email && email.trim()) {
+      try {
+        await Subscriber.findOneAndUpdate(
+          { email: email.trim().toLowerCase() },
+          {
+            email: email.trim().toLowerCase(),
+            name: name || visitor.name || '',
+            isActive: true,
+          },
+          { upsert: true, new: true }
+        );
+        console.log(`✅ Visitor added to subscribers: ${email}`);
+      } catch (subError: any) {
+        console.error('❌ Error adding visitor to subscribers:', subError);
       }
-      
-      // NO EMAILS SENT - Email notifications completely disabled
-      
-      return NextResponse.json({ 
-        success: true, 
-        message: 'Visitor tracked',
-        visitor 
-      });
     }
+    
+    return NextResponse.json({ 
+      success: true, 
+      message: visitor.visitCount === 1 ? 'Visitor tracked' : 'Visitor updated',
+      visitor 
+    });
   } catch (error: any) {
+    // Ignore connection reset errors (common when client disconnects)
+    if (error.code === 'ECONNRESET' || error.message?.includes('aborted') || error.message?.includes('ECONNRESET')) {
+      // Client disconnected, silently ignore
+      return NextResponse.json({ success: true, message: 'Connection closed' }, { status: 200 });
+    }
+    
+    // Handle duplicate key errors (race condition - visitor already exists)
+    if (error.code === 11000 || error.codeName === 'DuplicateKey') {
+      // Try to fetch and return existing visitor
+      try {
+        const existingVisitor = await Visitor.findOne({ sessionId });
+        if (existingVisitor) {
+          // Update it
+          existingVisitor.lastActivity = new Date();
+          existingVisitor.page = page;
+          existingVisitor.isActive = true;
+          existingVisitor.visitCount = (existingVisitor.visitCount || 0) + 1;
+          if (name) existingVisitor.name = name;
+          if (email) existingVisitor.email = email;
+          await existingVisitor.save();
+          
+          return NextResponse.json({ 
+            success: true, 
+            message: 'Visitor updated',
+            visitor: existingVisitor 
+          });
+        }
+      } catch (retryError) {
+        // If retry also fails, return success anyway to avoid breaking the page
+        return NextResponse.json({ success: true, message: 'Visitor tracked (duplicate)' }, { status: 200 });
+      }
+    }
+    
+    // Log other errors but don't fail the request
     console.error('Error tracking visitor:', error);
     return NextResponse.json(
       { success: false, error: error.message || 'Failed to track visitor' },

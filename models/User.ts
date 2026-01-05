@@ -5,8 +5,8 @@ const userSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
-    index: true,
     trim: true,
+    // Index defined separately below
   },
   firstChatAt: {
     type: Date,
@@ -29,7 +29,7 @@ const userSchema = new mongoose.Schema({
 });
 
 // Index for faster queries
-userSchema.index({ phoneNumber: 1 });
+// Note: phoneNumber already has unique: true which creates an index automatically
 userSchema.index({ lastActiveAt: -1 });
 
 export default mongoose.models.User || mongoose.model('User', userSchema);

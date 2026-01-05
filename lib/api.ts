@@ -637,20 +637,33 @@ export async function trackVisitor(data: {
   email?: string;
 }): Promise<{ success: boolean; visitor?: Visitor }> {
   try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 5000); // 5 second timeout
+
     const response = await fetch(`${API_BASE_URL}/api/visitors`, {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify(data),
+      signal: controller.signal,
     });
+
+    clearTimeout(timeoutId);
 
     if (!response.ok) {
       throw new Error('Failed to track visitor');
     }
 
     return await response.json();
-  } catch (error) {
+  } catch (error: any) {
+    // Ignore connection reset and abort errors (common when page unloads or client disconnects)
+    if (error.name === 'AbortError' || error.code === 'ECONNRESET' || error.message?.includes('aborted')) {
+      // Silently ignore - this is normal when page unloads
+      return { success: false };
+    }
+    
+    // Only log actual errors
     console.error('Error tracking visitor:', error);
     return { success: false };
   }

@@ -15,7 +15,7 @@ const applicationSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    index: true,
+    // Index defined separately below
   },
   address: {
     type: String,
@@ -26,19 +26,19 @@ const applicationSchema = new mongoose.Schema({
     type: String,
     required: true,
     trim: true,
-    index: true,
+    // Index defined separately below
   },
   status: {
     type: String,
     enum: ['pending', 'in_progress', 'completed', 'rejected'],
     default: 'pending',
-    index: true,
+    // Index defined separately below
   },
   trackingId: {
     type: String,
     unique: true,
     required: true,
-    index: true,
+    // Index defined separately below
   },
   remarks: {
     type: String,
@@ -64,8 +64,8 @@ const applicationSchema = new mongoose.Schema({
 });
 
 // Indexes for faster queries
+// Note: trackingId already has unique: true which creates an index automatically
 applicationSchema.index({ mobile: 1, submittedAt: -1 });
-applicationSchema.index({ trackingId: 1 });
 applicationSchema.index({ status: 1, submittedAt: -1 });
 applicationSchema.index({ service_type: 1 });
 

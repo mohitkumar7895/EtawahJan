@@ -70,8 +70,11 @@ export default function VisitorTracker() {
           browser,
           os,
         });
-      } catch (error) {
-        console.error('Failed to track visitor:', error);
+      } catch (error: any) {
+        // Ignore connection errors (common when page unloads)
+        if (error?.name !== 'AbortError' && error?.code !== 'ECONNRESET') {
+          console.error('Failed to track visitor:', error);
+        }
       }
     };
 

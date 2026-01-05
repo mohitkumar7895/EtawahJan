@@ -5,6 +5,7 @@ const VisitorSchema = new mongoose.Schema({
     type: String,
     required: true,
     unique: true,
+    // Index defined separately below
   },
   ipAddress: {
     type: String,
@@ -71,7 +72,7 @@ const VisitorSchema = new mongoose.Schema({
 });
 
 // Index for faster queries
-VisitorSchema.index({ sessionId: 1 });
+// Note: sessionId already has unique: true which creates an index automatically
 VisitorSchema.index({ lastActivity: -1 });
 VisitorSchema.index({ isActive: 1 });
 
