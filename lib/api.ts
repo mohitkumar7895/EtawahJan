@@ -772,4 +772,85 @@ export async function deleteChat(chatId: string): Promise<void> {
   }
 }
 
+// Government Links API
+export interface GovernmentLink {
+  id?: string;
+  _id?: string;
+  name: string;
+  url: string;
+  icon: string;
+  description?: string;
+  category?: string;
+  isActive?: boolean;
+  order?: number;
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}
 
+export async function getGovernmentLinks(activeOnly: boolean = true): Promise<GovernmentLink[]> {
+  try {
+    const response = await fetch(`/api/government-links?active=${activeOnly}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch government links');
+    }
+
+    const data = await response.json();
+    return data.links || [];
+  } catch (error: any) {
+    console.error('Error fetching government links:', error);
+    return [];
+  }
+}
+
+export async function createGovernmentLink(link: Omit<GovernmentLink, 'id' | '_id' | 'createdAt' | 'updatedAt'>): Promise<GovernmentLink> {
+  const response = await fetch('/api/government-links', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(link),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to create government link');
+  }
+
+  const data = await response.json();
+  return { ...data.link, id: data.link.id || data.link._id };
+}
+
+export async function updateGovernmentLink(id: string, link: Partial<GovernmentLink>): Promise<GovernmentLink> {
+  const response = await fetch(`/api/government-links/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(link),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to update government link');
+  }
+
+  const data = await response.json();
+  return { ...data.link, id: data.link.id || data.link._id };
+}
+
+export async function deleteGovernmentLink(id: string): Promise<void> {
+  const response = await fetch(`/api/government-links/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to delete government link');
+  }
+}

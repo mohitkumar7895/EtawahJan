@@ -310,7 +310,7 @@ export default function TrackPage() {
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm font-bold">2</span>
-                  <p>Click on "Track Application" button</p>
+                  <p>Click on &quot;Track Application&quot; button</p>
                 </div>
                 <div className="flex items-start gap-3">
                   <span className="bg-blue-600 text-white rounded-full w-6 h-6 flex items-center justify-center flex-shrink-0 text-sm font-bold">3</span>
