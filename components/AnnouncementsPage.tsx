@@ -27,7 +27,7 @@ export default function AnnouncementsPage() {
     
     const interval = setInterval(() => {
       loadAnnouncements();
-    }, 30000);
+    }, 5000); // Refresh every 5 seconds for faster updates
 
     return () => clearInterval(interval);
   }, []);

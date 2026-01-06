@@ -19,6 +19,7 @@ export default function NotificationBell() {
   const [isLoading, setIsLoading] = useState(false);
   const [userId, setUserId] = useState<string>('anonymous');
   const pollingIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const panelRef = useRef<HTMLDivElement>(null);
 
   // Generate or retrieve user ID from localStorage
   useEffect(() => {
@@ -61,8 +62,12 @@ export default function NotificationBell() {
       });
 
       if (response.ok) {
-        // Remove from local state
+        // Remove from local state immediately
         setNotifications(prev => prev.filter(n => n._id !== notificationId));
+        // Refresh to get latest from server
+        setTimeout(() => {
+          fetchNotifications();
+        }, 100);
       }
     } catch (error) {
       console.error('Error marking notification as seen:', error);
@@ -71,6 +76,8 @@ export default function NotificationBell() {
 
   // Mark all as seen
   const markAllAsSeen = async () => {
+    if (notifications.length === 0) return;
+    
     try {
       const response = await fetch('/api/notifications/mark-all-seen', {
         method: 'POST',
@@ -81,22 +88,40 @@ export default function NotificationBell() {
       });
 
       if (response.ok) {
+        // Clear local state immediately
         setNotifications([]);
+        // Refresh to get latest from server
+        setTimeout(() => {
+          fetchNotifications();
+        }, 100);
       }
     } catch (error) {
       console.error('Error marking all notifications as seen:', error);
     }
   };
 
-  // When notification panel opens, automatically mark all as seen
+  // Close panel when clicking outside
   useEffect(() => {
-    if (isOpen && notifications.length > 0 && userId && userId !== 'anonymous') {
-      // Mark all notifications as seen when panel opens
-      markAllAsSeen();
-    }
-  }, [isOpen]); // eslint-disable-line react-hooks/exhaustive-deps
+    const handleClickOutside = (event: MouseEvent) => {
+      if (panelRef.current && !panelRef.current.contains(event.target as Node)) {
+        const target = event.target as HTMLElement;
+        // Don't close if clicking on the bell button
+        if (!target.closest('button[aria-label="Notifications"]')) {
+          setIsOpen(false);
+        }
+      }
+    };
 
-  // Poll for new notifications every 30 seconds
+    if (isOpen) {
+      document.addEventListener('mousedown', handleClickOutside);
+    }
+
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+    };
+  }, [isOpen]);
+
+  // Poll for new notifications every 5 seconds for faster updates
   useEffect(() => {
     if (userId && userId !== 'anonymous') {
       // Initial fetch
@@ -105,7 +130,7 @@ export default function NotificationBell() {
       // Set up polling
       pollingIntervalRef.current = setInterval(() => {
         fetchNotifications();
-      }, 30000); // 30 seconds
+      }, 5000); // 5 seconds for faster updates
       
       return () => {
         if (pollingIntervalRef.current) {
@@ -136,12 +161,12 @@ export default function NotificationBell() {
       {/* Bell Icon */}
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="relative p-2 text-white hover:text-blue-200 transition-colors"
+        className="relative p-1.5 sm:p-2 text-white hover:text-blue-200 transition-colors rounded-md hover:bg-white/10"
         aria-label="Notifications"
       >
-        <Bell className="w-6 h-6" />
+        <Bell className="w-5 h-5 sm:w-6 sm:h-6" />
         {unreadCount > 0 && (
-          <span className="absolute top-0 right-0 bg-red-500 text-white text-xs font-bold rounded-full w-5 h-5 flex items-center justify-center">
+          <span className="absolute -top-1 -right-1 bg-red-500 text-white text-[10px] sm:text-xs font-bold rounded-full w-4 h-4 sm:w-5 sm:h-5 flex items-center justify-center animate-pulse">
             {unreadCount > 9 ? '9+' : unreadCount}
           </span>
         )}
@@ -152,61 +177,64 @@ export default function NotificationBell() {
         <>
           {/* Backdrop */}
           <div
-            className="fixed inset-0 z-40"
+            className="fixed inset-0 z-40 bg-black/20 sm:bg-transparent"
             onClick={() => setIsOpen(false)}
           />
           
           {/* Notification Panel */}
-          <div className="absolute right-0 mt-2 w-80 sm:w-96 bg-white rounded-lg shadow-xl border border-gray-200 z-50 max-h-[500px] overflow-hidden flex flex-col">
+          <div 
+            ref={panelRef}
+            className="fixed sm:absolute right-0 sm:right-0 top-14 sm:top-auto sm:mt-2 w-[calc(100vw-1rem)] sm:w-80 md:w-96 max-w-sm bg-white rounded-lg shadow-2xl border border-gray-200 z-50 max-h-[calc(100vh-5rem)] sm:max-h-[500px] overflow-hidden flex flex-col transform transition-all duration-200 ease-out"
+          >
             {/* Header */}
-            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-4 flex items-center justify-between">
+            <div className="bg-gradient-to-r from-blue-600 to-blue-700 text-white p-3 sm:p-4 flex items-center justify-between flex-shrink-0">
               <div className="flex items-center gap-2">
-                <Bell className="w-5 h-5" />
-                <h3 className="font-bold text-lg">Notifications</h3>
+                <Bell className="w-4 h-4 sm:w-5 sm:h-5" />
+                <h3 className="font-bold text-base sm:text-lg">Notifications</h3>
                 {unreadCount > 0 && (
-                  <span className="bg-white text-blue-600 text-xs font-bold px-2 py-1 rounded-full">
+                  <span className="bg-white text-blue-600 text-[10px] sm:text-xs font-bold px-1.5 sm:px-2 py-0.5 sm:py-1 rounded-full">
                     {unreadCount} new
                   </span>
                 )}
               </div>
               <button
                 onClick={() => setIsOpen(false)}
-                className="text-white hover:text-blue-200 transition-colors"
+                className="text-white hover:text-blue-200 transition-colors p-1 rounded-md hover:bg-white/10"
                 aria-label="Close"
               >
-                <X className="w-5 h-5" />
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
             </div>
 
             {/* Notifications List */}
-            <div className="flex-1 overflow-y-auto">
+            <div className="flex-1 overflow-y-auto overscroll-contain">
               {isLoading ? (
-                <div className="p-8 text-center text-gray-500">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600 mx-auto"></div>
-                  <p className="mt-2">Loading notifications...</p>
+                <div className="p-6 sm:p-8 text-center text-gray-500">
+                  <div className="animate-spin rounded-full h-6 w-6 sm:h-8 sm:w-8 border-b-2 border-blue-600 mx-auto"></div>
+                  <p className="mt-2 text-xs sm:text-sm">Loading notifications...</p>
                 </div>
               ) : notifications.length === 0 ? (
-                <div className="p-8 text-center text-gray-500">
-                  <Bell className="w-12 h-12 mx-auto mb-2 text-gray-300" />
-                  <p>No new notifications</p>
+                <div className="p-6 sm:p-8 text-center text-gray-500">
+                  <Bell className="w-10 h-10 sm:w-12 sm:h-12 mx-auto mb-2 text-gray-300" />
+                  <p className="text-xs sm:text-sm">No new notifications</p>
                 </div>
               ) : (
                 <div className="divide-y divide-gray-200">
                   {notifications.map((notification) => (
                     <div
                       key={notification._id}
-                      className="p-4 hover:bg-gray-50 transition-colors"
+                      className="p-3 sm:p-4 hover:bg-gray-50 transition-colors border-l-2 border-transparent hover:border-blue-500"
                     >
-                      <div className="flex items-start gap-3">
+                      <div className="flex items-start gap-2 sm:gap-3">
                         <div className="flex-1 min-w-0">
-                          <h4 className="font-semibold text-gray-900 text-sm mb-1">
+                          <h4 className="font-semibold text-gray-900 text-xs sm:text-sm mb-1 break-words">
                             {notification.title}
                           </h4>
-                          <p className="text-gray-600 text-xs mb-2 line-clamp-2">
+                          <p className="text-gray-600 text-[11px] sm:text-xs mb-2 line-clamp-2 break-words">
                             {notification.message}
                           </p>
-                          <div className="flex items-center justify-between">
-                            <span className="text-xs text-gray-400">
+                          <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-0">
+                            <span className="text-[10px] sm:text-xs text-gray-400">
                               {new Date(notification.createdAt).toLocaleDateString('en-IN', {
                                 day: 'numeric',
                                 month: 'short',
@@ -217,20 +245,24 @@ export default function NotificationBell() {
                             {notification.link && (
                               <Link
                                 href={notification.link}
-                                onClick={() => markAsSeen(notification._id)}
-                                className="text-xs text-blue-600 hover:text-blue-700 font-medium"
+                                onClick={() => {
+                                  markAsSeen(notification._id);
+                                  setIsOpen(false);
+                                }}
+                                className="text-[10px] sm:text-xs text-blue-600 hover:text-blue-700 font-medium inline-flex items-center gap-1"
                               >
-                                View →
+                                View
+                                <span>→</span>
                               </Link>
                             )}
                           </div>
                         </div>
                         <button
                           onClick={() => markAsSeen(notification._id)}
-                          className="text-gray-400 hover:text-green-600 transition-colors flex-shrink-0"
+                          className="text-gray-400 hover:text-green-600 transition-colors flex-shrink-0 p-1 rounded-md hover:bg-green-50"
                           aria-label="Mark as read"
                         >
-                          <CheckCircle className="w-5 h-5" />
+                          <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
                         </button>
                       </div>
                     </div>
@@ -241,10 +273,10 @@ export default function NotificationBell() {
 
             {/* Footer */}
             {notifications.length > 0 && (
-              <div className="border-t border-gray-200 p-3 bg-gray-50">
+              <div className="border-t border-gray-200 p-2 sm:p-3 bg-gray-50 flex-shrink-0">
                 <button
                   onClick={markAllAsSeen}
-                  className="w-full text-center text-sm text-blue-600 hover:text-blue-700 font-medium py-2"
+                  className="w-full text-center text-xs sm:text-sm text-blue-600 hover:text-blue-700 font-medium py-1.5 sm:py-2 rounded-md hover:bg-blue-50 transition-colors"
                 >
                   Mark all as read
                 </button>
