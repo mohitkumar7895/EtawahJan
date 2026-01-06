@@ -1616,6 +1616,7 @@ export default function AdminPage() {
                                         <p className="text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.content}</p>
                                       ) : msg.type === 'image' ? (
                                         <div className="rounded-lg overflow-hidden relative group">
+                                          {/* eslint-disable-next-line @next/next/no-img-element */}
                                           <img
                                             src={msg.content}
                                             alt="Shared image"

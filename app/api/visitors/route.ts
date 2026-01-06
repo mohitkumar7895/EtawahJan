@@ -6,11 +6,20 @@ import Subscriber from '@/models/Subscriber';
 
 // Track visitor
 export async function POST(request: NextRequest) {
+  let sessionId: string | undefined;
+  let page: string | undefined;
+  let name: string | undefined;
+  let email: string | undefined;
+  
   try {
     await connectDB();
     
     const body = await request.json();
-    const { sessionId, page, referrer, userAgent, device, browser, os, country, city, name, email } = body;
+    sessionId = body.sessionId;
+    page = body.page;
+    name = body.name;
+    email = body.email;
+    const { referrer, userAgent, device, browser, os, country, city } = body;
     
     // Get IP address from request
     const ipAddress = request.headers.get('x-forwarded-for') || 
@@ -87,10 +96,10 @@ export async function POST(request: NextRequest) {
       // Try to fetch and return existing visitor
       try {
         const existingVisitor = await Visitor.findOne({ sessionId });
-        if (existingVisitor) {
+        if (existingVisitor && sessionId) {
           // Update it
           existingVisitor.lastActivity = new Date();
-          existingVisitor.page = page;
+          if (page) existingVisitor.page = page;
           existingVisitor.isActive = true;
           existingVisitor.visitCount = (existingVisitor.visitCount || 0) + 1;
           if (name) existingVisitor.name = name;

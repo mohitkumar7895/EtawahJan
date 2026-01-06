@@ -2,6 +2,7 @@
 
 import { FileText, Phone, Menu, X, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
 
@@ -40,10 +41,13 @@ export default function Header() {
             className="flex items-center space-x-2 sm:space-x-3 hover:opacity-90 transition group min-w-0 flex-1"
           >
             <div className="flex-shrink-0">
-              <img 
+              <Image 
                 src="/jan-seva-logo-1.png" 
                 alt="Jan Seva Kendra Logo" 
+                width={80}
+                height={80}
                 className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-20 lg:h-20 object-contain"
+                priority
               />
             </div>
             <div className="min-w-0">

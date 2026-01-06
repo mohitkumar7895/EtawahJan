@@ -3,6 +3,7 @@
 import { MapPin, Phone, Mail, X, ArrowRight } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
+import Image from 'next/image';
 import ContactForm from './ContactForm';
 
 export default function Hero() {
@@ -25,19 +26,25 @@ export default function Hero() {
           <div className="text-center mb-6 sm:mb-8 md:mb-10 relative">
             {/* Logo in corner - Desktop only */}
             <div className="hidden lg:block absolute top-0 left-0">
-              <img 
+              <Image 
                 src="/jan-seva-logo-1.png" 
                 alt="Jan Seva Kendra Logo" 
+                width={176}
+                height={176}
                 className="w-32 h-32 xl:w-40 xl:h-40 2xl:w-44 2xl:h-44 object-contain"
+                priority
               />
             </div>
             
             {/* Mobile/Tablet Layout - Logo centered */}
             <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 md:gap-4 mb-0 px-2 lg:hidden">
-              <img 
+              <Image 
                 src="/jan-seva-logo-1.png" 
                 alt="Jan Seva Kendra Logo" 
+                width={144}
+                height={144}
                 className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 object-contain"
+                priority
               />
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-center whitespace-normal sm:whitespace-nowrap px-1">
                 Welcome to Jan Seva Kendra

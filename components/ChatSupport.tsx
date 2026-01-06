@@ -407,6 +407,7 @@ export default function ChatSupport() {
                                   <p className="text-xs sm:text-sm whitespace-pre-wrap break-words leading-relaxed">{msg.content}</p>
                                 ) : msg.type === 'image' ? (
                                   <div className="relative group">
+                                    {/* eslint-disable-next-line @next/next/no-img-element */}
                                     <img
                                       src={msg.content}
                                       alt="Shared image"

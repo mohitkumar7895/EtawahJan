@@ -2,6 +2,7 @@
 
 import { MapPin, Phone, Mail, Clock, FileText, Users, Shield, Award, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import Link from 'next/link';
+import Image from 'next/image';
 
 export default function Footer() {
   return (
@@ -12,9 +13,11 @@ export default function Footer() {
           {/* About Section */}
           <div className="col-span-2 sm:col-span-2 lg:col-span-1">
             <div className="flex items-center space-x-2 mb-2 sm:mb-3">
-              <img 
+              <Image 
                 src="/jan-seva-logo-1.png" 
                 alt="Jan Seva Kendra Logo" 
+                width={56}
+                height={56}
                 className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 object-contain flex-shrink-0"
               />
               <h3 className="text-sm sm:text-base lg:text-lg font-bold">Jan Seva Kendra</h3>
