@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB, isDBConnected } from '@/lib/db';
 import Vacancy from '@/models/Vacancy';
 import Subscriber from '@/models/Subscriber';
+import Notification from '@/models/Notification';
 import { sendEmail, isEmailConfigured } from '@/lib/emailService';
 import { websiteUpdateTemplate } from '@/lib/emailTemplates';
 
@@ -160,6 +161,30 @@ export async function POST(request: NextRequest) {
         ]) as any;
         
         console.log("✅ Vacancy created successfully:", savedVacancy._id);
+
+        // Create in-app notification
+        try {
+          const notificationMessage = savedVacancy.info 
+            ? `${savedVacancy.title} - ${savedVacancy.info.substring(0, 100)}${savedVacancy.info.length > 100 ? '...' : ''}`
+            : savedVacancy.title;
+          
+          const notificationLink = savedVacancy.link || '';
+          
+          const notification = new Notification({
+            title: `New ${savedVacancy.tag}: ${savedVacancy.title}`,
+            message: notificationMessage,
+            type: 'vacancy',
+            link: notificationLink,
+            relatedId: savedVacancy._id.toString(),
+            isActive: true,
+          });
+          
+          await notification.save();
+          console.log("✅ In-app notification created:", notification._id);
+        } catch (notifError: any) {
+          console.error('❌ Error creating in-app notification:', notifError);
+          // Don't fail the vacancy creation if notification fails
+        }
 
         // Send notifications to all subscribers if email service is configured
         if (isEmailConfigured()) {

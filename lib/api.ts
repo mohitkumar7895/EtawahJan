@@ -210,6 +210,115 @@ export async function deleteVacancy(id: string): Promise<void> {
   }
 }
 
+// Announcements API
+export interface Announcement {
+  _id?: string;
+  id?: string;
+  title: string;
+  description?: string;
+  link?: string;
+  isActive?: boolean;
+  expiresAt?: string;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export async function getAnnouncements(): Promise<Announcement[]> {
+  try {
+    const controller = new AbortController();
+    const timeoutId = setTimeout(() => controller.abort(), 10000);
+    
+    const response = await fetch(`${API_BASE_URL}/api/announcements`, {
+      signal: controller.signal,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+    
+    clearTimeout(timeoutId);
+    
+    if (!response.ok) {
+      return [];
+    }
+    
+    const data = await response.json();
+    
+    if (!Array.isArray(data)) {
+      return [];
+    }
+    
+    return data.map((a: any) => ({
+      ...a,
+      id: a._id || a.id,
+    }));
+  } catch (error: any) {
+    console.warn('Error fetching announcements:', error.message || error);
+    return [];
+  }
+}
+
+export async function createAnnouncement(announcement: Omit<Announcement, '_id' | 'id'>): Promise<Announcement> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 8000);
+
+  try {
+    const response = await fetch(`${API_BASE_URL}/api/announcements`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(announcement),
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.message || errorData.error || 'Failed to create announcement';
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    return { ...data, id: data._id || data.id };
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout. Please try again.');
+    }
+    throw error;
+  }
+}
+
+export async function updateAnnouncement(id: string, announcement: Omit<Announcement, '_id' | 'id'>): Promise<Announcement> {
+  const response = await fetch(`${API_BASE_URL}/api/announcements/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(announcement),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to update announcement');
+  }
+
+  const data = await response.json();
+  return { ...data, id: data._id || data.id };
+}
+
+export async function deleteAnnouncement(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/announcements/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    throw new Error('Failed to delete announcement');
+  }
+}
+
 // Admin API
 export interface Admin {
   _id?: string;
@@ -866,4 +975,40 @@ export async function deleteGovernmentLink(id: string): Promise<void> {
     const errorData = await response.json().catch(() => ({}));
     throw new Error(errorData.error || 'Failed to delete government link');
   }
+}
+
+// Notification API
+export interface Notification {
+  _id?: string;
+  id?: string;
+  title: string;
+  message: string;
+  type: 'vacancy' | 'announcement' | 'update' | 'general';
+  link?: string;
+  relatedId?: string;
+  createdAt?: string;
+}
+
+export async function createNotification(notification: {
+  title: string;
+  message: string;
+  type?: 'vacancy' | 'announcement' | 'update' | 'general';
+  link?: string;
+  relatedId?: string;
+}): Promise<Notification> {
+  const response = await fetch(`/api/notifications`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(notification),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to create notification');
+  }
+
+  const data = await response.json();
+  return data.notification;
 }

@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
+import NotificationBell from './NotificationBell';
 
 export default function Header() {
   const pathname = usePathname();
@@ -22,6 +23,7 @@ export default function Header() {
     { path: '/about', label: 'About' },
     { path: '/services', label: 'Services' },
     { path: '/vacancies', label: 'Vacancies' },
+    { path: '/announcements', label: 'Announcements' },
     { path: '/faq', label: 'FAQ' },
     { path: '/contact', label: 'Contact' },
   ];
@@ -77,6 +79,9 @@ export default function Header() {
 
           {/* Right Side - Phone, Chat & Mobile Menu */}
           <div className="flex items-center space-x-2 sm:space-x-4">
+            {/* Notification Bell */}
+            <NotificationBell />
+            
             {/* Chat Button - Desktop */}
             <button
               onClick={handleChatClick}
