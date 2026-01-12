@@ -428,10 +428,15 @@ export default function AdminPage() {
 
   // Helper function to check if visitor is new (arrived in last 1 minute)
   const isNewVisitor = (visitor: Visitor) => {
-    const firstVisit = new Date(visitor.firstVisit);
-    const now = new Date();
-    const diffInSeconds = (now.getTime() - firstVisit.getTime()) / 1000;
-    return diffInSeconds < 60; // New if arrived in last 60 seconds
+    if (!visitor.firstVisit) return false;
+    try {
+      const firstVisit = new Date(visitor.firstVisit);
+      const now = new Date();
+      const diffInSeconds = (now.getTime() - firstVisit.getTime()) / 1000;
+      return diffInSeconds < 60; // New if arrived in last 60 seconds
+    } catch (error) {
+      return false;
+    }
   };
 
   const loadSelectedChat = async () => {
@@ -1537,18 +1542,24 @@ export default function AdminPage() {
                                     <div className="text-xs text-gray-500 font-mono">{visitor.ipAddress}</div>
                                   </td>
                                   <td className="px-4 py-3">
-                                    <div className="text-sm text-gray-900">
-                                      {new Date(visitor.lastActivity).toLocaleTimeString('en-IN', {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                      })}
-                                    </div>
-                                    <div className="text-xs text-gray-500">
-                                      {new Date(visitor.lastActivity).toLocaleDateString('en-IN', {
-                                        day: 'numeric',
-                                        month: 'short',
-                                      })}
-                                    </div>
+                                    {visitor.lastActivity ? (
+                                      <>
+                                        <div className="text-sm text-gray-900">
+                                          {new Date(visitor.lastActivity).toLocaleTimeString('en-IN', {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                          })}
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                          {new Date(visitor.lastActivity).toLocaleDateString('en-IN', {
+                                            day: 'numeric',
+                                            month: 'short',
+                                          })}
+                                        </div>
+                                      </>
+                                    ) : (
+                                      <div className="text-xs text-gray-400">N/A</div>
+                                    )}
                                   </td>
                                   <td className="px-4 py-3">
                                     <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700">
@@ -1590,7 +1601,7 @@ export default function AdminPage() {
                                     ) : (
                                       <div className="font-semibold text-sm text-gray-900">{visitor.device || 'Desktop'}</div>
                                     )}
-                                    <div className="text-xs text-gray-500">{visitor.browser} • {visitor.os}</div>
+                                    <div className="text-xs text-gray-500">{visitor.browser || 'Unknown'} • {visitor.os || 'Unknown'}</div>
                                   </div>
                                 </div>
                                 <span className="inline-flex items-center px-2 py-1 rounded-full text-xs font-semibold bg-green-100 text-green-700 flex-shrink-0 ml-2">
@@ -1614,12 +1625,16 @@ export default function AdminPage() {
                                 <div className="flex items-center gap-2">
                                   <Clock className="w-3 h-3 text-gray-400" />
                                   <span className="text-xs text-gray-700">
-                                    {new Date(visitor.lastActivity).toLocaleString('en-IN', {
-                                      day: 'numeric',
-                                      month: 'short',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })}
+                                    {visitor.lastActivity ? (
+                                      new Date(visitor.lastActivity).toLocaleString('en-IN', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })
+                                    ) : (
+                                      'N/A'
+                                    )}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">
@@ -1711,19 +1726,25 @@ export default function AdminPage() {
                                     <div className="text-sm text-gray-900 font-mono truncate max-w-xs">{visitor.page || '/'}</div>
                                   </td>
                                   <td className="px-4 py-3">
-                                    <div className="text-sm text-gray-900">
-                                      {new Date(visitor.firstVisit).toLocaleDateString('en-IN', {
-                                        day: 'numeric',
-                                        month: 'short',
-                                        year: 'numeric',
-                                      })}
-                                    </div>
-                                    <div className="text-xs text-gray-500">
-                                      {new Date(visitor.firstVisit).toLocaleTimeString('en-IN', {
-                                        hour: '2-digit',
-                                        minute: '2-digit',
-                                      })}
-                                    </div>
+                                    {visitor.firstVisit ? (
+                                      <>
+                                        <div className="text-sm text-gray-900">
+                                          {new Date(visitor.firstVisit).toLocaleDateString('en-IN', {
+                                            day: 'numeric',
+                                            month: 'short',
+                                            year: 'numeric',
+                                          })}
+                                        </div>
+                                        <div className="text-xs text-gray-500">
+                                          {new Date(visitor.firstVisit).toLocaleTimeString('en-IN', {
+                                            hour: '2-digit',
+                                            minute: '2-digit',
+                                          })}
+                                        </div>
+                                      </>
+                                    ) : (
+                                      <div className="text-xs text-gray-400">N/A</div>
+                                    )}
                                   </td>
                                   <td className="px-4 py-3">
                                     {visitor.isActive ? (
@@ -1773,7 +1794,7 @@ export default function AdminPage() {
                                     ) : (
                                       <div className="font-semibold text-sm text-gray-900">{visitor.device || 'Desktop'}</div>
                                     )}
-                                    <div className="text-xs text-gray-500">{visitor.browser} • {visitor.os}</div>
+                                    <div className="text-xs text-gray-500">{visitor.browser || 'Unknown'} • {visitor.os || 'Unknown'}</div>
                                   </div>
                                 </div>
                                 {visitor.isActive ? (
@@ -1795,12 +1816,16 @@ export default function AdminPage() {
                                 <div className="flex items-center gap-2">
                                   <Clock className="w-3 h-3 text-gray-400" />
                                   <span className="text-xs text-gray-700">
-                                    {new Date(visitor.firstVisit).toLocaleString('en-IN', {
-                                      day: 'numeric',
-                                      month: 'short',
-                                      hour: '2-digit',
-                                      minute: '2-digit',
-                                    })}
+                                    {visitor.firstVisit ? (
+                                      new Date(visitor.firstVisit).toLocaleString('en-IN', {
+                                        day: 'numeric',
+                                        month: 'short',
+                                        hour: '2-digit',
+                                        minute: '2-digit',
+                                      })
+                                    ) : (
+                                      'N/A'
+                                    )}
                                   </span>
                                 </div>
                                 <div className="flex items-center gap-2">

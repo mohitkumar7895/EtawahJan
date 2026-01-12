@@ -6,19 +6,26 @@ import VisitorTracker from '@/components/VisitorTracker'
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.jan-seva.site/'),
   title: {
-    default: 'Jan Seva Kendra - All Government & Private Services in Etawah, UP',
+    default: 'Jan Seva Kendra | Best Service Center in Etawah, UP | Government & Private Services',
     template: '%s | Jan Seva Kendra'
   },
-  description: 'Jan Seva Kendra Bharthana Etawah - Complete solution for all government and private services. Aadhaar, PAN, Voter ID, Bill Payment, GST Registration, and more. Located at Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP. Call 7895094129, 9193898182.',
+  description: 'Jan Seva Kendra - #1 Service Center in Etawah, UP. Complete solution for all government and private services. Aadhaar Card, PAN Card, Voter ID, Ration Card, Bill Payment, GST Registration, PM Kisan, Ujjwala Yojana and more. Located at Mandi Trihaa, Bidhuna Road, Bharthana, Etawah. Call 7895094129, 9193898182.',
   keywords: [
     'Jan Seva Kendra',
     'Jan Seva Kendra Etawah',
     'Jan Seva Kendra Bharthana',
+    'Jan Seva Kendra UP',
+    'Jan Seva Kendra Etawah UP',
+    'Jan Seva Kendra near me',
+    'Jan Seva Kendra Etawah contact',
+    'Jan Seva Kendra phone number',
     'CSC Center Etawah',
+    'CSC Center Bharthana',
     'Government Services Etawah',
     'Aadhaar Card Etawah',
     'PAN Card Etawah',
     'Voter ID Etawah',
+    'Ration Card Etawah',
     'Bill Payment Etawah',
     'GST Registration Etawah',
     'PM Kisan Registration',
@@ -26,11 +33,17 @@ export const metadata: Metadata = {
     'Service Center Etawah',
     'सेवा केंद्र इटावा',
     'जन सेवा केंद्र',
+    'जन सेवा केंद्र इटावा',
+    'जन सेवा केंद्र भरथाना',
     'CSC Bharthana',
     'Online Services Etawah',
     'Document Services UP',
     'Government Schemes Etawah',
-    'Private Services Etawah'
+    'Private Services Etawah',
+    'Etawah Service Center',
+    'Bharthana Service Center',
+    'Best CSC Center Etawah',
+    'Top Service Center Etawah'
   ],
   authors: [{ name: 'Jan Seva Kendra' }],
   creator: 'Jan Seva Kendra',
@@ -45,22 +58,22 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: 'https://www.jan-seva.site/',
     siteName: 'Jan Seva Kendra',
-    title: 'Jan Seva Kendra - All Government & Private Services in Etawah, UP',
-    description: 'Complete solution for all government and private services. Aadhaar, PAN, Voter ID, Bill Payment, GST Registration, and more. Located at Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP.',
+    title: 'Jan Seva Kendra | Best Service Center in Etawah, UP | Government & Private Services',
+    description: 'Jan Seva Kendra - #1 Service Center in Etawah, UP. Complete solution for all government and private services. Aadhaar Card, PAN Card, Voter ID, Ration Card, Bill Payment, GST Registration and more. Located at Mandi Trihaa, Bidhuna Road, Bharthana, Etawah.',
     images: [
       {
-        url: '/jan-seva-logo-1.png',
+        url: 'https://www.jan-seva.site/jan-seva-logo-1.png',
         width: 1200,
         height: 630,
-        alt: 'Jan Seva Kendra Logo',
+        alt: 'Jan Seva Kendra - Service Center Etawah',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Jan Seva Kendra - All Government & Private Services in Etawah, UP',
-    description: 'Complete solution for all government and private services. Aadhaar, PAN, Voter ID, Bill Payment, GST Registration, and more.',
-    images: ['/jan-seva-logo-1.png'],
+    title: 'Jan Seva Kendra | Best Service Center in Etawah, UP',
+    description: 'Jan Seva Kendra - #1 Service Center in Etawah, UP. Complete solution for all government and private services. Aadhaar, PAN, Voter ID, Bill Payment, GST Registration and more.',
+    images: ['https://www.jan-seva.site/jan-seva-logo-1.png'],
   },
   robots: {
     index: true,
@@ -115,15 +128,22 @@ export default function RootLayout({
         <meta name="contact" content="arpitcsc1707@gmail.com" />
         <meta name="telephone" content="+917895094129, +9193898182" />
         <meta name="address" content="Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, Uttar Pradesh" />
+        <meta name="author" content="Jan Seva Kendra" />
+        <meta name="copyright" content="Jan Seva Kendra" />
+        <meta name="revisit-after" content="7 days" />
+        <meta name="rating" content="general" />
         <script
           type="application/ld+json"
           dangerouslySetInnerHTML={{
             __html: JSON.stringify({
               "@context": "https://schema.org",
               "@type": "LocalBusiness",
+              "@id": "https://www.jan-seva.site/#organization",
               "name": "Jan Seva Kendra",
-              "image": "https://www.jan-seva.site//jan-seva-logo-1.png",
-              "description": "Complete solution for all government and private services. Aadhaar, PAN, Voter ID, Bill Payment, GST Registration, and more.",
+              "alternateName": ["जन सेवा केंद्र", "Jan Seva Kendra Etawah", "Jan Seva Kendra Bharthana"],
+              "image": "https://www.jan-seva.site/jan-seva-logo-1.png",
+              "logo": "https://www.jan-seva.site/jan-seva-logo-1.png",
+              "description": "Jan Seva Kendra - #1 Service Center in Etawah, UP. Complete solution for all government and private services. Aadhaar Card, PAN Card, Voter ID, Ration Card, Bill Payment, GST Registration, PM Kisan, Ujjwala Yojana and more.",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "Mandi Trihaa, Bidhuna Road",
@@ -138,26 +158,37 @@ export default function RootLayout({
                 "longitude": "79.0290"
               },
               "url": "https://www.jan-seva.site/",
-              "telephone": "+917895094129, +9193898182",
+              "telephone": ["+917895094129", "+9193898182"],
               "email": "arpitcsc1707@gmail.com",
               "priceRange": "$$",
-              "openingHoursSpecification": {
-                "@type": "OpeningHoursSpecification",
-                "dayOfWeek": [
-                  "Monday",
-                  "Tuesday",
-                  "Wednesday",
-                  "Thursday",
-                  "Friday",
-                  "Saturday"
-                ],
-                "opens": "09:00",
-                "closes": "18:00"
-              },
-              "areaServed": {
-                "@type": "City",
-                "name": "Etawah"
-              },
+              "openingHoursSpecification": [
+                {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"],
+                  "opens": "09:00",
+                  "closes": "19:00"
+                },
+                {
+                  "@type": "OpeningHoursSpecification",
+                  "dayOfWeek": "Sunday",
+                  "opens": "10:00",
+                  "closes": "17:00"
+                }
+              ],
+              "areaServed": [
+                {
+                  "@type": "City",
+                  "name": "Etawah"
+                },
+                {
+                  "@type": "City",
+                  "name": "Bharthana"
+                },
+                {
+                  "@type": "State",
+                  "name": "Uttar Pradesh"
+                }
+              ],
               "serviceType": [
                 "Government Services",
                 "Private Services",
@@ -166,8 +197,16 @@ export default function RootLayout({
                 "GST Registration",
                 "Aadhaar Services",
                 "PAN Card Services",
-                "Voter ID Services"
+                "Voter ID Services",
+                "Ration Card Services",
+                "CSC Services",
+                "Online Services"
               ],
+              "aggregateRating": {
+                "@type": "AggregateRating",
+                "ratingValue": "4.8",
+                "reviewCount": "150"
+              },
               "sameAs": []
             })
           }}

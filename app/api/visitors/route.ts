@@ -152,14 +152,32 @@ export async function GET(request: NextRequest) {
     // Get stats
     const totalVisitors = await Visitor.countDocuments();
     const activeCount = activeVisitors.length;
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
     const todayVisitors = await Visitor.countDocuments({
-      firstVisit: { $gte: new Date(new Date().setHours(0, 0, 0, 0)) }
+      firstVisit: { $gte: todayStart }
     });
     
     return NextResponse.json({
       success: true,
-      activeVisitors,
-      allVisitors: allVisitors.slice(0, 100), // Limit to 100 for performance
+      activeVisitors: activeVisitors.map((v: any) => ({
+        ...v,
+        _id: v._id?.toString(),
+        id: v._id?.toString(),
+        firstVisit: v.firstVisit || v.createdAt || new Date(),
+        lastActivity: v.lastActivity || v.updatedAt || new Date(),
+        visitCount: v.visitCount || 1,
+        isActive: v.isActive !== undefined ? v.isActive : true,
+      })),
+      allVisitors: allVisitors.slice(0, 100).map((v: any) => ({
+        ...v,
+        _id: v._id?.toString(),
+        id: v._id?.toString(),
+        firstVisit: v.firstVisit || v.createdAt || new Date(),
+        lastActivity: v.lastActivity || v.updatedAt || new Date(),
+        visitCount: v.visitCount || 1,
+        isActive: v.isActive !== undefined ? v.isActive : false,
+      })),
       stats: {
         total: totalVisitors,
         active: activeCount,
