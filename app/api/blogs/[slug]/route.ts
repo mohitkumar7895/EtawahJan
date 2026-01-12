@@ -25,7 +25,7 @@ export async function GET(
 
     const { slug } = params;
 
-    const blog = await Blog.findOne({ slug }).lean();
+    const blog = await Blog.findOne({ slug }).lean() as any;
 
     if (!blog) {
       return NextResponse.json(
@@ -39,7 +39,7 @@ export async function GET(
 
     // Get related blogs (same category, exclude current)
     const relatedBlogs = await Blog.find({
-      category: blog.category,
+      category: blog.category || 'General',
       slug: { $ne: slug },
       isPublished: true,
       publishedAt: { $lte: new Date() },

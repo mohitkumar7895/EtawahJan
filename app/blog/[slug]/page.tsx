@@ -21,7 +21,7 @@ export async function generateMetadata({ params }: BlogPostPageProps): Promise<M
       }
     }
 
-    const blog = await Blog.findOne({ slug: params.slug, isPublished: true }).lean();
+    const blog = await Blog.findOne({ slug: params.slug, isPublished: true }).lean() as any;
 
     if (!blog) {
       return {
@@ -93,9 +93,9 @@ export async function generateStaticParams() {
     const blogs = await Blog.find({ isPublished: true })
       .select('slug')
       .limit(50) // Generate static pages for top 50 posts
-      .lean();
+      .lean() as any[];
 
-    return blogs.map((blog) => ({
+    return blogs.map((blog: any) => ({
       slug: blog.slug,
     }));
   } catch (error) {
@@ -103,6 +103,9 @@ export async function generateStaticParams() {
     return [];
   }
 }
+
+export const dynamic = 'force-dynamic';
+export const dynamicParams = true;
 
 export default async function BlogPostPage({ params }: BlogPostPageProps) {
   return (

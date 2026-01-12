@@ -3,6 +3,8 @@ import Footer from '@/components/Footer';
 import BlogPageComponent from '@/components/BlogPage';
 import type { Metadata } from 'next';
 
+export const dynamic = 'force-dynamic';
+
 export const metadata: Metadata = {
   title: 'Blog - Jan Seva Kendra',
   description: 'Read informative articles about government services, document services, schemes, and tips from Jan Seva Kendra Etawah. Stay updated with latest news and guides.',

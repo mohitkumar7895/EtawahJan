@@ -70,9 +70,9 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .select('slug updatedAt publishedAt')
         .sort({ publishedAt: -1 })
         .limit(100) // Limit to 100 most recent posts for sitemap
-        .lean()
+        .lean() as any[]
 
-      const blogPages: MetadataRoute.Sitemap = blogs.map((blog) => ({
+      const blogPages: MetadataRoute.Sitemap = blogs.map((blog: any) => ({
         url: `${baseUrl}blog/${blog.slug}`,
         lastModified: blog.updatedAt || blog.publishedAt || new Date(),
         changeFrequency: 'weekly' as const,
