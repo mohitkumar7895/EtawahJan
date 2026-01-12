@@ -81,11 +81,11 @@ function PaymentFailedContent() {
                     If you continue to experience issues, please contact our support team.
                   </p>
                   <a
-                    href="tel:9193898182"
+                    href="tel:7895094129"
                     className="inline-flex items-center gap-2 bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-4 rounded-lg transition-colors"
                   >
                     <Phone className="w-4 h-4" />
-                    Call 9193898182
+                    Call 7895094129, 9193898182
                   </a>
                 </div>
               </div>

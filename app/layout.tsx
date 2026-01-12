@@ -9,7 +9,7 @@ export const metadata: Metadata = {
     default: 'Jan Seva Kendra - All Government & Private Services in Etawah, UP',
     template: '%s | Jan Seva Kendra'
   },
-  description: 'Jan Seva Kendra Bharthana Etawah - Complete solution for all government and private services. Aadhaar, PAN, Voter ID, Bill Payment, GST Registration, and more. Located at Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP. Call 9193898182.',
+  description: 'Jan Seva Kendra Bharthana Etawah - Complete solution for all government and private services. Aadhaar, PAN, Voter ID, Bill Payment, GST Registration, and more. Located at Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP. Call 7895094129, 9193898182.',
   keywords: [
     'Jan Seva Kendra',
     'Jan Seva Kendra Etawah',
@@ -113,7 +113,7 @@ export default function RootLayout({
         <meta name="ICBM" content="26.7855, 79.0290" />
         <meta name="language" content="Hindi, English" />
         <meta name="contact" content="arpitcsc1707@gmail.com" />
-        <meta name="telephone" content="+9193898182" />
+        <meta name="telephone" content="+917895094129, +9193898182" />
         <meta name="address" content="Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, Uttar Pradesh" />
         <script
           type="application/ld+json"
@@ -138,7 +138,7 @@ export default function RootLayout({
                 "longitude": "79.0290"
               },
               "url": "https://www.jan-seva.site/",
-              "telephone": "+9193898182",
+              "telephone": "+917895094129, +9193898182",
               "email": "arpitcsc1707@gmail.com",
               "priceRange": "$$",
               "openingHoursSpecification": {

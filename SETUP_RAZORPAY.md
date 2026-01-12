@@ -88,7 +88,7 @@ RAZORPAY_KEY_ID = rzp_test_abc123
 
 ## 📞 Help Chahiye?
 
-Contact: 9193898182
+Contact: 7895094129, 9193898182
 
 ---
 
@@ -103,6 +103,7 @@ Contact: 9193898182
 - [ ] Payment test kiya
 
 Sab tick ho gaya? Phir payment kaam karega! 🎉
+
 
 
 

@@ -1012,3 +1012,128 @@ export async function createNotification(notification: {
   const data = await response.json();
   return data.notification;
 }
+
+// Blog API
+export interface Blog {
+  _id?: string;
+  id?: string;
+  title: string;
+  slug: string;
+  excerpt: string;
+  content: string;
+  featuredImage?: string;
+  category: string;
+  tags?: string[];
+  author?: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
+  isPublished?: boolean;
+  publishedAt?: string;
+  views?: number;
+  readingTime?: number;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export async function getBlogs(params?: {
+  page?: number;
+  limit?: number;
+  category?: string;
+  tag?: string;
+  search?: string;
+  published?: boolean;
+}): Promise<{ blogs: Blog[]; pagination: any }> {
+  try {
+    const queryParams = new URLSearchParams();
+    if (params?.page) queryParams.append('page', params.page.toString());
+    if (params?.limit) queryParams.append('limit', params.limit.toString());
+    if (params?.category) queryParams.append('category', params.category);
+    if (params?.tag) queryParams.append('tag', params.tag);
+    if (params?.search) queryParams.append('search', params.search);
+    if (params?.published !== undefined) queryParams.append('published', params.published.toString());
+
+    const response = await fetch(`${API_BASE_URL}/api/blogs?${queryParams.toString()}`, {
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      cache: 'no-store',
+    });
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch blogs');
+    }
+
+    const data = await response.json();
+    return {
+      blogs: data.blogs.map((b: any) => ({ ...b, id: b._id || b.id })),
+      pagination: data.pagination,
+    };
+  } catch (error: any) {
+    console.error('Error fetching blogs:', error);
+    return { blogs: [], pagination: { page: 1, limit: 10, total: 0, pages: 0 } };
+  }
+}
+
+export async function getBlog(slug: string): Promise<Blog> {
+  const response = await fetch(`${API_BASE_URL}/api/blogs/${slug}`, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to fetch blog');
+  }
+
+  const data = await response.json();
+  return { ...data.blog, id: data.blog._id || data.blog.id };
+}
+
+export async function createBlog(blog: Omit<Blog, '_id' | 'id' | 'createdAt' | 'updatedAt'>): Promise<Blog> {
+  const response = await fetch(`${API_BASE_URL}/api/blogs`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(blog),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to create blog');
+  }
+
+  const data = await response.json();
+  return { ...data.blog, id: data.blog._id || data.blog.id };
+}
+
+export async function updateBlog(slug: string, blog: Partial<Blog>): Promise<Blog> {
+  const response = await fetch(`${API_BASE_URL}/api/blogs/${slug}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(blog),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to update blog');
+  }
+
+  const data = await response.json();
+  return { ...data.blog, id: data.blog._id || data.blog.id };
+}
+
+export async function deleteBlog(slug: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/blogs/${slug}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to delete blog');
+  }
+}

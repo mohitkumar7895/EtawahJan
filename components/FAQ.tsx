@@ -22,8 +22,8 @@ const faqs: FAQItem[] = [
   {
     question: 'How can I apply for a service?',
     questionHindi: 'मैं सेवा के लिए कैसे आवेदन कर सकता हूं?',
-    answer: 'You can apply for any service by visiting our website, selecting the service you need, filling out the application form with your details, and submitting it. Our team will contact you soon. You can also visit our center directly or call us at 9193898182.',
-    answerHindi: 'आप हमारी वेबसाइट पर जाकर, अपनी आवश्यक सेवा का चयन करके, अपनी जानकारी के साथ आवेदन फॉर्म भरकर और सबमिट करके किसी भी सेवा के लिए आवेदन कर सकते हैं। हमारी टीम जल्द ही आपसे संपर्क करेगी। आप सीधे हमारे केंद्र पर भी जा सकते हैं या हमें 9193898182 पर कॉल कर सकते हैं।',
+    answer: 'You can apply for any service by visiting our website, selecting the service you need, filling out the application form with your details, and submitting it. Our team will contact you soon. You can also visit our center directly or call us at 7895094129, 9193898182.',
+    answerHindi: 'आप हमारी वेबसाइट पर जाकर, अपनी आवश्यक सेवा का चयन करके, अपनी जानकारी के साथ आवेदन फॉर्म भरकर और सबमिट करके किसी भी सेवा के लिए आवेदन कर सकते हैं। हमारी टीम जल्द ही आपसे संपर्क करेगी। आप सीधे हमारे केंद्र पर भी जा सकते हैं या हमें 7895094129, 9193898182 पर कॉल कर सकते हैं।',
     category: 'General',
   },
   {
@@ -216,10 +216,10 @@ export default function FAQ() {
             </p>
             <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
               <a
-                href="tel:9193898182"
+                href="tel:7895094129"
                 className="bg-white text-blue-600 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition text-center"
               >
-                📞 Call: 9193898182
+                📞 Call: 7895094129, 9193898182
               </a>
               <a
                 href="/contact"

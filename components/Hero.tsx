@@ -120,8 +120,8 @@ export default function Hero() {
                 </div>
                 <div className="min-w-0 flex-1">
                   <h3 className="font-semibold mb-1 sm:mb-2 text-xs sm:text-sm md:text-base">Phone</h3>
-                  <a href="tel:9193898182" className="text-yellow-300 hover:text-yellow-200 active:text-yellow-100 font-bold text-sm sm:text-base md:text-lg transition block break-all">
-                    9193898182
+                  <a href="tel:7895094129" className="text-yellow-300 hover:text-yellow-200 active:text-yellow-100 font-bold text-sm sm:text-base md:text-lg transition block break-all">
+                    7895094129, 9193898182
                   </a>
                 </div>
               </div>
@@ -197,8 +197,8 @@ export default function Hero() {
                 <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs text-gray-600">
                   <Phone className="w-3.5 h-3.5 text-blue-600 flex-shrink-0" />
                   <span>Need help? Call us at</span>
-                  <a href="tel:9193898182" className="font-bold text-blue-600 hover:text-blue-700 transition break-all">
-                    9193898182
+                  <a href="tel:7895094129" className="font-bold text-blue-600 hover:text-blue-700 transition break-all">
+                    7895094129, 9193898182
                   </a>
                 </div>
               </div>

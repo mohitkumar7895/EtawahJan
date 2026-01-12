@@ -105,7 +105,7 @@ export async function GET(request: NextRequest) {
           </div>
           <div class="footer">
             <p style="margin: 0; font-size: 18px; font-weight: bold;">Jan Seva Kendra - Etawah</p>
-            <p style="margin: 10px 0 0 0;">📞 9193898182</p>
+            <p style="margin: 10px 0 0 0;">📞 7895094129, 9193898182</p>
           </div>
         </div>
       </body>
@@ -159,6 +159,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   return GET(request);
 }
+
 
 
 

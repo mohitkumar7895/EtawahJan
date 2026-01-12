@@ -73,11 +73,12 @@ npm run dev
 ## 📞 Help:
 
 - Razorpay Support: support@razorpay.com
-- Phone: 9193898182
+- Phone: 7895094129, 9193898182
 
 ---
 
 **Abhi Test Mode Chal Raha Hai** - Real payments ke liye upar wale steps follow karo!
+
 
 
 

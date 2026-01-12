@@ -50,7 +50,7 @@ Thank you for your payment!
 Jan Seva Kendra
 Mandi Trihaa, Bidhuna Road
 Bharthana, Etawah, UP
-Phone: 9193898182
+Phone: 7895094129, 9193898182
     `;
 
     // Create and download file
@@ -143,10 +143,10 @@ Phone: 9193898182
               <p className="text-xs text-gray-600 text-center mt-2">
                 For any queries, contact us at{' '}
                 <a
-                  href="tel:9193898182"
+                  href="tel:7895094129"
                   className="text-blue-600 hover:text-blue-700 font-semibold"
                 >
-                  9193898182
+                  7895094129, 9193898182
                 </a>
               </p>
             </div>

@@ -1,8 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle, Eye, Globe, Monitor, Smartphone, Tablet } from 'lucide-react';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement } from '@/lib/api';
+import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle, Eye, Globe, Monitor, Smartphone, Tablet, BookOpen } from 'lucide-react';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, type Blog } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'adminmohit1234';
@@ -26,7 +26,7 @@ export default function AdminPage() {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [adminForm, setAdminForm] = useState({ username: '', password: '' });
   
-  const [activeTab, setActiveTab] = useState<'vacancies' | 'announcements' | 'admins' | 'chats' | 'payments' | 'visitors' | 'government-links'>('vacancies');
+  const [activeTab, setActiveTab] = useState<'vacancies' | 'announcements' | 'admins' | 'chats' | 'payments' | 'visitors' | 'government-links' | 'blogs'>('vacancies');
   
   // Payment state
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -51,6 +51,24 @@ export default function AdminPage() {
   const [linkForm, setLinkForm] = useState({ name: '', url: '', icon: '🔗', description: '', category: 'General', order: 0 });
   const [editingLinkId, setEditingLinkId] = useState<string | null>(null);
 
+  // Blog state
+  const [blogs, setBlogs] = useState<Blog[]>([]);
+  const [blogForm, setBlogForm] = useState({
+    title: '',
+    slug: '',
+    excerpt: '',
+    content: '',
+    featuredImage: '',
+    category: 'Government Services',
+    tags: '',
+    author: 'Jan Seva Kendra',
+    metaTitle: '',
+    metaDescription: '',
+    keywords: '',
+    isPublished: false,
+  });
+  const [editingBlogSlug, setEditingBlogSlug] = useState<string | null>(null);
+
   useEffect(() => {
     if (isAuthed) {
       loadVacanciesFromAPI();
@@ -69,6 +87,9 @@ export default function AdminPage() {
       }
       if (activeTab === 'announcements') {
         loadAnnouncementsFromAPI();
+      }
+      if (activeTab === 'blogs') {
+        loadBlogsFromAPI();
       }
     }
   }, [isAuthed, activeTab]);
@@ -617,6 +638,128 @@ export default function AdminPage() {
     }
   };
 
+  // Blog functions
+  const loadBlogsFromAPI = async () => {
+    try {
+      const data = await getBlogs({ limit: 100, published: false });
+      setBlogs(data.blogs);
+    } catch (err) {
+      console.error('Error loading blogs:', err);
+      setBlogs([]);
+    }
+  };
+
+  const handleSubmitBlog = async () => {
+    if (!blogForm.title.trim() || !blogForm.slug.trim() || !blogForm.excerpt.trim() || !blogForm.content.trim()) {
+      setError('Title, Slug, Excerpt, and Content are required');
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const blogData = {
+        title: blogForm.title.trim(),
+        slug: blogForm.slug.trim().toLowerCase().replace(/\s+/g, '-'),
+        excerpt: blogForm.excerpt.trim(),
+        content: blogForm.content.trim(),
+        featuredImage: blogForm.featuredImage.trim() || undefined,
+        category: blogForm.category,
+        tags: blogForm.tags.split(',').map(t => t.trim()).filter(t => t),
+        author: blogForm.author.trim() || 'Jan Seva Kendra',
+        metaTitle: blogForm.metaTitle.trim() || blogForm.title.trim(),
+        metaDescription: blogForm.metaDescription.trim() || blogForm.excerpt.trim().substring(0, 160),
+        keywords: blogForm.keywords.split(',').map(k => k.trim()).filter(k => k),
+        isPublished: blogForm.isPublished,
+      };
+
+      if (editingBlogSlug) {
+        await updateBlog(editingBlogSlug, blogData);
+      } else {
+        await createBlog(blogData);
+      }
+      await loadBlogsFromAPI();
+      setBlogForm({
+        title: '',
+        slug: '',
+        excerpt: '',
+        content: '',
+        featuredImage: '',
+        category: 'Government Services',
+        tags: '',
+        author: 'Jan Seva Kendra',
+        metaTitle: '',
+        metaDescription: '',
+        keywords: '',
+        isPublished: false,
+      });
+      setEditingBlogSlug(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save blog');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleEditBlog = async (slug: string) => {
+    try {
+      const blog = await getBlog(slug);
+      setBlogForm({
+        title: blog.title,
+        slug: blog.slug,
+        excerpt: blog.excerpt,
+        content: blog.content,
+        featuredImage: blog.featuredImage || '',
+        category: blog.category,
+        tags: blog.tags?.join(', ') || '',
+        author: blog.author || 'Jan Seva Kendra',
+        metaTitle: blog.metaTitle || '',
+        metaDescription: blog.metaDescription || '',
+        keywords: blog.keywords?.join(', ') || '',
+        isPublished: blog.isPublished || false,
+      });
+      setEditingBlogSlug(slug);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load blog');
+    }
+  };
+
+  const handleDeleteBlog = async (slug: string) => {
+    if (!confirm('Are you sure you want to delete this blog post?')) {
+      return;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      await deleteBlog(slug);
+      await loadBlogsFromAPI();
+      if (editingBlogSlug === slug) {
+        setEditingBlogSlug(null);
+        setBlogForm({
+          title: '',
+          slug: '',
+          excerpt: '',
+          content: '',
+          featuredImage: '',
+          category: 'Government Services',
+          tags: '',
+          author: 'Jan Seva Kendra',
+          metaTitle: '',
+          metaDescription: '',
+          keywords: '',
+          isPublished: false,
+        });
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete blog');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gray-50">
       <header className="bg-white shadow sticky top-0 z-50">
@@ -724,6 +867,17 @@ export default function AdminPage() {
                   <Globe className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                   <span className="hidden sm:inline">Gov Links</span>
                   <span className="sm:hidden">Links</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('blogs')}
+                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
+                    activeTab === 'blogs'
+                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
+                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                  }`}
+                >
+                  <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span>Blog</span>
                 </button>
               </nav>
             </div>
@@ -2146,6 +2300,256 @@ export default function AdminPage() {
                       </div>
                     )}
                   </div>
+                </div>
+              </div>
+            )}
+
+            {/* Blog Tab */}
+            {activeTab === 'blogs' && (
+              <div className="space-y-4 sm:space-y-6">
+                {/* Form */}
+                <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 sm:p-6">
+                  <h2 className="text-lg sm:text-xl font-bold mb-4 sm:mb-6 flex items-center gap-2">
+                    <BookOpen className="w-5 h-5" />
+                    {editingBlogSlug ? 'Edit Blog Post' : 'Create New Blog Post'}
+                  </h2>
+                  <div className="space-y-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Title *</label>
+                        <input
+                          type="text"
+                          value={blogForm.title}
+                          onChange={(e) => setBlogForm({ ...blogForm, title: e.target.value })}
+                          placeholder="Blog Title"
+                          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Slug * (URL-friendly)</label>
+                        <input
+                          type="text"
+                          value={blogForm.slug}
+                          onChange={(e) => setBlogForm({ ...blogForm, slug: e.target.value.toLowerCase().replace(/\s+/g, '-') })}
+                          placeholder="blog-post-slug"
+                          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Excerpt * (Short description, max 300 chars)</label>
+                      <textarea
+                        value={blogForm.excerpt}
+                        onChange={(e) => setBlogForm({ ...blogForm, excerpt: e.target.value })}
+                        placeholder="Short description of the blog post..."
+                        rows={3}
+                        maxLength={300}
+                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">{blogForm.excerpt.length}/300</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Content * (HTML supported)</label>
+                      <textarea
+                        value={blogForm.content}
+                        onChange={(e) => setBlogForm({ ...blogForm, content: e.target.value })}
+                        placeholder="<p>Your blog content here...</p>"
+                        rows={10}
+                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500 font-mono"
+                      />
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Category *</label>
+                        <select
+                          value={blogForm.category}
+                          onChange={(e) => setBlogForm({ ...blogForm, category: e.target.value })}
+                          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500"
+                        >
+                          <option value="Government Services">Government Services</option>
+                          <option value="Document Services">Document Services</option>
+                          <option value="Schemes & Benefits">Schemes & Benefits</option>
+                          <option value="Tips & Guides">Tips & Guides</option>
+                          <option value="News & Updates">News & Updates</option>
+                          <option value="General">General</option>
+                        </select>
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Featured Image URL</label>
+                        <input
+                          type="url"
+                          value={blogForm.featuredImage}
+                          onChange={(e) => setBlogForm({ ...blogForm, featuredImage: e.target.value })}
+                          placeholder="https://example.com/image.jpg"
+                          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Tags (comma-separated)</label>
+                        <input
+                          type="text"
+                          value={blogForm.tags}
+                          onChange={(e) => setBlogForm({ ...blogForm, tags: e.target.value })}
+                          placeholder="Aadhaar, PAN Card, Documents"
+                          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Author</label>
+                        <input
+                          type="text"
+                          value={blogForm.author}
+                          onChange={(e) => setBlogForm({ ...blogForm, author: e.target.value })}
+                          placeholder="Jan Seva Kendra"
+                          className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Meta Title (SEO)</label>
+                      <input
+                        type="text"
+                        value={blogForm.metaTitle}
+                        onChange={(e) => setBlogForm({ ...blogForm, metaTitle: e.target.value })}
+                        placeholder="Leave empty to use title"
+                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Meta Description (SEO, max 160 chars)</label>
+                      <textarea
+                        value={blogForm.metaDescription}
+                        onChange={(e) => setBlogForm({ ...blogForm, metaDescription: e.target.value })}
+                        placeholder="Leave empty to use excerpt"
+                        rows={2}
+                        maxLength={160}
+                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500"
+                      />
+                      <p className="text-xs text-gray-500 mt-1">{blogForm.metaDescription.length}/160</p>
+                    </div>
+                    <div>
+                      <label className="block text-sm font-semibold text-gray-700 mb-1">Keywords (SEO, comma-separated)</label>
+                      <input
+                        type="text"
+                        value={blogForm.keywords}
+                        onChange={(e) => setBlogForm({ ...blogForm, keywords: e.target.value })}
+                        placeholder="keyword1, keyword2, keyword3"
+                        className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500"
+                      />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <input
+                        type="checkbox"
+                        id="isPublished"
+                        checked={blogForm.isPublished}
+                        onChange={(e) => setBlogForm({ ...blogForm, isPublished: e.target.checked })}
+                        className="w-4 h-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500"
+                      />
+                      <label htmlFor="isPublished" className="text-sm font-semibold text-gray-700">
+                        Publish immediately
+                      </label>
+                    </div>
+                    <div className="flex gap-2">
+                      <button
+                        onClick={handleSubmitBlog}
+                        disabled={loading}
+                        className="px-6 py-2 bg-blue-600 text-white rounded-lg font-semibold hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+                      >
+                        {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Plus className="w-4 h-4" />}
+                        {editingBlogSlug ? 'Update Blog' : 'Create Blog'}
+                      </button>
+                      {editingBlogSlug && (
+                        <button
+                          onClick={() => {
+                            setEditingBlogSlug(null);
+                            setBlogForm({
+                              title: '',
+                              slug: '',
+                              excerpt: '',
+                              content: '',
+                              featuredImage: '',
+                              category: 'Government Services',
+                              tags: '',
+                              author: 'Jan Seva Kendra',
+                              metaTitle: '',
+                              metaDescription: '',
+                              keywords: '',
+                              isPublished: false,
+                            });
+                          }}
+                          className="px-6 py-2 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600"
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  </div>
+                </div>
+
+                {/* Blog List */}
+                <div className="bg-white rounded-lg shadow-lg border border-gray-200 p-4 sm:p-6">
+                  <h2 className="text-lg sm:text-xl font-bold mb-4">All Blog Posts ({blogs.length})</h2>
+                  {blogs.length === 0 ? (
+                    <p className="text-gray-500 text-center py-8">No blog posts yet. Create your first blog post above!</p>
+                  ) : (
+                    <div className="space-y-3">
+                      {blogs.map((blog) => (
+                        <div
+                          key={blog.id || blog._id}
+                          className="border border-gray-200 rounded-lg p-4 hover:bg-gray-50 transition"
+                        >
+                          <div className="flex items-start justify-between gap-4">
+                            <div className="flex-1">
+                              <div className="flex items-center gap-2 mb-2">
+                                <h3 className="font-bold text-gray-900">{blog.title}</h3>
+                                <span className={`px-2 py-1 rounded text-xs font-semibold ${
+                                  blog.isPublished ? 'bg-green-100 text-green-700' : 'bg-yellow-100 text-yellow-700'
+                                }`}>
+                                  {blog.isPublished ? 'Published' : 'Draft'}
+                                </span>
+                                <span className="px-2 py-1 bg-blue-100 text-blue-700 rounded text-xs font-semibold">
+                                  {blog.category}
+                                </span>
+                              </div>
+                              <p className="text-sm text-gray-600 mb-2 line-clamp-2">{blog.excerpt}</p>
+                              <div className="flex items-center gap-4 text-xs text-gray-500">
+                                <span>Slug: /blog/{blog.slug}</span>
+                                {blog.views && <span>Views: {blog.views}</span>}
+                                {blog.readingTime && <span>Reading: {blog.readingTime} min</span>}
+                              </div>
+                            </div>
+                            <div className="flex gap-2">
+                              <a
+                                href={`/blog/${blog.slug}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="p-2 text-blue-600 hover:bg-blue-50 rounded"
+                                title="View"
+                              >
+                                <Eye className="w-4 h-4" />
+                              </a>
+                              <button
+                                onClick={() => handleEditBlog(blog.slug)}
+                                className="p-2 text-green-600 hover:bg-green-50 rounded"
+                                title="Edit"
+                              >
+                                <Edit className="w-4 h-4" />
+                              </button>
+                              <button
+                                onClick={() => handleDeleteBlog(blog.slug)}
+                                className="p-2 text-red-600 hover:bg-red-50 rounded"
+                                title="Delete"
+                              >
+                                <Trash2 className="w-4 h-4" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
                 </div>
               </div>
             )}

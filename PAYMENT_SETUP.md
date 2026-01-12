@@ -89,7 +89,8 @@ For Razorpay support:
 - Support: support@razorpay.com
 
 For application support:
-- Contact: 9193898182
+- Contact: 7895094129, 9193898182
+
 
 
 
