@@ -156,7 +156,7 @@ export const serviceApplicationTemplate = (data: any) => `
         </div>
         <div class="footer">
             <p><strong>Jan Seva Kendra - Etawah</strong></p>
-            <p>📞 Contact: <strong>7895094129, 9193898182</strong></p>
+            <p>📞 Contact: <strong>9193898182, 7895094129</strong></p>
             <p>📍 Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP</p>
             <p style="margin-top: 10px; font-size: 12px;">
                 This is an automated email. Please respond to the applicant directly.
@@ -272,7 +272,7 @@ export const contactFormTemplate = (data: any) => `
 
             <div class="footer">
                 <p>This is an automated message from Jun Seva Kendra</p>
-                <p>📞 Contact: 7895094129, 9193898182</p>
+                <p>📞 Contact: 9193898182, 7895094129</p>
             </div>
         </div>
     </div>
@@ -429,7 +429,7 @@ export const userConfirmationTemplate = (data: any) => `
 
             <div class="footer">
                 <p><strong>Jan Seva Kendra - Etawah</strong></p>
-                <p>📞 Contact: <strong>7895094129, 9193898182</strong></p>
+                <p>📞 Contact: <strong>9193898182, 7895094129</strong></p>
                 <p>📍 Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP</p>
                 <p style="margin-top: 15px; font-size: 12px; color: #9ca3af;">
                     यह एक स्वचालित ईमेल है। कृपया इस ईमेल का जवाब न दें।<br/>
@@ -548,7 +548,7 @@ export const websiteUpdateTemplate = (data: any) => `
 
             <div class="footer">
                 <p><strong>Jan Seva Kendra - Etawah</strong></p>
-                <p>📞 Contact: <strong>7895094129, 9193898182</strong></p>
+                <p>📞 Contact: <strong>9193898182, 7895094129</strong></p>
                 <p>📍 Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP</p>
                 <p style="margin-top: 15px; font-size: 12px; color: #9ca3af;">
                     यह एक स्वचालित नोटिफिकेशन है।<br/>

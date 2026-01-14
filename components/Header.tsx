@@ -104,16 +104,16 @@ export default function Header() {
 
             {/* Phone Number - Desktop */}
             <a 
-              href="tel:7895094129" 
+              href="tel:9193898182" 
               className="hidden md:flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition group"
             >
               <Phone className="w-4 h-4 group-hover:scale-110 transition" />
-              <span className="font-semibold text-sm">7895094129, 9193898182</span>
+              <span className="font-semibold text-sm">9193898182, 7895094129</span>
             </a>
 
             {/* Call Button - Mobile */}
             <a 
-              href="tel:7895094129" 
+              href="tel:9193898182" 
               className="md:hidden bg-white/10 hover:bg-white/20 p-2 rounded-lg transition"
               aria-label="Call"
             >
@@ -164,12 +164,12 @@ export default function Header() {
                 <span>Chat Support</span>
               </button>
               <a 
-                href="tel:7895094129"
+                href="tel:9193898182"
                 onClick={() => setMobileMenuOpen(false)}
                 className="flex items-center justify-center space-x-2 px-4 py-3 bg-blue-600 hover:bg-blue-700 rounded-lg font-semibold transition mt-2"
               >
                 <Phone className="w-5 h-5" />
-                <span>Call Now: 7895094129, 9193898182</span>
+                <span>Call Now: 9193898182, 7895094129</span>
               </a>
             </nav>
           </div>

@@ -7,7 +7,7 @@ import { join } from 'path';
 import { existsSync } from 'fs';
 
 // Admin phone numbers
-const ADMIN_PHONES = ['7895094129', '9193898182'];
+const ADMIN_PHONES = ['9193898182', '7895094129'];
 
 /**
  * POST /api/chats/upload

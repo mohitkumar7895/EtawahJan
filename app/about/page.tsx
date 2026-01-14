@@ -125,7 +125,7 @@ export default function AboutPage() {
                   <div>
                     <h3 className="text-lg sm:text-xl font-semibold mb-2 sm:mb-3">Contact Information</h3>
                     <p className="text-sm sm:text-base text-blue-100 mb-2">
-                      <strong>Phone:</strong> <a href="tel:7895094129" className="hover:text-white transition break-all">7895094129, 9193898182</a>
+                      <strong>Phone:</strong> <a href="tel:9193898182" className="hover:text-white transition break-all">9193898182, 7895094129</a>
                     </p>
                     <p className="text-sm sm:text-base text-blue-100">
                       <strong>Email:</strong> <a href="mailto:arpitcsc1707@gmail.com" className="hover:text-white transition break-all">arpitcsc1707@gmail.com</a>

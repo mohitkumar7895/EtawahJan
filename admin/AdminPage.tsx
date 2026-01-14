@@ -1869,7 +1869,7 @@ export default function AdminPage() {
                     </div>
                     <div className="flex items-center gap-2 text-xs text-blue-100">
                       <Phone className="w-3 h-3" />
-                      <span>7895094129, 9193898182</span>
+                      <span>9193898182, 7895094129</span>
                     </div>
                     {chats.length > 0 && (
                       <div className="mt-3 pt-3 border-t border-blue-400/30">

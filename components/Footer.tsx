@@ -114,8 +114,8 @@ export default function Footer() {
               </div>
               <div className="flex items-center space-x-1.5 sm:space-x-2">
                 <Phone className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 text-blue-400" />
-                <a href="tel:7895094129" className="hover:text-blue-400 transition font-semibold break-all text-xs">
-                  7895094129, 9193898182
+                <a href="tel:9193898182" className="hover:text-blue-400 transition font-semibold break-all text-xs">
+                  9193898182, 7895094129
                 </a>
               </div>
               <div className="flex items-start space-x-1.5 sm:space-x-2">
@@ -187,8 +187,8 @@ export default function Footer() {
               </p>
             </div>
             <div className="flex flex-wrap justify-center md:justify-end gap-1.5 sm:gap-2 text-xs text-gray-400 w-full md:w-auto">
-              <a href="tel:7895094129" className="hover:text-blue-400 transition whitespace-nowrap">
-                📞 7895094129, 9193898182
+              <a href="tel:9193898182" className="hover:text-blue-400 transition whitespace-nowrap">
+                📞 9193898182, 7895094129
               </a>
               <span className="hidden sm:inline text-gray-600">|</span>
               <a href="mailto:arpitcsc1707@gmail.com" className="hover:text-blue-400 transition whitespace-nowrap hidden sm:inline">

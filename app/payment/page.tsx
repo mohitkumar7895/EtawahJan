@@ -322,10 +322,10 @@ export default function PaymentPage() {
                 <strong>Note:</strong> After successful payment, you will receive a payment confirmation.
                 For any queries, contact us at{' '}
                 <a
-                  href="tel:7895094129"
+                  href="tel:9193898182"
                   className="text-blue-600 hover:text-blue-700 font-semibold"
                 >
-                  7895094129, 9193898182
+                  9193898182, 7895094129
                 </a>
               </p>
             </div>

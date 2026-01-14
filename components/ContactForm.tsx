@@ -337,8 +337,8 @@ export default function ContactForm({ embedded }: ContactFormProps) {
       {!embedded && (
         <div className="mt-8 text-center text-white">
           <p className="text-lg mb-2">या सीधे हमसे संपर्क करें:</p>
-          <a href="tel:7895094129" className="text-2xl font-bold hover:text-blue-200 transition">
-            📞 7895094129, 9193898182
+          <a href="tel:9193898182" className="text-2xl font-bold hover:text-blue-200 transition">
+            📞 9193898182, 7895094129
           </a>
         </div>
       )}
