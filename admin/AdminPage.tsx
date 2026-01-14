@@ -2,7 +2,7 @@
 
 import { useEffect, useState } from 'react';
 import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle, Eye, Globe, Monitor, Smartphone, Tablet, BookOpen } from 'lucide-react';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, type Blog } from '@/lib/api';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'adminmohit1234';
@@ -68,6 +68,8 @@ export default function AdminPage() {
     isPublished: false,
   });
   const [editingBlogSlug, setEditingBlogSlug] = useState<string | null>(null);
+  const [blogImageFile, setBlogImageFile] = useState<File | null>(null);
+  const [blogImagePreview, setBlogImagePreview] = useState<string>('');
 
   useEffect(() => {
     if (isAuthed) {
@@ -664,12 +666,18 @@ export default function AdminPage() {
     setError(null);
 
     try {
+      // Upload image first if a new file is selected
+      let imageUrl = blogForm.featuredImage.trim() || undefined;
+      if (blogImageFile) {
+        imageUrl = await uploadBlogImage(blogImageFile);
+      }
+
       const blogData = {
         title: blogForm.title.trim(),
         slug: blogForm.slug.trim().toLowerCase().replace(/\s+/g, '-'),
         excerpt: blogForm.excerpt.trim(),
         content: blogForm.content.trim(),
-        featuredImage: blogForm.featuredImage.trim() || undefined,
+        featuredImage: imageUrl,
         category: blogForm.category,
         tags: blogForm.tags.split(',').map(t => t.trim()).filter(t => t),
         author: blogForm.author.trim() || 'Jan Seva Kendra',
@@ -699,6 +707,8 @@ export default function AdminPage() {
         keywords: '',
         isPublished: false,
       });
+      setBlogImageFile(null);
+      setBlogImagePreview('');
       setEditingBlogSlug(null);
     } catch (err: any) {
       setError(err.message || 'Failed to save blog');
@@ -724,6 +734,9 @@ export default function AdminPage() {
         keywords: blog.keywords?.join(', ') || '',
         isPublished: blog.isPublished || false,
       });
+      // Clear image file state when editing (existing image will show from featuredImage)
+      setBlogImageFile(null);
+      setBlogImagePreview('');
       setEditingBlogSlug(slug);
     } catch (err: any) {
       setError(err.message || 'Failed to load blog');
@@ -2400,14 +2413,64 @@ export default function AdminPage() {
                         </select>
                       </div>
                       <div>
-                        <label className="block text-sm font-semibold text-gray-700 mb-1">Featured Image URL</label>
+                        <label className="block text-sm font-semibold text-gray-700 mb-1">Featured Image</label>
                         <input
-                          type="url"
-                          value={blogForm.featuredImage}
-                          onChange={(e) => setBlogForm({ ...blogForm, featuredImage: e.target.value })}
-                          placeholder="https://example.com/image.jpg"
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => {
+                            const file = e.target.files?.[0];
+                            if (file) {
+                              // Validate file type
+                              if (!file.type.startsWith('image/')) {
+                                setError('Please select an image file');
+                                return;
+                              }
+                              // Validate file size (5MB)
+                              if (file.size > 5 * 1024 * 1024) {
+                                setError('Image size must be less than 5MB');
+                                return;
+                              }
+                              setBlogImageFile(file);
+                              // Create preview
+                              const reader = new FileReader();
+                              reader.onloadend = () => {
+                                setBlogImagePreview(reader.result as string);
+                              };
+                              reader.readAsDataURL(file);
+                            }
+                          }}
                           className="w-full px-4 py-2 border-2 border-gray-300 rounded-lg text-sm text-gray-900 focus:outline-none focus:border-blue-500"
                         />
+                        {blogImagePreview && (
+                          <div className="mt-2">
+                            <img 
+                              src={blogImagePreview} 
+                              alt="Preview" 
+                              className="max-w-full h-32 object-cover rounded-lg border border-gray-300"
+                            />
+                            <button
+                              type="button"
+                              onClick={() => {
+                                setBlogImageFile(null);
+                                setBlogImagePreview('');
+                                setBlogForm({ ...blogForm, featuredImage: '' });
+                              }}
+                              className="mt-1 text-xs text-red-600 hover:text-red-700"
+                            >
+                              Remove image
+                            </button>
+                          </div>
+                        )}
+                        {blogForm.featuredImage && !blogImagePreview && (
+                          <div className="mt-2">
+                            <p className="text-xs text-gray-500 mb-1">Current image:</p>
+                            <img 
+                              src={blogForm.featuredImage} 
+                              alt="Current" 
+                              className="max-w-full h-32 object-cover rounded-lg border border-gray-300"
+                            />
+                          </div>
+                        )}
                       </div>
                     </div>
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -2503,6 +2566,8 @@ export default function AdminPage() {
                               keywords: '',
                               isPublished: false,
                             });
+                            setBlogImageFile(null);
+                            setBlogImagePreview('');
                           }}
                           className="px-6 py-2 bg-gray-500 text-white rounded-lg font-semibold hover:bg-gray-600"
                         >

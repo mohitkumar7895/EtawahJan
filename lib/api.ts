@@ -1137,3 +1137,37 @@ export async function deleteBlog(slug: string): Promise<void> {
     throw new Error(errorData.error || 'Failed to delete blog');
   }
 }
+
+export async function uploadBlogImage(file: File): Promise<string> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 30000); // 30s for file upload
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/api/blogs/upload`, {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage = errorData.message || errorData.error || 'Failed to upload image';
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    return data.fileUrl;
+  } catch (error: any) {
+    clearTimeout(timeoutId);
+    
+    if (error.name === 'AbortError') {
+      throw new Error('Request timeout. Please try again.');
+    }
+    throw error;
+  }
+}
