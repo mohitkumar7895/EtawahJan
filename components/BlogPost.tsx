@@ -200,7 +200,7 @@ export default function BlogPostComponent({ slug }: BlogPostProps) {
             {/* Featured Image */}
             {blog.featuredImage && (
               <div className="mb-8 rounded-xl overflow-hidden shadow-lg">
-                <div className="relative w-full h-64 sm:h-80 md:h-96">
+                <div className="relative w-full h-48 sm:h-56 md:h-64">
                   <Image
                     src={blog.featuredImage}
                     alt={blog.title}
