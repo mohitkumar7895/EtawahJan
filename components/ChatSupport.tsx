@@ -22,6 +22,90 @@ export default function ChatSupport() {
   const notificationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const notificationRef = useRef<Notification | null>(null);
+  const serviceWorkerRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
+
+  // Register Service Worker for background notifications
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration);
+          serviceWorkerRegistrationRef.current = registration;
+          
+          // Check for updates
+          registration.update();
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+
+      // Listen for messages from Service Worker
+      navigator.serviceWorker.addEventListener('message', (event) => {
+        if (event.data && event.data.type === 'NEW_MESSAGE') {
+          // New message received from background
+          if (phoneNumber) {
+            loadChat(true);
+          }
+        } else if (event.data && event.data.type === 'OPEN_CHAT') {
+          // Open chat from notification click
+          setIsOpen(true);
+          setShowNotification(false);
+        }
+      });
+    }
+  }, []);
+
+  // Start/Stop Service Worker monitoring when phone number changes
+  useEffect(() => {
+    if (phoneEntered && phoneNumber && serviceWorkerRegistrationRef.current) {
+      // Start monitoring in Service Worker
+      if (serviceWorkerRegistrationRef.current.active) {
+        serviceWorkerRegistrationRef.current.active.postMessage({
+          type: 'START_MONITORING',
+          phoneNumber,
+          lastAdminMessageTime: lastAdminMessageTime?.toISOString() || null,
+        });
+      } else {
+        // Wait for service worker to be ready
+        navigator.serviceWorker.ready.then((registration) => {
+          if (registration.active) {
+            registration.active.postMessage({
+              type: 'START_MONITORING',
+              phoneNumber,
+              lastAdminMessageTime: lastAdminMessageTime?.toISOString() || null,
+            });
+          }
+        });
+      }
+    } else if (!phoneEntered && serviceWorkerRegistrationRef.current) {
+      // Stop monitoring
+      if (serviceWorkerRegistrationRef.current.active) {
+        serviceWorkerRegistrationRef.current.active.postMessage({
+          type: 'STOP_MONITORING',
+        });
+      }
+    }
+
+    return () => {
+      // Cleanup: Stop monitoring when component unmounts
+      if (serviceWorkerRegistrationRef.current?.active) {
+        serviceWorkerRegistrationRef.current.active.postMessage({
+          type: 'STOP_MONITORING',
+        });
+      }
+    };
+  }, [phoneEntered, phoneNumber, lastAdminMessageTime]);
+
+  // Update Service Worker when lastAdminMessageTime changes
+  useEffect(() => {
+    if (phoneEntered && phoneNumber && lastAdminMessageTime && serviceWorkerRegistrationRef.current?.active) {
+      serviceWorkerRegistrationRef.current.active.postMessage({
+        type: 'UPDATE_LAST_MESSAGE_TIME',
+        lastAdminMessageTime: lastAdminMessageTime.toISOString(),
+      });
+    }
+  }, [lastAdminMessageTime, phoneEntered, phoneNumber]);
 
   // Check notification permission on mount
   useEffect(() => {
