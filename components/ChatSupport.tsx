@@ -439,7 +439,7 @@ export default function ChatSupport() {
               </div>
               <div className="flex-1 min-w-0">
                 <p className="text-sm sm:text-base font-semibold">नया संदेश आया है</p>
-                <p className="text-xs sm:text-sm text-green-100 mt-0.5">Admin से नया message आया है, देख लीजिए</p>
+                <p className="text-xs sm:text-sm text-green-100 mt-0.5">Jan Seva Kendra से नया message आया है, देख लीजिए</p>
               </div>
             </div>
             <div className="flex items-center gap-2 flex-shrink-0">
