@@ -20,6 +20,50 @@ export default function ChatSupport() {
   const [lastMessageCount, setLastMessageCount] = useState(0);
   const [lastAdminMessageTime, setLastAdminMessageTime] = useState<Date | null>(null);
   const notificationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
+  const notificationRef = useRef<Notification | null>(null);
+
+  // Check notification permission on mount
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      setNotificationPermission(Notification.permission);
+      
+      // Listen for permission changes
+      const handlePermissionChange = () => {
+        setNotificationPermission(Notification.permission);
+      };
+      
+      // Check permission periodically (some browsers don't fire events)
+      const checkInterval = setInterval(() => {
+        if (Notification.permission !== notificationPermission) {
+          setNotificationPermission(Notification.permission);
+        }
+      }, 1000);
+      
+      return () => clearInterval(checkInterval);
+    }
+  }, [notificationPermission]);
+
+  // Handle window focus from notification click
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const handleFocus = () => {
+        // Check if we should open chat (stored in sessionStorage when notification is clicked)
+        const shouldOpenChat = sessionStorage.getItem('openChatFromNotification');
+        if (shouldOpenChat === 'true') {
+          setIsOpen(true);
+          setShowNotification(false);
+          sessionStorage.removeItem('openChatFromNotification');
+        }
+      };
+      
+      window.addEventListener('focus', handleFocus);
+      
+      return () => {
+        window.removeEventListener('focus', handleFocus);
+      };
+    }
+  }, []);
 
   // Load saved phone number from localStorage on mount
   useEffect(() => {
@@ -94,10 +138,63 @@ export default function ChatSupport() {
           const latestAdminMsg = newAdminMessages[newAdminMessages.length - 1];
           setLastAdminMessageTime(new Date(latestAdminMsg.timestamp));
           
-          // Show notification
+          // Show in-app notification banner
           setShowNotification(true);
           
-          // Auto-hide notification after 8 seconds
+          // Show browser notification (works even when app is closed)
+          if (typeof window !== 'undefined' && 'Notification' in window) {
+            if (Notification.permission === 'granted') {
+              // Close previous notification if exists
+              if (notificationRef.current) {
+                notificationRef.current.close();
+              }
+              
+              // Create new browser notification
+              const messagePreview = latestAdminMsg.type === 'text' 
+                ? (latestAdminMsg.content.length > 50 ? latestAdminMsg.content.substring(0, 50) + '...' : latestAdminMsg.content)
+                : latestAdminMsg.type === 'image' ? '📷 Image भेजा गया है' 
+                : latestAdminMsg.type === 'video' ? '🎥 Video भेजा गया है'
+                : '📄 File भेजा गया है';
+              
+              const notificationOptions: NotificationOptions = {
+                body: messagePreview,
+                icon: '/jan-seva-logo.png', // Logo file path
+                badge: '/jan-seva-logo.png',
+                tag: `chat-${phoneNumber}-${Date.now()}`, // Unique tag to show multiple notifications
+                requireInteraction: false,
+                silent: false,
+              };
+              
+              // Add vibrate for mobile devices (if supported)
+              if ('vibrate' in navigator) {
+                (notificationOptions as any).vibrate = [200, 100, 200];
+              }
+              
+              const notification = new Notification('नया संदेश आया है - Jan Seva Kendra', notificationOptions);
+              
+              notificationRef.current = notification;
+              
+              // Handle notification click
+              notification.onclick = (event) => {
+                event.preventDefault();
+                // Store flag to open chat when window gets focus
+                if (typeof window !== 'undefined') {
+                  sessionStorage.setItem('openChatFromNotification', 'true');
+                }
+                window.focus();
+                setIsOpen(true);
+                setShowNotification(false);
+                notification.close();
+              };
+              
+              // Auto-close after 10 seconds
+              setTimeout(() => {
+                notification.close();
+              }, 10000);
+            }
+          }
+          
+          // Auto-hide in-app notification after 8 seconds
           if (notificationTimeoutRef.current) {
             clearTimeout(notificationTimeoutRef.current);
           }
@@ -222,6 +319,18 @@ export default function ChatSupport() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [phoneEntered, phoneNumber, isOpen]);
 
+  const requestNotificationPermission = async () => {
+    if (typeof window !== 'undefined' && 'Notification' in window) {
+      if (Notification.permission === 'default') {
+        const permission = await Notification.requestPermission();
+        setNotificationPermission(permission);
+        return permission === 'granted';
+      }
+      return Notification.permission === 'granted';
+    }
+    return false;
+  };
+
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     const cleanPhone = phoneNumber.trim().replace(/\D/g, '');
@@ -241,6 +350,9 @@ export default function ChatSupport() {
       if (typeof window !== 'undefined') {
         localStorage.setItem('chatPhoneNumber', cleanPhone);
       }
+
+      // Request notification permission
+      await requestNotificationPermission();
 
       // Save user to MongoDB database
       await saveUser(cleanPhone);
@@ -390,11 +502,28 @@ export default function ChatSupport() {
   const handleClose = () => {
     setIsOpen(false);
     setShowNotification(false); // Hide notification when chat is closed
+    // Close browser notification if open
+    if (notificationRef.current) {
+      notificationRef.current.close();
+      notificationRef.current = null;
+    }
     if (pollingInterval) {
       clearInterval(pollingInterval);
       setPollingInterval(null);
     }
   };
+
+  // Cleanup notifications on unmount
+  useEffect(() => {
+    return () => {
+      if (notificationRef.current) {
+        notificationRef.current.close();
+      }
+      if (notificationTimeoutRef.current) {
+        clearTimeout(notificationTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const handleNotificationClick = () => {
     setShowNotification(false);
@@ -491,6 +620,16 @@ export default function ChatSupport() {
                 )}
               </div>
               <div className="flex items-center gap-1">
+                {phoneEntered && phoneNumber && notificationPermission !== 'granted' && typeof window !== 'undefined' && 'Notification' in window && (
+                  <button
+                    onClick={requestNotificationPermission}
+                    className="text-xs sm:text-sm text-blue-100 hover:text-white hover:bg-blue-700 px-2 py-1 rounded transition-colors active:bg-blue-800"
+                    aria-label="Enable notifications"
+                    title="Enable browser notifications to receive messages even when app is closed"
+                  >
+                    🔔 Enable
+                  </button>
+                )}
                 {phoneEntered && phoneNumber && (
                   <button
                     onClick={handleClearPhone}
