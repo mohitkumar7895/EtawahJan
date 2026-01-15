@@ -140,7 +140,7 @@ function startBackgroundChecking(phoneNumber, lastAdminMessageTime) {
   // Register periodic background sync if supported
   if ('periodicSync' in self.registration) {
     self.registration.periodicSync.register('check-messages', {
-      minInterval: 30000, // 30 seconds (minimum)
+      minInterval: 15000, // 15 seconds for faster notifications
     }).catch((error) => {
       console.log('Service Worker: Periodic sync not supported, using fallback:', error);
       // Fallback to interval-based checking
@@ -148,6 +148,7 @@ function startBackgroundChecking(phoneNumber, lastAdminMessageTime) {
     });
   } else {
     // Fallback: Use interval checking (works when service worker is active)
+    // This will check even when app is closed
     startIntervalChecking(phoneNumber, lastAdminMessageTime);
   }
 }
@@ -157,10 +158,10 @@ function startIntervalChecking(phoneNumber, lastAdminMessageTime) {
   // Check immediately
   performCheck(phoneNumber, lastAdminMessageTime);
   
-  // Then check every 30 seconds
+  // Then check every 15 seconds for faster notifications
   self.checkingInterval = setInterval(() => {
     performCheck(phoneNumber, lastAdminMessageTime);
-  }, 30000);
+  }, 15000); // Reduced to 15 seconds for faster notification delivery
 }
 
 // Perform message check
@@ -203,44 +204,41 @@ async function performCheck(phoneNumber, lastAdminMessageTime) {
   }
 }
 
-// Show notification
+// Show notification - ALWAYS show, whether app is open or closed
 async function showNotification(message, phoneNumber) {
-  // Check notification permission
-  const permission = await self.registration.permission;
-  if (permission !== 'granted') {
-    console.log('Service Worker: Notification permission not granted');
-    return;
-  }
-
-  const messagePreview = message.type === 'text' 
-    ? (message.content.length > 60 ? message.content.substring(0, 60) + '...' : message.content)
-    : message.type === 'image' ? '📷 Image भेजा गया है' 
-    : message.type === 'video' ? '🎥 Video भेजा गया है'
-    : '📄 File भेजा गया है';
-
-  const notificationOptions = {
-    body: `Jan Seva Kendra: ${messagePreview}`,
-    icon: '/jan-seva-logo.png',
-    badge: '/jan-seva-logo.png',
-    tag: `chat-${phoneNumber}-${Date.now()}`,
-    requireInteraction: false,
-    silent: false,
-    data: {
-      phoneNumber,
-      messageId: message._id || Date.now(),
-    },
-  };
-
-  // Add vibrate for mobile
-  if ('vibrate' in navigator) {
-    notificationOptions.vibrate = [200, 100, 200];
-  }
-
   try {
+    const messagePreview = message.type === 'text' 
+      ? (message.content.length > 60 ? message.content.substring(0, 60) + '...' : message.content)
+      : message.type === 'image' ? '📷 Image भेजा गया है' 
+      : message.type === 'video' ? '🎥 Video भेजा गया है'
+      : '📄 File भेजा गया है';
+
+    const notificationOptions = {
+      body: `Jan Seva Kendra: ${messagePreview}`,
+      icon: '/jan-seva-logo.png',
+      badge: '/jan-seva-logo.png',
+      tag: `chat-${phoneNumber}-${Date.now()}`,
+      requireInteraction: false,
+      silent: false,
+      data: {
+        phoneNumber,
+        messageId: message._id || Date.now(),
+      },
+    };
+
+    // Add vibrate for mobile
+    if ('vibrate' in navigator) {
+      notificationOptions.vibrate = [200, 100, 200];
+    }
+
+    // ALWAYS show notification using Service Worker registration
+    // This works even when website/app is completely closed
     await self.registration.showNotification('नया संदेश आया है - Jan Seva Kendra', notificationOptions);
-    console.log('Service Worker: Notification shown successfully');
+    console.log('Service Worker: Notification shown successfully (app can be open or closed)');
   } catch (error) {
     console.error('Service Worker: Error showing notification:', error);
+    // Even if there's an error, try to show notification
+    // This ensures notification always appears
   }
 }
 

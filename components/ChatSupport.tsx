@@ -58,32 +58,50 @@ export default function ChatSupport() {
 
   // Start/Stop Service Worker monitoring when phone number changes
   useEffect(() => {
-    if (phoneEntered && phoneNumber && serviceWorkerRegistrationRef.current) {
-      // Start monitoring in Service Worker
-      if (serviceWorkerRegistrationRef.current.active) {
-        serviceWorkerRegistrationRef.current.active.postMessage({
-          type: 'START_MONITORING',
-          phoneNumber,
-          lastAdminMessageTime: lastAdminMessageTime?.toISOString() || null,
-        });
-      } else {
-        // Wait for service worker to be ready
-        navigator.serviceWorker.ready.then((registration) => {
+    if (phoneEntered && phoneNumber) {
+      // Ensure Service Worker is ready
+      const startMonitoring = async () => {
+        try {
+          let registration = serviceWorkerRegistrationRef.current;
+          
+          if (!registration) {
+            // Wait for service worker to be ready
+            registration = await navigator.serviceWorker.ready;
+            serviceWorkerRegistrationRef.current = registration;
+          }
+          
           if (registration.active) {
             registration.active.postMessage({
               type: 'START_MONITORING',
               phoneNumber,
               lastAdminMessageTime: lastAdminMessageTime?.toISOString() || null,
             });
+            console.log('Service Worker: Monitoring started for', phoneNumber);
+          } else {
+            // Wait a bit and try again
+            setTimeout(() => {
+              if (registration.active) {
+                registration.active.postMessage({
+                  type: 'START_MONITORING',
+                  phoneNumber,
+                  lastAdminMessageTime: lastAdminMessageTime?.toISOString() || null,
+                });
+              }
+            }, 1000);
           }
-        });
-      }
+        } catch (error) {
+          console.error('Service Worker: Error starting monitoring:', error);
+        }
+      };
+      
+      startMonitoring();
     } else if (!phoneEntered && serviceWorkerRegistrationRef.current) {
       // Stop monitoring
       if (serviceWorkerRegistrationRef.current.active) {
         serviceWorkerRegistrationRef.current.active.postMessage({
           type: 'STOP_MONITORING',
         });
+        console.log('Service Worker: Monitoring stopped');
       }
     }
 
@@ -216,16 +234,27 @@ export default function ChatSupport() {
           return false;
         });
 
-        // If new admin message found and chat is closed, show notification
-        if (isBackgroundCheck && newAdminMessages.length > 0 && !isOpen) {
+        // If new admin message found, ALWAYS show notification (whether app is open or closed)
+        if (newAdminMessages.length > 0) {
           // Find the latest admin message
           const latestAdminMsg = newAdminMessages[newAdminMessages.length - 1];
           setLastAdminMessageTime(new Date(latestAdminMsg.timestamp));
           
-          // Show in-app notification banner
-          setShowNotification(true);
+          // Show in-app notification banner (only if chat is closed)
+          if (!isOpen) {
+            setShowNotification(true);
+            
+            // Auto-hide in-app notification after 8 seconds
+            if (notificationTimeoutRef.current) {
+              clearTimeout(notificationTimeoutRef.current);
+            }
+            notificationTimeoutRef.current = setTimeout(() => {
+              setShowNotification(false);
+            }, 8000);
+          }
           
-          // Show browser notification (works even when app is closed)
+          // ALWAYS show browser notification (works even when app is closed)
+          // This will show notification whether website is open or closed
           if (typeof window !== 'undefined' && 'Notification' in window) {
             if (Notification.permission === 'granted') {
               // Close previous notification if exists
@@ -241,7 +270,7 @@ export default function ChatSupport() {
                 : '📄 File भेजा गया है';
               
               const notificationOptions: NotificationOptions = {
-                body: messagePreview,
+                body: `Jan Seva Kendra: ${messagePreview}`,
                 icon: '/jan-seva-logo.png', // Logo file path
                 badge: '/jan-seva-logo.png',
                 tag: `chat-${phoneNumber}-${Date.now()}`, // Unique tag to show multiple notifications
@@ -277,14 +306,6 @@ export default function ChatSupport() {
               }, 10000);
             }
           }
-          
-          // Auto-hide in-app notification after 8 seconds
-          if (notificationTimeoutRef.current) {
-            clearTimeout(notificationTimeoutRef.current);
-          }
-          notificationTimeoutRef.current = setTimeout(() => {
-            setShowNotification(false);
-          }, 8000);
         }
 
         // Update last admin message time
