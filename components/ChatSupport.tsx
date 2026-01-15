@@ -15,6 +15,11 @@ export default function ChatSupport() {
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [pollingInterval, setPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [backgroundPollingInterval, setBackgroundPollingInterval] = useState<NodeJS.Timeout | null>(null);
+  const [showNotification, setShowNotification] = useState(false);
+  const [lastMessageCount, setLastMessageCount] = useState(0);
+  const [lastAdminMessageTime, setLastAdminMessageTime] = useState<Date | null>(null);
+  const notificationTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // Load saved phone number from localStorage on mount
   useEffect(() => {
@@ -58,11 +63,59 @@ export default function ChatSupport() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [chat?.messages?.length]); // Only trigger on message count change, not on every render
 
-  const loadChat = useCallback(async (isInitialLoad: boolean = false) => {
+  const loadChat = useCallback(async (isInitialLoad: boolean = false, isBackgroundCheck: boolean = false) => {
     if (!phoneNumber) return;
 
     try {
       const chatData = await getChat(phoneNumber);
+      
+      // Check for new admin messages
+      if (chatData.messages && chatData.messages.length > 0) {
+        const newAdminMessages = chatData.messages.filter((msg: ChatMessage) => {
+          if (msg.sender !== 'admin') return false;
+          
+          const msgTime = new Date(msg.timestamp);
+          // Check if this is a new admin message (after last known admin message time)
+          if (lastAdminMessageTime && msgTime > lastAdminMessageTime) {
+            return true;
+          }
+          // If no last admin message time, check if message is recent (within last 2 minutes)
+          if (!lastAdminMessageTime) {
+            const now = new Date();
+            const diff = now.getTime() - msgTime.getTime();
+            return diff < 120000; // 2 minutes
+          }
+          return false;
+        });
+
+        // If new admin message found and chat is closed, show notification
+        if (isBackgroundCheck && newAdminMessages.length > 0 && !isOpen) {
+          // Find the latest admin message
+          const latestAdminMsg = newAdminMessages[newAdminMessages.length - 1];
+          setLastAdminMessageTime(new Date(latestAdminMsg.timestamp));
+          
+          // Show notification
+          setShowNotification(true);
+          
+          // Auto-hide notification after 8 seconds
+          if (notificationTimeoutRef.current) {
+            clearTimeout(notificationTimeoutRef.current);
+          }
+          notificationTimeoutRef.current = setTimeout(() => {
+            setShowNotification(false);
+          }, 8000);
+        }
+
+        // Update last admin message time
+        const adminMessages = chatData.messages.filter((msg: ChatMessage) => msg.sender === 'admin');
+        if (adminMessages.length > 0) {
+          const latestAdminMsg = adminMessages[adminMessages.length - 1];
+          const latestTime = new Date(latestAdminMsg.timestamp);
+          if (!lastAdminMessageTime || latestTime > lastAdminMessageTime) {
+            setLastAdminMessageTime(latestTime);
+          }
+        }
+      }
       
       // Only update state if messages actually changed (prevent unnecessary re-renders)
       setChat(prevChat => {
@@ -71,6 +124,7 @@ export default function ChatSupport() {
         
         // Only update if messages changed or it's initial load
         if (isInitialLoad || prevMessageCount !== newMessageCount) {
+          setLastMessageCount(newMessageCount);
           return chatData;
         }
         return prevChat;
@@ -78,6 +132,16 @@ export default function ChatSupport() {
       
       if (isInitialLoad) {
         setError(null);
+        setLastMessageCount(chatData.messages?.length || 0);
+        
+        // Initialize lastAdminMessageTime on initial load to prevent showing notifications for old messages
+        if (chatData.messages && chatData.messages.length > 0) {
+          const adminMessages = chatData.messages.filter((msg: ChatMessage) => msg.sender === 'admin');
+          if (adminMessages.length > 0) {
+            const latestAdminMsg = adminMessages[adminMessages.length - 1];
+            setLastAdminMessageTime(new Date(latestAdminMsg.timestamp));
+          }
+        }
         
         // Update user's last active time only on initial load (not on every poll)
         if (chatData.messages && chatData.messages.length > 0) {
@@ -98,7 +162,18 @@ export default function ChatSupport() {
         setError(err.message || 'Failed to load chat');
       }
     }
-  }, [phoneNumber]);
+  }, [phoneNumber, isOpen, lastAdminMessageTime]);
+
+  // Clear notification when chat opens
+  useEffect(() => {
+    if (isOpen) {
+      setShowNotification(false);
+      if (notificationTimeoutRef.current) {
+        clearTimeout(notificationTimeoutRef.current);
+        notificationTimeoutRef.current = null;
+      }
+    }
+  }, [isOpen]);
 
   // Poll for new messages when chat is open
   useEffect(() => {
@@ -119,6 +194,33 @@ export default function ChatSupport() {
       };
     }
   }, [isOpen, phoneEntered, phoneNumber, loadChat]);
+
+  // Background polling for new messages even when chat is closed
+  useEffect(() => {
+    if (phoneEntered && phoneNumber && !isOpen) {
+      // Initial background check
+      loadChat(false, true);
+
+      // Poll every 10 seconds for new messages in background
+      const interval = setInterval(() => {
+        loadChat(false, true); // Background check
+      }, 10000); // 10 seconds for background polling
+
+      setBackgroundPollingInterval(interval);
+
+      return () => {
+        clearInterval(interval);
+        setBackgroundPollingInterval(null);
+      };
+    } else {
+      // Clear background polling when chat opens
+      if (backgroundPollingInterval) {
+        clearInterval(backgroundPollingInterval);
+        setBackgroundPollingInterval(null);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [phoneEntered, phoneNumber, isOpen]);
 
   const handlePhoneSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -287,9 +389,25 @@ export default function ChatSupport() {
 
   const handleClose = () => {
     setIsOpen(false);
+    setShowNotification(false); // Hide notification when chat is closed
     if (pollingInterval) {
       clearInterval(pollingInterval);
       setPollingInterval(null);
+    }
+  };
+
+  const handleNotificationClick = () => {
+    setShowNotification(false);
+    setIsOpen(true);
+    if (notificationTimeoutRef.current) {
+      clearTimeout(notificationTimeoutRef.current);
+    }
+  };
+
+  const handleNotificationDismiss = () => {
+    setShowNotification(false);
+    if (notificationTimeoutRef.current) {
+      clearTimeout(notificationTimeoutRef.current);
     }
   };
 
@@ -306,9 +424,52 @@ export default function ChatSupport() {
 
   return (
     <>
+      {/* WhatsApp-style Notification Banner */}
+      {showNotification && !isOpen && (
+        <div 
+          className="fixed top-0 left-0 right-0 z-[100] bg-green-600 text-white shadow-lg animate-slide-down"
+          style={{
+            animation: 'slideDown 0.3s ease-out',
+          }}
+        >
+          <div className="max-w-7xl mx-auto px-4 py-3 sm:py-4 flex items-center justify-between gap-3">
+            <div className="flex items-center gap-3 flex-1 min-w-0">
+              <div className="flex-shrink-0">
+                <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
+              </div>
+              <div className="flex-1 min-w-0">
+                <p className="text-sm sm:text-base font-semibold">नया संदेश आया है</p>
+                <p className="text-xs sm:text-sm text-green-100 mt-0.5">Admin से नया message आया है, देख लीजिए</p>
+              </div>
+            </div>
+            <div className="flex items-center gap-2 flex-shrink-0">
+              <button
+                onClick={handleNotificationClick}
+                className="bg-white text-green-600 px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg text-xs sm:text-sm font-medium hover:bg-green-50 active:bg-green-100 transition-colors whitespace-nowrap"
+              >
+                देखें
+              </button>
+              <button
+                onClick={handleNotificationDismiss}
+                className="text-white hover:text-green-100 active:text-green-200 p-1 rounded-full transition-colors"
+                aria-label="Dismiss notification"
+              >
+                <X className="w-4 h-4 sm:w-5 sm:h-5" />
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       {/* Floating Chat Button */}
       <button
-        onClick={() => setIsOpen(true)}
+        onClick={() => {
+          setIsOpen(true);
+          setShowNotification(false);
+          if (notificationTimeoutRef.current) {
+            clearTimeout(notificationTimeoutRef.current);
+          }
+        }}
         className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-green-600 hover:bg-green-700 text-white rounded-full p-3 sm:p-4 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center"
         aria-label="Open chat support"
       >
