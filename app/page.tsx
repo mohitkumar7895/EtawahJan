@@ -3,6 +3,7 @@ import Footer from '@/components/Footer'
 import Hero from '@/components/Hero'
 import Services from '@/components/Services'
 import Announcements from '@/components/Announcements'
+import Reviews from '@/components/Reviews'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -49,6 +50,7 @@ export default function Home() {
       <Hero />
       <Announcements />
       <Services />
+      <Reviews />
       <Footer />
     </>
   )
