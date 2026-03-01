@@ -4,7 +4,6 @@ import Hero from '@/components/Hero'
 import Services from '@/components/Services'
 import Announcements from '@/components/Announcements'
 import Reviews from '@/components/Reviews'
-import LocalSeoContent from '@/components/LocalSeoContent'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -50,7 +49,6 @@ export default function Home() {
       <Announcements />
       <Services />
       <Reviews />
-      <LocalSeoContent />
       <Footer />
     </>
   )
