@@ -47,14 +47,14 @@ export default function Hero() {
                 priority
               />
               <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-center whitespace-normal sm:whitespace-nowrap px-1">
-                Jan Seva Kendra - Best Service Center in Etawah, UP
+                Jan Seva Kendra Near Me – CSC Center Etawah, UP
               </h1>
             </div>
             
             {/* Desktop Layout - Text only (logo in corner) */}
             <div className="hidden lg:block">
               <h1 className="text-2xl xl:text-3xl 2xl:text-4xl font-bold text-center whitespace-nowrap px-1">
-                Welcome to Jan Seva Kendra, Etawah UP
+                Jan Seva Kendra Near Me – Etawah, Bharthana, UP
               </h1>
             </div>
             <p className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-bold text-yellow-300 mb-1 px-2 -mt-2 sm:-mt-1">
@@ -65,7 +65,7 @@ export default function Hero() {
               आपकी सेवा में हमेशा तत्पर
             </p>
             <p className="text-sm sm:text-base md:text-lg lg:text-lg text-blue-200 mb-4 sm:mb-6 md:mb-8 px-2">
-              All Government & Private Services Under One Roof
+              All Government & Private Services Under One Roof • Same Day Work • No Agent Required
             </p>
 
             {/* CTA Buttons */}

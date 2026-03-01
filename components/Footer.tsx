@@ -177,7 +177,7 @@ export default function Footer() {
 
         {/* Bottom Bar */}
         <div className="border-t border-gray-700 pt-3 sm:pt-4 md:pt-5 mt-4 sm:mt-5 md:mt-6">
-          <div className="flex flex-col md:flex-row justify-between items-center space-y-2 sm:space-y-2 md:space-y-0">
+            <div className="flex flex-col md:flex-row justify-between items-center space-y-2 sm:space-y-2 md:space-y-0">
             <div className="text-center md:text-left w-full md:w-auto">
               <p className="text-xs sm:text-sm text-gray-400">
                 &copy; {new Date().getFullYear()} Jan Seva Kendra. All rights reserved.
@@ -189,6 +189,10 @@ export default function Footer() {
             <div className="flex flex-wrap justify-center md:justify-end gap-1.5 sm:gap-2 text-xs text-gray-400 w-full md:w-auto">
               <a href="tel:9193898182" className="hover:text-blue-400 transition whitespace-nowrap">
                 📞 9193898182, 7895094129
+              </a>
+              <span className="hidden sm:inline text-gray-600">|</span>
+              <a href="https://wa.me/9193898182" target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition whitespace-nowrap">
+                💬 WhatsApp Now
               </a>
               <span className="hidden sm:inline text-gray-600">|</span>
               <a href="mailto:arpitcsc1707@gmail.com" className="hover:text-blue-400 transition whitespace-nowrap hidden sm:inline">

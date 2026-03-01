@@ -1,6 +1,16 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import { CheckCircle, Clock, Shield, Users, Award, Target } from 'lucide-react';
+import type { Metadata } from 'next'
+
+export const metadata: Metadata = {
+  title: 'About Jan Seva Kendra | CSC Center Etawah, Bharthana – Government Authorized',
+  description: 'Jan Seva Kendra Etawah, Bharthana – government authorized CSC center. Same day service, official process, no agent required. Mandi Trihaa, Bidhuna Road. Call 9193898182.',
+  openGraph: {
+    title: 'About Us | Jan Seva Kendra – CSC Etawah, Bharthana',
+    url: 'https://www.jan-seva.site/about',
+  },
+}
 
 export default function AboutPage() {
   return (

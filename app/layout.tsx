@@ -6,44 +6,44 @@ import VisitorTracker from '@/components/VisitorTracker'
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.jan-seva.site/'),
   title: {
-    default: 'Jan Seva Kendra | Best Service Center in Etawah, UP | Government & Private Services',
+    default: 'Jan Seva Kendra Near Me | CSC Center Etawah, Bharthana | Same Day Aadhaar, PAN, Ration Card',
     template: '%s | Jan Seva Kendra'
   },
-  description: 'Jan Seva Kendra - #1 Service Center in Etawah, UP. Complete solution for all government and private services. Aadhaar Card, PAN Card, Voter ID, Ration Card, Bill Payment, GST Registration, PM Kisan, Ujjwala Yojana and more. Located at Mandi Trihaa, Bidhuna Road, Bharthana, Etawah. Call 9193898182, 7895094129.',
+  description: 'Looking for Jan Seva Kendra or CSC center near me? We serve Etawah, Bharthana, Agra, Kanpur, Lucknow, Firozabad, Ekdil, Auraiya. Aadhaar update, PAN card apply, income certificate, birth certificate, ration card, Ayushman card—same day help, official process. Call Now: 9193898182, 7895094129 | WhatsApp Now.',
   keywords: [
-    'Jan Seva Kendra',
-    'Jan Seva Kendra Etawah',
-    'Jan Seva Kendra Bharthana',
+    'jan seva kendra near me',
+    'csc center near me',
+    'jan seva kendra Etawah',
+    'jan seva kendra Bharthana',
+    'csc center Etawah',
+    'csc center Bharthana',
+    'aadhar update near me',
+    'aadhaar update Etawah',
+    'pan card apply near me',
+    'pan card Etawah',
+    'income certificate apply near me',
+    'birth certificate online near me',
+    'caste certificate online',
+    'ration card apply',
+    'ration card Etawah',
+    'ayushman card apply',
+    'government work online near me',
     'Jan Seva Kendra UP',
-    'Jan Seva Kendra Etawah UP',
-    'Jan Seva Kendra near me',
     'Jan Seva Kendra Etawah contact',
     'Jan Seva Kendra phone number',
-    'CSC Center Etawah',
-    'CSC Center Bharthana',
     'Government Services Etawah',
     'Aadhaar Card Etawah',
-    'PAN Card Etawah',
     'Voter ID Etawah',
-    'Ration Card Etawah',
-    'Bill Payment Etawah',
-    'GST Registration Etawah',
-    'PM Kisan Registration',
-    'Ujjwala Yojana',
     'Service Center Etawah',
-    'सेवा केंद्र इटावा',
-    'जन सेवा केंद्र',
-    'जन सेवा केंद्र इटावा',
+    'जन सेवा केंद्र नजदीक',
+    'सीएससी सेंटर इटावा',
+    'आधार अपडेट इटावा',
+    'पैन कार्ड इटावा',
     'जन सेवा केंद्र भरथाना',
-    'CSC Bharthana',
-    'Online Services Etawah',
-    'Document Services UP',
-    'Government Schemes Etawah',
-    'Private Services Etawah',
-    'Etawah Service Center',
-    'Bharthana Service Center',
+    'सरकारी काम ऑनलाइन इटावा',
     'Best CSC Center Etawah',
-    'Top Service Center Etawah'
+    'same day document service Etawah',
+    'instant certificate Etawah',
   ],
   authors: [{ name: 'Jan Seva Kendra' }],
   creator: 'Jan Seva Kendra',
@@ -58,8 +58,8 @@ export const metadata: Metadata = {
     locale: 'en_IN',
     url: 'https://www.jan-seva.site/',
     siteName: 'Jan Seva Kendra',
-    title: 'Jan Seva Kendra | Best Service Center in Etawah, UP | Government & Private Services',
-    description: 'Jan Seva Kendra - #1 Service Center in Etawah, UP. Complete solution for all government and private services. Aadhaar Card, PAN Card, Voter ID, Ration Card, Bill Payment, GST Registration and more. Located at Mandi Trihaa, Bidhuna Road, Bharthana, Etawah.',
+    title: 'Jan Seva Kendra Near Me | CSC Center Etawah | Same Day Aadhaar, PAN, Certificates',
+    description: 'Jan Seva Kendra & CSC center near Etawah, Bharthana, Agra, Kanpur. Aadhaar update, PAN card, income certificate, ration card—same day help. Call 9193898182. Visit Mandi Trihaa, Bidhuna Road, Bharthana.',
     images: [
       {
         url: 'https://www.jan-seva.site/jan-seva-logo-1.png',
@@ -71,8 +71,8 @@ export const metadata: Metadata = {
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Jan Seva Kendra | Best Service Center in Etawah, UP',
-    description: 'Jan Seva Kendra - #1 Service Center in Etawah, UP. Complete solution for all government and private services. Aadhaar, PAN, Voter ID, Bill Payment, GST Registration and more.',
+    title: 'Jan Seva Kendra Near Me | CSC Etawah | Same Day Aadhaar, PAN, Ration Card',
+    description: 'CSC center near Etawah, Bharthana. Aadhaar update, PAN, certificates—same day, official process. Call 9193898182.',
     images: ['https://www.jan-seva.site/jan-seva-logo-1.png'],
   },
   robots: {
@@ -143,7 +143,7 @@ export default function RootLayout({
               "alternateName": ["जन सेवा केंद्र", "Jan Seva Kendra Etawah", "Jan Seva Kendra Bharthana"],
               "image": "https://www.jan-seva.site/jan-seva-logo-1.png",
               "logo": "https://www.jan-seva.site/jan-seva-logo-1.png",
-              "description": "Jan Seva Kendra - #1 Service Center in Etawah, UP. Complete solution for all government and private services. Aadhaar Card, PAN Card, Voter ID, Ration Card, Bill Payment, GST Registration, PM Kisan, Ujjwala Yojana and more.",
+              "description": "Jan Seva Kendra - Government authorized CSC center near Etawah, Bharthana. Same day Aadhaar update, PAN card apply, income certificate, birth certificate, ration card, Ayushman card. Official process, no agent required. Etawah, Agra, Kanpur, Lucknow, Firozabad, Ekdil, Auraiya.",
               "address": {
                 "@type": "PostalAddress",
                 "streetAddress": "Mandi Trihaa, Bidhuna Road",
@@ -176,18 +176,15 @@ export default function RootLayout({
                 }
               ],
               "areaServed": [
-                {
-                  "@type": "City",
-                  "name": "Etawah"
-                },
-                {
-                  "@type": "City",
-                  "name": "Bharthana"
-                },
-                {
-                  "@type": "State",
-                  "name": "Uttar Pradesh"
-                }
+                { "@type": "City", "name": "Etawah" },
+                { "@type": "City", "name": "Bharthana" },
+                { "@type": "City", "name": "Agra" },
+                { "@type": "City", "name": "Kanpur" },
+                { "@type": "City", "name": "Lucknow" },
+                { "@type": "City", "name": "Firozabad" },
+                { "@type": "City", "name": "Ekdil" },
+                { "@type": "City", "name": "Auraiya" },
+                { "@type": "State", "name": "Uttar Pradesh" }
               ],
               "serviceType": [
                 "Government Services",

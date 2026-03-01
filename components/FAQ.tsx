@@ -96,6 +96,27 @@ const faqs: FAQItem[] = [
     answerHindi: 'जन्म प्रमाणपत्र प्राप्त करने के लिए, आपको अस्पताल डिस्चार्ज स्लिप, माता-पिता का आधार कार्ड, माता-पिता का पहचान प्रमाण और विवाह प्रमाणपत्र की आवश्यकता होती है। प्रमाणपत्र नगर निगम या ग्राम पंचायत द्वारा जारी किया जाता है। हम आपको पूरी प्रक्रिया में मदद कर सकते हैं।',
     category: 'Documents',
   },
+  {
+    question: 'Where is Jan Seva Kendra near me? CSC center Etawah address?',
+    questionHindi: 'जन सेवा केंद्र नजदीक कहाँ है? सीएससी सेंटर इटावा का पता?',
+    answer: 'Jan Seva Kendra / CSC center is at Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP. We serve Etawah, Bharthana, Agra, Kanpur, Lucknow, Firozabad, Ekdil, Auraiya within 25 km. Same day work, official process. Call 9193898182, 7895094129 or WhatsApp now. Visit today.',
+    answerHindi: 'जन सेवा केंद्र / सीएससी सेंटर मंडी त्रिहा, बिदूना रोड, भरथाना, इटावा, यूपी में है। हम 25 किमी के अंदर इटावा, भरथाना, आगरा, कानपुर, लखनऊ, फिरोजाबाद, एकदिल, औरैया में सेवा देते हैं। समान दिन काम, ऑफिशियल प्रोसेस। कॉल 9193898182, 7895094129 या अभी WhatsApp करें।',
+    category: 'General',
+  },
+  {
+    question: 'Aadhaar update near me same day? PAN card apply near Etawah?',
+    questionHindi: 'आधार अपडेट नजदीक समान दिन? पैन कार्ड इटावा के पास?',
+    answer: 'Yes. We do Aadhaar update, correction, photo update same day at our center. PAN card apply near Etawah—we help with form fill, submission and fast approval. Official process, no agent required. Bring documents and visit Mandi Trihaa, Bidhuna Road, Bharthana. Call now 9193898182.',
+    answerHindi: 'हाँ। हम आधार अपडेट, सुधार, फोटो अपडेट समान दिन करते हैं। पैन कार्ड इटावा के पास—फॉर्म भरना, सबमिशन और फास्ट अप्रूवल में मदद। ऑफिशियल प्रोसेस, एजेंट की जरूरत नहीं। दस्तावेज लेकर मंडी त्रिहा, बिदूना रोड, भरथाना आएं। अभी कॉल 9193898182।',
+    category: 'Documents',
+  },
+  {
+    question: 'Income certificate apply near me? Ration card apply? Ayushman card apply?',
+    questionHindi: 'आय प्रमाणपत्र नजदीक कहाँ? राशन कार्ड कहाँ बनवाएं? आयुष्मान कार्ड कैसे?',
+    answer: 'Income certificate, ration card apply, and Ayushman card apply—all available at Jan Seva Kendra, Bharthana (Mandi Trihaa, Bidhuna Road). Same day application, official process, fast approval help. No agent required. Call 9193898182, 7895094129 or WhatsApp now. Visit today.',
+    answerHindi: 'आय प्रमाणपत्र, राशन कार्ड और आयुष्मान कार्ड—सब जन सेवा केंद्र भरथाना (मंडी त्रिहा, बिदूना रोड) पर। समान दिन आवेदन, ऑफिशियल प्रोसेस। एजेंट की जरूरत नहीं। कॉल 9193898182, 7895094129 या अभी WhatsApp। आज ही आएं।',
+    category: 'General',
+  },
 ];
 
 export default function FAQ() {
@@ -114,6 +135,24 @@ export default function FAQ() {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-50 py-12 sm:py-16 md:py-20">
+      {/* FAQ Schema for SEO / Voice search */}
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{
+          __html: JSON.stringify({
+            '@context': 'https://schema.org',
+            '@type': 'FAQPage',
+            mainEntity: faqs.map((faq) => ({
+              '@type': 'Question',
+              name: faq.question,
+              acceptedAnswer: {
+                '@type': 'Answer',
+                text: faq.answer,
+              },
+            })),
+          }),
+        }}
+      />
       <div className="container mx-auto px-4 sm:px-6">
         <div className="max-w-4xl mx-auto">
           {/* Header */}
@@ -214,12 +253,20 @@ export default function FAQ() {
               <br />
               यदि आपके कोई अन्य प्रश्न हैं, तो बेझिझक हमसे संपर्क करें। हम आपकी मदद के लिए यहां हैं!
             </p>
-            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4">
+            <div className="flex flex-col sm:flex-row gap-3 sm:gap-4 flex-wrap">
               <a
                 href="tel:9193898182"
                 className="bg-white text-blue-600 px-6 py-3 rounded-lg font-bold hover:bg-blue-50 transition text-center"
               >
                 📞 Call: 9193898182, 7895094129
+              </a>
+              <a
+                href="https://wa.me/9193898182"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold transition text-center"
+              >
+                💬 WhatsApp Now
               </a>
               <a
                 href="/contact"
