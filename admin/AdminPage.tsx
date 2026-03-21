@@ -1,7 +1,8 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle, Eye, Globe, Monitor, Smartphone, Tablet, BookOpen } from 'lucide-react';
+import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle, Eye, Globe, Monitor, Smartphone, Tablet, BookOpen, Database } from 'lucide-react';
+import JanSevaDataModule from '@/components/admin/JanSevaDataModule';
 import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
@@ -26,7 +27,9 @@ export default function AdminPage() {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [adminForm, setAdminForm] = useState({ username: '', password: '' });
   
-  const [activeTab, setActiveTab] = useState<'vacancies' | 'announcements' | 'admins' | 'chats' | 'payments' | 'visitors' | 'government-links' | 'blogs'>('vacancies');
+  const [activeTab, setActiveTab] = useState<
+    'vacancies' | 'announcements' | 'admins' | 'chats' | 'payments' | 'visitors' | 'government-links' | 'blogs' | 'jan-seva-data'
+  >('vacancies');
   
   // Payment state
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -779,41 +782,66 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      <header className="bg-white shadow sticky top-0 z-50">
-        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4 flex items-center justify-between">
-          <h1 className="text-base sm:text-lg md:text-xl font-bold truncate">Admin Panel</h1>
+    <div className="min-h-screen bg-zinc-50/90">
+      <header className="sticky top-0 z-50 border-b border-zinc-200/80 bg-white/90 backdrop-blur-md shadow-[0_1px_0_0_rgba(0,0,0,0.04)]">
+        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between">
+          <div className="min-w-0">
+            <h1 className="text-sm sm:text-base font-semibold text-zinc-900 tracking-tight truncate">Admin</h1>
+            <p className="text-[11px] text-zinc-500 hidden sm:block truncate">Jan Seva Kendra · Control panel</p>
+          </div>
           {isAuthed ? (
             <div className="flex items-center space-x-2 sm:space-x-3">
-              <button onClick={handleLogout} className="px-2 sm:px-3 py-1.5 sm:py-2 bg-red-600 text-white rounded text-xs sm:text-sm md:text-base whitespace-nowrap">Logout</button>
+              <button
+                onClick={handleLogout}
+                className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-zinc-700 border border-zinc-200 rounded-lg bg-white hover:bg-zinc-50 transition-colors whitespace-nowrap"
+              >
+                Log out
+              </button>
             </div>
           ) : null}
         </div>
       </header>
 
-      <main className="container mx-auto px-2 sm:px-3 md:px-4 py-4 sm:py-6 md:py-8">
+      <main className="container mx-auto px-2 sm:px-3 md:px-4 py-6 sm:py-8 md:py-10 max-w-[1600px]">
         {!isAuthed ? (
-          <div className="max-w-md mx-auto bg-white rounded-lg shadow-lg p-4 sm:p-6 md:p-8">
-            <h2 className="text-lg sm:text-xl md:text-2xl font-semibold mb-4 sm:mb-6 text-center">Admin Login</h2>
+          <div className="max-w-[400px] mx-auto rounded-2xl border border-zinc-200/80 bg-white p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)]">
+            <h2 className="text-lg font-semibold text-zinc-900 text-center tracking-tight mb-1">Sign in</h2>
+            <p className="text-xs text-zinc-500 text-center mb-6">Use your admin credentials</p>
             <div className="space-y-4">
-              <input value={user} onChange={(e) => setUser(e.target.value)} placeholder="Username" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
-              <input value={pass} onChange={(e) => setPass(e.target.value)} placeholder="Password" type="password" className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" />
-              <div className="flex items-center justify-center">
-                <button onClick={handleLogin} className="w-full sm:w-auto bg-blue-600 hover:bg-blue-700 text-white px-6 py-3 rounded-lg text-sm sm:text-base font-medium transition-colors shadow-md hover:shadow-lg">Login</button>
+              <input
+                value={user}
+                onChange={(e) => setUser(e.target.value)}
+                placeholder="Username"
+                className="w-full px-3.5 py-2.5 border border-zinc-200 rounded-lg text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition"
+              />
+              <input
+                value={pass}
+                onChange={(e) => setPass(e.target.value)}
+                placeholder="Password"
+                type="password"
+                className="w-full px-3.5 py-2.5 border border-zinc-200 rounded-lg text-sm text-zinc-900 placeholder:text-zinc-400 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 focus:border-zinc-300 transition"
+              />
+              <div className="pt-1">
+                <button
+                  onClick={handleLogin}
+                  className="w-full bg-zinc-900 hover:bg-zinc-800 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                >
+                  Continue
+                </button>
               </div>
             </div>
           </div>
         ) : (
           <div>
-            {/* Tabs Navigation - Mobile Responsive */}
-            <div className="mb-4 sm:mb-6 border-b border-gray-200 overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
-              <nav className="flex space-x-1 sm:space-x-2 md:space-x-4 lg:space-x-8 min-w-max">
+            {/* Tabs — neutral chrome */}
+            <div className="mb-5 sm:mb-6 border-b border-zinc-200/80 overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0">
+              <nav className="flex gap-0.5 sm:gap-1 min-w-max pb-px">
                 <button
                   onClick={() => setActiveTab('vacancies')}
-                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
+                  className={`px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap rounded-t-md ${
                     activeTab === 'vacancies'
-                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'border-zinc-900 text-zinc-900 bg-white'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/60'
                   }`}
                 >
                   Vacancies
@@ -822,8 +850,8 @@ export default function AdminPage() {
                   onClick={() => setActiveTab('announcements')}
                   className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'announcements'
-                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'border-zinc-900 text-zinc-900 bg-white'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/60'
                   }`}
                 >
                   Announcements
@@ -832,8 +860,8 @@ export default function AdminPage() {
                   onClick={() => setActiveTab('admins')}
                   className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
                     activeTab === 'admins'
-                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'border-zinc-900 text-zinc-900 bg-white'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/60'
                   }`}
                 >
                   Admins
@@ -842,8 +870,8 @@ export default function AdminPage() {
                   onClick={() => setActiveTab('payments')}
                   className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
                     activeTab === 'payments'
-                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'border-zinc-900 text-zinc-900 bg-white'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/60'
                   }`}
                 >
                   <CreditCard className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -854,8 +882,8 @@ export default function AdminPage() {
                   onClick={() => setActiveTab('chats')}
                   className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
                     activeTab === 'chats'
-                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'border-zinc-900 text-zinc-900 bg-white'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/60'
                   }`}
                 >
                   <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -866,8 +894,8 @@ export default function AdminPage() {
                   onClick={() => setActiveTab('visitors')}
                   className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
                     activeTab === 'visitors'
-                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'border-zinc-900 text-zinc-900 bg-white'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/60'
                   }`}
                 >
                   <Globe className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -878,8 +906,8 @@ export default function AdminPage() {
                   onClick={() => setActiveTab('government-links')}
                   className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
                     activeTab === 'government-links'
-                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'border-zinc-900 text-zinc-900 bg-white'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/60'
                   }`}
                 >
                   <Globe className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
@@ -890,12 +918,24 @@ export default function AdminPage() {
                   onClick={() => setActiveTab('blogs')}
                   className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
                     activeTab === 'blogs'
-                      ? 'border-blue-600 text-blue-600 bg-blue-50/50'
-                      : 'border-transparent text-gray-500 hover:text-gray-700 hover:bg-gray-50'
+                      ? 'border-zinc-900 text-zinc-900 bg-white'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/60'
                   }`}
                 >
                   <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
                   <span>Blog</span>
+                </button>
+                <button
+                  onClick={() => setActiveTab('jan-seva-data')}
+                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
+                    activeTab === 'jan-seva-data'
+                      ? 'border-zinc-900 text-zinc-900 bg-white'
+                      : 'border-transparent text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100/60'
+                  }`}
+                >
+                  <Database className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
+                  <span className="hidden sm:inline">Jan Seva Data</span>
+                  <span className="sm:hidden">Data</span>
                 </button>
               </nav>
             </div>
@@ -2643,6 +2683,8 @@ export default function AdminPage() {
                 </div>
               </div>
             )}
+
+            {activeTab === 'jan-seva-data' && <JanSevaDataModule />}
           </div>
         )}
       </main>
