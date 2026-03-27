@@ -28,12 +28,11 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search');
     const publishedOnly = searchParams.get('published') !== 'false';
 
-    // Build query
+    // Build query (use $and so "search $or" does not clash with published date rules)
     const query: any = {};
-    
+
     if (publishedOnly) {
       query.isPublished = true;
-      query.publishedAt = { $lte: new Date() };
     }
 
     if (category) {
@@ -44,13 +43,30 @@ export async function GET(request: NextRequest) {
       query.tags = { $in: [tag] };
     }
 
+    const andBlocks: object[] = [];
+
+    if (publishedOnly) {
+      andBlocks.push({
+        $or: [
+          { publishedAt: null },
+          { publishedAt: { $lte: new Date() } },
+        ],
+      });
+    }
+
     if (search) {
-      query.$or = [
-        { title: { $regex: search, $options: 'i' } },
-        { excerpt: { $regex: search, $options: 'i' } },
-        { content: { $regex: search, $options: 'i' } },
-        { tags: { $in: [new RegExp(search, 'i')] } },
-      ];
+      andBlocks.push({
+        $or: [
+          { title: { $regex: search, $options: 'i' } },
+          { excerpt: { $regex: search, $options: 'i' } },
+          { content: { $regex: search, $options: 'i' } },
+          { tags: { $in: [new RegExp(search, 'i')] } },
+        ],
+      });
+    }
+
+    if (andBlocks.length > 0) {
+      query.$and = andBlocks;
     }
 
     // Calculate pagination

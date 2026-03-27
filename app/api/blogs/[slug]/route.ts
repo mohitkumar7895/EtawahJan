@@ -34,15 +34,24 @@ export async function GET(
       );
     }
 
+    const isPublicRead = blog.isPublished === true &&
+      (blog.publishedAt == null || new Date(blog.publishedAt) <= new Date());
+    if (!isPublicRead) {
+      return NextResponse.json(
+        { error: 'Blog not found' },
+        { status: 404 }
+      );
+    }
+
     // Increment views
     await Blog.updateOne({ slug }, { $inc: { views: 1 } });
 
-    // Get related blogs (same category, exclude current)
+    // Get related blogs (same category, exclude current) — include posts with null publishedAt
     const relatedBlogs = await Blog.find({
       category: blog.category || 'General',
       slug: { $ne: slug },
       isPublished: true,
-      publishedAt: { $lte: new Date() },
+      $or: [{ publishedAt: null }, { publishedAt: { $lte: new Date() } }],
     })
       .select('-content')
       .sort({ publishedAt: -1 })

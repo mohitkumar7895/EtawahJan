@@ -20,27 +20,30 @@ import {
   type EdistrictRecord,
   type WithdrawalRecord,
 } from '@/lib/janSevaApi';
+import { useAdminTheme } from '@/components/admin/AdminThemeContext';
 
 type Section = 'electricity' | 'edistrict' | 'withdrawal';
 
 const PAGE_SIZE = 10;
 
 const field =
-  'w-full px-3 py-2.5 text-sm border border-zinc-200 rounded-lg bg-white text-zinc-900 placeholder:text-zinc-400 shadow-sm transition focus:outline-none focus:ring-2 focus:ring-zinc-900/[0.08] focus:border-zinc-300';
-const lbl = 'block text-[11px] font-semibold text-zinc-500 uppercase tracking-wider mb-1.5';
-const card = 'rounded-2xl border border-zinc-200/90 bg-white shadow-[0_1px_3px_rgba(0,0,0,0.04)] overflow-hidden';
+  'w-full px-3 py-2.5 text-sm border border-zinc-200 dark:border-zinc-600 rounded-lg bg-white dark:bg-zinc-950 text-zinc-900 dark:text-zinc-100 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 shadow-sm transition-colors duration-200 focus:outline-none focus:ring-2 focus:ring-zinc-900/[0.08] dark:focus:ring-zinc-100/15 focus:border-zinc-300 dark:focus:border-zinc-500';
+const lbl =
+  'block text-[11px] font-semibold text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-1.5';
+const card =
+  'rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 shadow-[0_1px_3px_rgba(0,0,0,0.04)] dark:shadow-black/20 overflow-hidden transition-colors duration-200';
 const cardTitle =
-  'flex items-center gap-3 px-5 py-4 border-b border-zinc-100 bg-gradient-to-b from-zinc-50/90 to-white';
+  'flex items-center gap-3 px-5 py-4 border-b border-zinc-100 dark:border-zinc-800 bg-gradient-to-b from-zinc-50/90 to-white dark:from-zinc-800/80 dark:to-zinc-900 transition-colors duration-200';
 const tableHead =
-  'bg-zinc-50/95 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500';
+  'bg-zinc-50/95 dark:bg-zinc-800/90 text-left text-[11px] font-semibold uppercase tracking-wider text-zinc-500 dark:text-zinc-400';
 const btnPrimary =
-  'inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white bg-zinc-900 rounded-lg hover:bg-zinc-800 active:scale-[0.99] transition shadow-sm';
+  'inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-white bg-zinc-900 dark:bg-zinc-100 dark:text-zinc-900 rounded-lg hover:bg-zinc-800 dark:hover:bg-white active:scale-[0.99] transition shadow-sm';
 const btnGhost =
-  'inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-zinc-700 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition';
+  'inline-flex items-center justify-center px-5 py-2.5 text-sm font-medium text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-600 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-colors duration-200';
 const iconBtn =
-  'inline-flex items-center justify-center p-2 text-zinc-500 hover:text-zinc-900 hover:bg-zinc-100 rounded-lg transition-colors';
+  'inline-flex items-center justify-center p-2 text-zinc-500 dark:text-zinc-400 hover:text-zinc-900 dark:hover:text-zinc-100 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg transition-colors';
 const iconBtnDanger =
-  'inline-flex items-center justify-center p-2 text-zinc-500 hover:text-red-700 hover:bg-red-50 rounded-lg transition-colors';
+  'inline-flex items-center justify-center p-2 text-zinc-500 dark:text-zinc-400 hover:text-red-700 dark:hover:text-red-400 hover:bg-red-50 dark:hover:bg-red-950/40 rounded-lg transition-colors';
 
 function toDateInput(iso?: string) {
   if (!iso) return '';
@@ -57,14 +60,15 @@ function formatDisplayDate(iso?: string) {
 }
 
 export default function JanSevaDataModule() {
+  const { resolvedTheme } = useAdminTheme();
   const [section, setSection] = useState<Section>('electricity');
 
   return (
-    <div className="flex flex-col lg:flex-row gap-5 lg:gap-8 min-h-[480px]">
-      <Toaster position="top-right" richColors={false} closeButton theme="light" />
+    <div className="flex flex-col lg:flex-row gap-5 lg:gap-8 min-h-[480px] transition-colors duration-200">
+      <Toaster position="top-right" richColors={false} closeButton theme={resolvedTheme === 'dark' ? 'dark' : 'light'} />
       <aside className="w-full lg:w-52 shrink-0">
-        <div className="rounded-2xl border border-zinc-200/90 bg-white p-2 shadow-sm space-y-0.5">
-          <p className="px-3 pt-2 pb-1.5 text-[10px] font-semibold text-zinc-400 uppercase tracking-[0.14em]">
+        <div className="rounded-2xl border border-zinc-200/90 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-2 shadow-sm dark:shadow-black/20 space-y-0.5 transition-colors duration-200">
+          <p className="px-3 pt-2 pb-1.5 text-[10px] font-semibold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.14em]">
             Modules
           </p>
           <button
@@ -72,8 +76,8 @@ export default function JanSevaDataModule() {
             onClick={() => setSection('electricity')}
             className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
               section === 'electricity'
-                ? 'bg-zinc-900 text-white shadow-sm'
-                : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
+                : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100'
             }`}
           >
             <Zap className={`w-4 h-4 shrink-0 ${section === 'electricity' ? 'opacity-100' : 'opacity-70'}`} />
@@ -84,8 +88,8 @@ export default function JanSevaDataModule() {
             onClick={() => setSection('edistrict')}
             className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
               section === 'edistrict'
-                ? 'bg-zinc-900 text-white shadow-sm'
-                : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
+                : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100'
             }`}
           >
             <Building2 className={`w-4 h-4 shrink-0 ${section === 'edistrict' ? 'opacity-100' : 'opacity-70'}`} />
@@ -96,8 +100,8 @@ export default function JanSevaDataModule() {
             onClick={() => setSection('withdrawal')}
             className={`w-full flex items-center gap-2.5 px-3 py-2.5 rounded-xl text-sm font-medium transition-all ${
               section === 'withdrawal'
-                ? 'bg-zinc-900 text-white shadow-sm'
-                : 'text-zinc-600 hover:bg-zinc-50 hover:text-zinc-900'
+                ? 'bg-zinc-900 dark:bg-zinc-100 text-white dark:text-zinc-900 shadow-sm'
+                : 'text-zinc-600 dark:text-zinc-400 hover:bg-zinc-50 dark:hover:bg-zinc-800 hover:text-zinc-900 dark:hover:text-zinc-100'
             }`}
           >
             <Banknote className={`w-4 h-4 shrink-0 ${section === 'withdrawal' ? 'opacity-100' : 'opacity-70'}`} />
@@ -233,7 +237,7 @@ function ElectricityPanel() {
             <Zap className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-zinc-900 tracking-tight">Electricity</h2>
+            <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">Electricity</h2>
             <p className="text-xs text-zinc-500 mt-0.5">Add or update consumer records</p>
           </div>
         </div>
@@ -328,8 +332,8 @@ function ElectricityPanel() {
       </div>
 
       <div className={card}>
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 bg-zinc-50/40">
-          <h3 className="text-sm font-semibold text-zinc-900">Registry</h3>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-800/40">
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Registry</h3>
           {loading && <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />}
         </div>
         <div className="overflow-x-auto">
@@ -345,7 +349,7 @@ function ElectricityPanel() {
                 <th className="px-4 py-3 font-medium text-right w-[100px]">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100 text-zinc-700">
+            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800 text-zinc-700 dark:text-zinc-300">
               {rows.length === 0 && !loading && (
                 <tr>
                   <td colSpan={7} className="px-4 py-14 text-center text-sm text-zinc-500">
@@ -356,9 +360,9 @@ function ElectricityPanel() {
               {rows.map((r) => {
                 const key = r.id || r._id || '';
                 return (
-                  <tr key={key} className="hover:bg-zinc-50/60 transition-colors">
+                  <tr key={key} className="hover:bg-zinc-50/60 dark:hover:bg-zinc-800/50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap text-zinc-600 tabular-nums">{formatDisplayDate(r.date)}</td>
-                    <td className="px-4 py-3 font-medium text-zinc-900">{r.name}</td>
+                    <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">{r.name}</td>
                     <td className="px-4 py-2 font-mono text-xs text-zinc-600">{r.consumerId}</td>
                     <td className="px-4 py-3 tabular-nums">₹{Number(r.amount || 0).toLocaleString('en-IN')}</td>
                     <td className="px-4 py-3 tabular-nums">₹{Number(r.baki ?? 0).toLocaleString('en-IN')}</td>
@@ -515,7 +519,7 @@ function EdistrictPanel() {
             <Building2 className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-zinc-900 tracking-tight">eDistrict</h2>
+            <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">eDistrict</h2>
             <p className="text-xs text-zinc-500 mt-0.5">Certificate and payment fields</p>
           </div>
         </div>
@@ -620,8 +624,8 @@ function EdistrictPanel() {
       </div>
 
       <div className={card}>
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 bg-zinc-50/40">
-          <h3 className="text-sm font-semibold text-zinc-900">Registry</h3>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-800/40">
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Registry</h3>
           {loading && <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />}
         </div>
         <div className="overflow-x-auto">
@@ -637,7 +641,7 @@ function EdistrictPanel() {
                 <th className="px-4 py-3 font-medium text-right w-[100px]">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100 text-zinc-700">
+            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800 text-zinc-700 dark:text-zinc-300">
               {rows.length === 0 && !loading && (
                 <tr>
                   <td colSpan={7} className="px-4 py-14 text-center text-sm text-zinc-500">
@@ -648,9 +652,9 @@ function EdistrictPanel() {
               {rows.map((r) => {
                 const key = r.id || r._id || '';
                 return (
-                  <tr key={key} className="hover:bg-zinc-50/60 transition-colors">
+                  <tr key={key} className="hover:bg-zinc-50/60 dark:hover:bg-zinc-800/50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap text-zinc-600 tabular-nums">{formatDisplayDate(r.date)}</td>
-                    <td className="px-4 py-3 max-w-[140px] truncate text-zinc-900 font-medium" title={r.subject}>
+                    <td className="px-4 py-3 max-w-[140px] truncate text-zinc-900 dark:text-zinc-100 font-medium" title={r.subject}>
                       {r.subject}
                     </td>
                     <td className="px-4 py-3">{r.name}</td>
@@ -791,7 +795,7 @@ function WithdrawalPanel() {
             <Banknote className="w-4 h-4" />
           </div>
           <div>
-            <h2 className="text-base font-semibold text-zinc-900 tracking-tight">Withdrawal</h2>
+            <h2 className="text-base font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">Withdrawal</h2>
             <p className="text-xs text-zinc-500 mt-0.5">Enter withdrawal details and balance remains manually</p>
           </div>
         </div>
@@ -874,8 +878,8 @@ function WithdrawalPanel() {
       </div>
 
       <div className={card}>
-        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 bg-zinc-50/40">
-          <h3 className="text-sm font-semibold text-zinc-900">Registry</h3>
+        <div className="flex items-center justify-between px-5 py-3.5 border-b border-zinc-100 dark:border-zinc-800 bg-zinc-50/40 dark:bg-zinc-800/40">
+          <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-100">Registry</h3>
           {loading && <Loader2 className="w-4 h-4 animate-spin text-zinc-400" />}
         </div>
         <div className="overflow-x-auto">
@@ -890,7 +894,7 @@ function WithdrawalPanel() {
                 <th className="px-4 py-3 font-medium text-right w-[100px]">Actions</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-zinc-100 text-zinc-700">
+            <tbody className="divide-y divide-zinc-100 dark:divide-zinc-800 text-zinc-700 dark:text-zinc-300">
               {rows.length === 0 && !loading && (
                 <tr>
                   <td colSpan={6} className="px-4 py-14 text-center text-sm text-zinc-500">
@@ -901,9 +905,9 @@ function WithdrawalPanel() {
               {rows.map((r) => {
                 const key = r.id || r._id || '';
                 return (
-                  <tr key={key} className="hover:bg-zinc-50/60 transition-colors">
+                  <tr key={key} className="hover:bg-zinc-50/60 dark:hover:bg-zinc-800/50 transition-colors">
                     <td className="px-4 py-3 whitespace-nowrap text-zinc-600 tabular-nums">{formatDisplayDate(r.date)}</td>
-                    <td className="px-4 py-3 font-medium text-zinc-900">{r.name}</td>
+                    <td className="px-4 py-3 font-medium text-zinc-900 dark:text-zinc-100">{r.name}</td>
                     <td className="px-4 py-2 font-mono text-xs text-zinc-600">{r.aadharNumber}</td>
                     <td className="px-4 py-3 max-w-[120px] truncate" title={r.withdrawal}>
                       {r.withdrawal || '—'}
@@ -939,9 +943,9 @@ function PaginationBar({
   onPageChange: (p: number) => void;
 }) {
   return (
-    <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 border-t border-zinc-100 bg-zinc-50/50">
+    <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3.5 border-t border-zinc-100 dark:border-zinc-800 bg-zinc-50/50 dark:bg-zinc-800/40">
       <p className="text-xs font-medium text-zinc-500 tabular-nums">
-        Page <span className="text-zinc-900">{page}</span>
+        Page <span className="text-zinc-900 dark:text-zinc-100">{page}</span>
         <span className="text-zinc-400 mx-1">/</span>
         {totalPages}
       </p>
@@ -950,7 +954,7 @@ function PaginationBar({
           type="button"
           disabled={page <= 1}
           onClick={() => onPageChange(page - 1)}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-700 bg-white hover:bg-zinc-50 disabled:opacity-35 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-600 text-xs font-medium text-zinc-700 dark:text-zinc-200 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-35 disabled:cursor-not-allowed transition-colors"
         >
           <ChevronLeft className="w-3.5 h-3.5" />
           Prev
@@ -959,7 +963,7 @@ function PaginationBar({
           type="button"
           disabled={page >= totalPages}
           onClick={() => onPageChange(page + 1)}
-          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 text-xs font-medium text-zinc-700 bg-white hover:bg-zinc-50 disabled:opacity-35 disabled:cursor-not-allowed transition-colors"
+          className="inline-flex items-center gap-1 px-3 py-1.5 rounded-lg border border-zinc-200 dark:border-zinc-600 text-xs font-medium text-zinc-700 dark:text-zinc-200 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 disabled:opacity-35 disabled:cursor-not-allowed transition-colors"
         >
           Next
           <ChevronRight className="w-3.5 h-3.5" />

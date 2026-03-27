@@ -739,7 +739,7 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
       </head>
-      <body className="min-h-screen bg-white">
+      <body className="min-h-screen bg-white text-zinc-900 antialiased">
         {children}
         <ChatSupport />
         <VisitorTracker />

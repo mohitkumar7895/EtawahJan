@@ -22,6 +22,7 @@ export default function Header() {
     { path: '/', label: 'Home' },
     { path: '/about', label: 'About' },
     { path: '/services', label: 'Services' },
+    { path: '/government-links', label: 'Gov Links' },
     { path: '/blog', label: 'Blog' },
     { path: '/vacancies', label: 'Vacancies' },
     { path: '/announcements', label: 'Announcements' },
@@ -82,7 +83,7 @@ export default function Header() {
           <div className="flex items-center space-x-2 sm:space-x-4">
             {/* Notification Bell */}
             <NotificationBell />
-            
+
             {/* Chat Button - Desktop */}
             <button
               onClick={handleChatClick}
