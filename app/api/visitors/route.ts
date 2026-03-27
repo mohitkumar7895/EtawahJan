@@ -10,16 +10,38 @@ export async function POST(request: NextRequest) {
   let page: string | undefined;
   let name: string | undefined;
   let email: string | undefined;
-  
+
   try {
     await connectDB();
-    
-    const body = await request.json();
-    sessionId = body.sessionId;
-    page = body.page;
-    name = body.name;
-    email = body.email;
-    const { referrer, userAgent, device, browser, os, country, city } = body;
+
+    let body: Record<string, unknown> = {};
+    try {
+      body = (await request.json()) as Record<string, unknown>;
+    } catch {
+      body = {};
+    }
+
+    sessionId =
+      typeof body.sessionId === 'string' && body.sessionId.trim()
+        ? body.sessionId.trim()
+        : undefined;
+    page = typeof body.page === 'string' && body.page.trim() ? body.page.trim() : '/';
+    name = typeof body.name === 'string' ? body.name : undefined;
+    email = typeof body.email === 'string' ? body.email : undefined;
+    const referrer = typeof body.referrer === 'string' ? body.referrer : '';
+    const userAgent = typeof body.userAgent === 'string' ? body.userAgent : '';
+    const device = typeof body.device === 'string' ? body.device : '';
+    const browser = typeof body.browser === 'string' ? body.browser : '';
+    const os = typeof body.os === 'string' ? body.os : '';
+    const country = typeof body.country === 'string' ? body.country : '';
+    const city = typeof body.city === 'string' ? body.city : '';
+
+    if (!sessionId) {
+      return NextResponse.json(
+        { success: false, error: 'sessionId is required' },
+        { status: 400 },
+      );
+    }
     
     // Get IP address from request
     const ipAddress = request.headers.get('x-forwarded-for') || 
@@ -30,6 +52,7 @@ export async function POST(request: NextRequest) {
     const ip = Array.isArray(ipAddress) ? ipAddress[0] : ipAddress;
     const ua = userAgent || request.headers.get('user-agent') || 'unknown';
     
+    // Do not put visitCount in $setOnInsert — MongoDB forbids $inc and $setOnInsert on the same path (conflict → 500).
     const visitor = await Visitor.findOneAndUpdate(
       { sessionId },
       {
@@ -51,7 +74,6 @@ export async function POST(request: NextRequest) {
         $inc: { visitCount: 1 },
         $setOnInsert: {
           firstVisit: new Date(),
-          visitCount: 1,
         },
       },
       {

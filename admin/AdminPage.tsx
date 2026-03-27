@@ -1,7 +1,43 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle, Eye, Globe, Monitor, Smartphone, Tablet, BookOpen, Database } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
+import {
+  Trash2,
+  Edit,
+  Plus,
+  Loader2,
+  MessageCircle,
+  Send,
+  Image,
+  Video,
+  Phone,
+  Clock,
+  User,
+  Search,
+  Paperclip,
+  Download,
+  X,
+  CreditCard,
+  IndianRupee,
+  CheckCircle,
+  XCircle,
+  Eye,
+  Globe,
+  Monitor,
+  Smartphone,
+  Tablet,
+  BookOpen,
+  Database,
+  Menu,
+  Briefcase,
+  Megaphone,
+  Shield,
+  Users,
+  Link2,
+  LogOut,
+} from 'lucide-react';
+import NextImage from 'next/image';
 import JanSevaDataModule from '@/components/admin/JanSevaDataModule';
 import { AdminThemeToggle } from '@/components/admin/AdminThemeToggle';
 import CardContainer from '@/components/admin/CardContainer';
@@ -16,8 +52,54 @@ import {
 import { resolveAnnouncementMedia, videoMimeTypeForUrl } from '@/lib/announcementMedia';
 import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, uploadAnnouncementMedia, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog } from '@/lib/api';
 
+const ADMIN_LOGO_SRC = '/jan-seva-logo-1.png';
+
+function AdminBrandLogo({
+  className,
+  size = 40,
+  priority = false,
+}: {
+  className?: string;
+  size?: number;
+  priority?: boolean;
+}) {
+  return (
+    <NextImage
+      src={ADMIN_LOGO_SRC}
+      alt="Jan Seva Kendra"
+      width={size}
+      height={size}
+      className={className ?? 'h-auto w-auto object-contain'}
+      priority={priority}
+    />
+  );
+}
+
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'adminmohit1234';
+
+type AdminTab =
+  | 'vacancies'
+  | 'announcements'
+  | 'admins'
+  | 'chats'
+  | 'payments'
+  | 'visitors'
+  | 'government-links'
+  | 'blogs'
+  | 'jan-seva-data';
+
+const ADMIN_NAV: { id: AdminTab; label: string; description: string; icon: LucideIcon }[] = [
+  { id: 'vacancies', label: 'Vacancies', description: 'Job listings & results', icon: Briefcase },
+  { id: 'announcements', label: 'Announcements', description: 'News & media', icon: Megaphone },
+  { id: 'admins', label: 'Administrators', description: 'Access control', icon: Shield },
+  { id: 'payments', label: 'Payments', description: 'Transactions & stats', icon: CreditCard },
+  { id: 'chats', label: 'Chat support', description: 'Customer messages', icon: MessageCircle },
+  { id: 'visitors', label: 'Live visitors', description: 'Analytics & presence', icon: Users },
+  { id: 'government-links', label: 'Gov links', description: 'Public quick links', icon: Link2 },
+  { id: 'blogs', label: 'Blog', description: 'Posts & SEO', icon: BookOpen },
+  { id: 'jan-seva-data', label: 'Jan Seva data', description: 'Registry modules', icon: Database },
+];
 
 export default function AdminPage() {
   const [isAuthed, setIsAuthed] = useState<boolean>(false);
@@ -45,9 +127,15 @@ export default function AdminPage() {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [adminForm, setAdminForm] = useState({ username: '', password: '' });
   
-  const [activeTab, setActiveTab] = useState<
-    'vacancies' | 'announcements' | 'admins' | 'chats' | 'payments' | 'visitors' | 'government-links' | 'blogs' | 'jan-seva-data'
-  >('vacancies');
+  const [activeTab, setActiveTab] = useState<AdminTab>('vacancies');
+  const [mobileNavOpen, setMobileNavOpen] = useState(false);
+
+  const setTab = (id: AdminTab) => {
+    setActiveTab(id);
+    setMobileNavOpen(false);
+  };
+
+  const currentNav = ADMIN_NAV.find((n) => n.id === activeTab);
   
   // Payment state
   const [payments, setPayments] = useState<Payment[]>([]);
@@ -832,167 +920,169 @@ export default function AdminPage() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-50/90 dark:bg-zinc-950 transition-colors duration-200 ease-out">
-      <header className="sticky top-0 z-50 border-b border-zinc-200/80 dark:border-zinc-800/90 bg-white/90 dark:bg-zinc-900/90 backdrop-blur-md shadow-[0_1px_0_0_rgba(0,0,0,0.04)] dark:shadow-[0_1px_0_0_rgba(255,255,255,0.06)] transition-colors duration-200">
-        <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-3.5 flex items-center justify-between gap-3">
-          <div className="min-w-0">
-            <h1 className="text-sm sm:text-base font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight truncate">Admin</h1>
-            <p className="text-[11px] text-zinc-500 dark:text-zinc-400 hidden sm:block truncate">Jan Seva Kendra · Control panel</p>
-          </div>
-          <div className="flex items-center gap-2 sm:gap-3 shrink-0">
-            <AdminThemeToggle />
-            {isAuthed ? (
-              <button
-                type="button"
-                onClick={handleLogout}
-                className="px-3 sm:px-4 py-2 text-xs sm:text-sm font-medium text-zinc-700 dark:text-zinc-200 border border-zinc-200 dark:border-zinc-700 rounded-lg bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 transition-colors whitespace-nowrap"
-              >
-                Log out
-              </button>
-            ) : null}
-          </div>
-        </div>
-      </header>
-
-      <main className="container mx-auto px-2 sm:px-3 md:px-4 py-6 sm:py-8 md:py-10 max-w-[1600px]">
+    <>
         {!isAuthed ? (
-          <div className="max-w-[400px] mx-auto rounded-2xl border border-zinc-200/80 dark:border-zinc-800 bg-white dark:bg-zinc-900 p-6 sm:p-8 shadow-[0_8px_30px_rgb(0,0,0,0.06)] dark:shadow-[0_8px_30px_rgba(0,0,0,0.4)] transition-colors duration-200">
-            <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50 text-center tracking-tight mb-1">Sign in</h2>
-            <p className="text-xs text-zinc-500 dark:text-zinc-400 text-center mb-6">Use your admin credentials</p>
+          <div className="min-h-screen flex flex-col bg-gradient-to-br from-slate-100 via-white to-indigo-50/60 dark:from-zinc-950 dark:via-zinc-900 dark:to-indigo-950/25 transition-colors duration-200">
+            <header className="shrink-0 border-b border-zinc-200/70 dark:border-zinc-800/90 bg-white/80 dark:bg-zinc-900/80 backdrop-blur-md">
+              <div className="max-w-7xl mx-auto px-4 sm:px-6 py-4 flex items-center gap-3">
+                <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700">
+                  <AdminBrandLogo size={44} className="h-9 w-9 object-contain" priority />
+                </div>
+                <div>
+                  <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 tracking-tight">Jan Seva Kendra</p>
+                  <p className="text-[11px] text-zinc-500 dark:text-zinc-400">Secure admin console</p>
+                </div>
+              </div>
+            </header>
+            <div className="flex-1 flex items-center justify-center p-4 sm:p-6">
+          <div className="w-full max-w-md rounded-2xl border border-zinc-200/90 dark:border-zinc-700/90 bg-white/95 dark:bg-zinc-900/95 p-8 sm:p-10 shadow-[0_25px_50px_-12px_rgba(0,0,0,0.15)] dark:shadow-[0_25px_50px_-12px_rgba(0,0,0,0.5)] backdrop-blur-sm transition-colors duration-200">
+            <div className="mx-auto mb-6 flex h-20 w-20 items-center justify-center rounded-2xl bg-white shadow-sm ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700">
+              <AdminBrandLogo size={72} className="h-16 w-16 object-contain" priority />
+            </div>
+            <h2 className="text-xl font-semibold text-zinc-900 dark:text-zinc-50 text-center tracking-tight mb-1">Welcome back</h2>
+            <p className="text-sm text-zinc-500 dark:text-zinc-400 text-center mb-8">Sign in with your administrator credentials</p>
             <div className="space-y-4">
               <input
                 value={user}
                 onChange={(e) => setUser(e.target.value)}
                 placeholder="Username"
-                className="w-full px-3.5 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 dark:focus:ring-zinc-100/20 focus:border-zinc-300 dark:focus:border-zinc-600 transition"
+                autoComplete="username"
+                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-indigo-400"
               />
               <input
                 value={pass}
                 onChange={(e) => setPass(e.target.value)}
                 placeholder="Password"
                 type="password"
-                className="w-full px-3.5 py-2.5 border border-zinc-200 dark:border-zinc-700 rounded-lg text-sm text-zinc-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder:text-zinc-400 dark:placeholder:text-zinc-500 shadow-sm focus:outline-none focus:ring-2 focus:ring-zinc-900/10 dark:focus:ring-zinc-100/20 focus:border-zinc-300 dark:focus:border-zinc-600 transition"
+                autoComplete="current-password"
+                className="w-full rounded-xl border border-zinc-200 bg-white px-4 py-3 text-sm text-zinc-900 shadow-sm placeholder:text-zinc-400 transition focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/20 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 dark:placeholder:text-zinc-500 dark:focus:border-indigo-400"
               />
-              <div className="pt-1">
+              <div className="pt-2">
                 <button
                   type="button"
                   onClick={handleLogin}
-                  className="w-full bg-zinc-900 hover:bg-zinc-800 dark:bg-zinc-100 dark:hover:bg-white dark:text-zinc-900 text-white px-4 py-2.5 rounded-lg text-sm font-medium transition-colors shadow-sm"
+                  className="w-full rounded-xl bg-indigo-600 px-4 py-3 text-sm font-semibold text-white shadow-lg shadow-indigo-600/25 transition hover:bg-indigo-500 focus:outline-none focus-visible:ring-2 focus-visible:ring-indigo-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-zinc-900"
                 >
-                  Continue
+                  Continue to dashboard
                 </button>
               </div>
             </div>
           </div>
+            </div>
+          </div>
         ) : (
-          <div>
-            {/* Tabs — neutral chrome */}
-            <div className="mb-5 sm:mb-6 border-b border-zinc-200/80 dark:border-zinc-800 overflow-x-auto -mx-2 sm:mx-0 px-2 sm:px-0 transition-colors duration-200">
-              <nav className="flex gap-0.5 sm:gap-1 min-w-max pb-px">
+          <div className="flex min-h-screen w-full bg-zinc-100/90 text-zinc-900 transition-colors duration-200 ease-out dark:bg-zinc-950 dark:text-zinc-100">
+            <button
+              type="button"
+              aria-label="Close menu"
+              className={`fixed inset-0 z-40 bg-zinc-900/40 backdrop-blur-[2px] transition-opacity md:hidden ${
+                mobileNavOpen ? 'opacity-100' : 'pointer-events-none opacity-0'
+              }`}
+              onClick={() => setMobileNavOpen(false)}
+            />
+            <aside
+              className={`fixed left-0 top-0 z-50 flex h-full w-[280px] max-w-[85vw] flex-col border-r border-zinc-200/90 bg-white shadow-2xl shadow-zinc-900/10 transition-transform duration-200 ease-out dark:border-zinc-800 dark:bg-zinc-900 dark:shadow-black/40 md:static md:z-0 md:max-w-none md:translate-x-0 md:shadow-none ${
+                mobileNavOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'
+              }`}
+            >
+              <div className="flex h-16 shrink-0 items-center gap-3 border-b border-zinc-200/80 px-4 dark:border-zinc-800">
+                <div className="flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-white shadow-sm ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700">
+                  <AdminBrandLogo size={36} className="h-8 w-8 object-contain" />
+                </div>
+                <div className="min-w-0 flex-1">
+                  <p className="truncate text-sm font-semibold text-zinc-900 dark:text-zinc-50">Jan Seva Kendra</p>
+                  <p className="truncate text-[11px] text-zinc-500 dark:text-zinc-400">Admin console</p>
+                </div>
                 <button
                   type="button"
-                  onClick={() => setActiveTab('vacancies')}
-                  className={`px-3 sm:px-4 py-2.5 text-xs sm:text-sm font-medium border-b-2 transition-colors whitespace-nowrap rounded-t-md ${
-                    activeTab === 'vacancies'
-                      ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-50 bg-white dark:bg-zinc-900/90'
-                      : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/50'
-                  }`}
+                  className="rounded-lg p-2 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 md:hidden"
+                  onClick={() => setMobileNavOpen(false)}
+                  aria-label="Close navigation"
                 >
-                  Vacancies
+                  <X className="h-5 w-5" />
                 </button>
-                <button
-                  onClick={() => setActiveTab('announcements')}
-                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
-                    activeTab === 'announcements'
-                      ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-50 bg-white dark:bg-zinc-900/90'
-                      : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/50'
-                  }`}
-                >
-                  Announcements
-                </button>
-                <button
-                  onClick={() => setActiveTab('admins')}
-                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap ${
-                    activeTab === 'admins'
-                      ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-50 bg-white dark:bg-zinc-900/90'
-                      : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/50'
-                  }`}
-                >
-                  Admins
-                </button>
-                <button
-                  onClick={() => setActiveTab('payments')}
-                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
-                    activeTab === 'payments'
-                      ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-50 bg-white dark:bg-zinc-900/90'
-                      : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/50'
-                  }`}
-                >
-                  <CreditCard className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="hidden xs:inline">Payments</span>
-                  <span className="xs:hidden">Pay</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('chats')}
-                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
-                    activeTab === 'chats'
-                      ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-50 bg-white dark:bg-zinc-900/90'
-                      : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/50'
-                  }`}
-                >
-                  <MessageCircle className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="hidden sm:inline">Chat Support</span>
-                  <span className="sm:hidden">Chat</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('visitors')}
-                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
-                    activeTab === 'visitors'
-                      ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-50 bg-white dark:bg-zinc-900/90'
-                      : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/50'
-                  }`}
-                >
-                  <Globe className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="hidden sm:inline">Visitors</span>
-                  <span className="sm:hidden">Visit</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('government-links')}
-                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
-                    activeTab === 'government-links'
-                      ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-50 bg-white dark:bg-zinc-900/90'
-                      : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/50'
-                  }`}
-                >
-                  <Globe className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="hidden sm:inline">Gov Links</span>
-                  <span className="sm:hidden">Links</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('blogs')}
-                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
-                    activeTab === 'blogs'
-                      ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-50 bg-white dark:bg-zinc-900/90'
-                      : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/50'
-                  }`}
-                >
-                  <BookOpen className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span>Blog</span>
-                </button>
-                <button
-                  onClick={() => setActiveTab('jan-seva-data')}
-                  className={`px-3 sm:px-4 md:px-5 py-2.5 text-xs sm:text-sm md:text-base font-medium border-b-2 transition-colors whitespace-nowrap flex items-center gap-1 sm:gap-2 ${
-                    activeTab === 'jan-seva-data'
-                      ? 'border-zinc-900 dark:border-zinc-100 text-zinc-900 dark:text-zinc-50 bg-white dark:bg-zinc-900/90'
-                      : 'border-transparent text-zinc-500 dark:text-zinc-400 hover:text-zinc-800 dark:hover:text-zinc-200 hover:bg-zinc-100/60 dark:hover:bg-zinc-800/50'
-                  }`}
-                >
-                  <Database className="w-3 h-3 sm:w-4 sm:h-4 flex-shrink-0" />
-                  <span className="hidden sm:inline">Jan Seva Data</span>
-                  <span className="sm:hidden">Data</span>
-                </button>
+              </div>
+              <nav className="flex flex-1 flex-col gap-0.5 overflow-y-auto overflow-x-hidden p-3">
+                {ADMIN_NAV.map((item) => {
+                  const Icon = item.icon;
+                  const active = activeTab === item.id;
+                  return (
+                    <button
+                      key={item.id}
+                      type="button"
+                      onClick={() => setTab(item.id)}
+                      className={`group flex w-full items-start gap-3 rounded-xl px-3 py-2.5 text-left transition-colors ${
+                        active
+                          ? 'bg-indigo-50 text-indigo-950 shadow-sm ring-1 ring-indigo-200/80 dark:bg-indigo-950/40 dark:text-indigo-50 dark:ring-indigo-800/60'
+                          : 'text-zinc-600 hover:bg-zinc-100 dark:text-zinc-400 dark:hover:bg-zinc-800/80'
+                      }`}
+                    >
+                      <span
+                        className={`mt-0.5 flex h-8 w-8 shrink-0 items-center justify-center rounded-lg ${
+                          active
+                            ? 'bg-indigo-600 text-white dark:bg-indigo-500'
+                            : 'bg-zinc-100 text-zinc-500 group-hover:bg-zinc-200 dark:bg-zinc-800 dark:text-zinc-400 dark:group-hover:bg-zinc-700'
+                        }`}
+                      >
+                        <Icon className="h-4 w-4" aria-hidden />
+                      </span>
+                      <span className="min-w-0">
+                        <span className="block text-sm font-medium leading-tight">{item.label}</span>
+                        <span className="mt-0.5 block text-[11px] leading-snug text-zinc-500 dark:text-zinc-500">{item.description}</span>
+                      </span>
+                    </button>
+                  );
+                })}
               </nav>
-            </div>
+              <div className="mt-auto shrink-0 space-y-3 border-t border-zinc-200/80 p-4 dark:border-zinc-800">
+                <div className="flex justify-center">
+                  <AdminThemeToggle />
+                </div>
+                <button
+                  type="button"
+                  onClick={handleLogout}
+                  className="flex w-full items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+                >
+                  <LogOut className="h-4 w-4" aria-hidden />
+                  Log out
+                </button>
+              </div>
+            </aside>
+            <div className="flex min-w-0 flex-1 flex-col">
+              <header className="sticky top-0 z-30 flex h-14 shrink-0 items-center justify-between gap-3 border-b border-zinc-200/90 bg-white/80 px-4 backdrop-blur-md dark:border-zinc-800 dark:bg-zinc-900/80 sm:px-6">
+                <div className="flex min-w-0 items-center gap-3">
+                  <button
+                    type="button"
+                    className="inline-flex rounded-xl border border-zinc-200 bg-white p-2 text-zinc-700 shadow-sm hover:bg-zinc-50 md:hidden dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700"
+                    onClick={() => setMobileNavOpen(true)}
+                    aria-label="Open navigation"
+                  >
+                    <Menu className="h-5 w-5" />
+                  </button>
+                  <div className="flex h-8 w-8 shrink-0 items-center justify-center rounded-lg bg-white shadow-sm ring-1 ring-zinc-200/80 dark:bg-zinc-800 dark:ring-zinc-700 sm:h-9 sm:w-9">
+                    <AdminBrandLogo size={32} className="h-6 w-6 object-contain sm:h-7 sm:w-7" />
+                  </div>
+                  <div className="min-w-0">
+                    <p className="truncate text-sm font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Jan Seva Kendra</p>
+                    <p className="text-[10px] font-semibold uppercase tracking-wider text-indigo-600 dark:text-indigo-400">
+                      {currentNav?.label ?? 'Dashboard'}
+                    </p>
+                  </div>
+                </div>
+                {loading ? (
+                  <Loader2 className="h-5 w-5 shrink-0 animate-spin text-indigo-600 dark:text-indigo-400" aria-hidden />
+                ) : null}
+              </header>
+              <main className="mx-auto w-full max-w-[1600px] flex-1 overflow-y-auto px-4 py-6 sm:px-6 lg:px-8">
+                {error ? (
+                  <div
+                    className="mb-6 flex items-start gap-3 rounded-xl border border-red-200 bg-red-50/90 px-4 py-3 text-sm text-red-800 dark:border-red-900/50 dark:bg-red-950/40 dark:text-red-200"
+                    role="alert"
+                  >
+                    <XCircle className="mt-0.5 h-5 w-5 shrink-0" aria-hidden />
+                    <span>{error}</span>
+                  </div>
+                ) : null}
 
             {/* Payments Tab */}
             {activeTab === 'payments' && (
@@ -2831,10 +2921,11 @@ export default function AdminPage() {
             )}
 
             {activeTab === 'jan-seva-data' && <JanSevaDataModule />}
+              </main>
+            </div>
           </div>
         )}
-      </main>
-    </div>
+    </>
   );
 }
 
