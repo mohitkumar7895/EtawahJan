@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle, Eye, Globe, Monitor, Smartphone, Tablet, BookOpen, Database } from 'lucide-react';
 import JanSevaDataModule from '@/components/admin/JanSevaDataModule';
-import { resolveAnnouncementMedia } from '@/lib/announcementMedia';
+import { resolveAnnouncementMedia, videoMimeTypeForUrl } from '@/lib/announcementMedia';
 import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, uploadAnnouncementMedia, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
@@ -1329,7 +1329,9 @@ export default function AdminPage() {
 
                       <div className="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50">
                         <p className="text-xs font-medium text-gray-700">Photo or video (optional)</p>
-                        <p className="text-xs text-gray-500">Image up to 5MB · Video up to 25MB (MP4, MOV, WebM, …). Windows: file must have an extension like .mp4. Only one media item shows on the card.</p>
+                        <p className="text-xs text-gray-500">
+                          Stored on ImageKit (HTTPS URLs — works on production). Image up to 5MB · Video up to ~95MB per your plan. Use .mp4/.mov if type is missing. Set IMAGEKIT_PRIVATE_KEY in server env.
+                        </p>
                         <div className="flex flex-wrap gap-2">
                           <label className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs sm:text-sm cursor-pointer hover:bg-gray-50">
                             <Image className="w-4 h-4 text-gray-600" />
@@ -1378,11 +1380,12 @@ export default function AdminPage() {
                             {videoSrc ? (
                               <video
                                 key={videoSrc}
-                                src={videoSrc}
                                 className="w-full h-full max-h-48 object-contain"
                                 controls
                                 playsInline
-                              />
+                              >
+                                <source src={videoSrc} type={videoMimeTypeForUrl(videoSrc)} />
+                              </video>
                             ) : (
                               // eslint-disable-next-line @next/next/no-img-element
                               <img
@@ -1455,11 +1458,12 @@ export default function AdminPage() {
                                   {videoSrc ? (
                                     <video
                                       key={videoSrc}
-                                      src={videoSrc}
                                       className="w-full h-full object-contain max-h-40"
                                       controls
                                       playsInline
-                                    />
+                                    >
+                                      <source src={videoSrc} type={videoMimeTypeForUrl(videoSrc)} />
+                                    </video>
                                   ) : (
                                     // eslint-disable-next-line @next/next/no-img-element
                                     <img src={imageSrc!} alt="" className="w-full h-full object-cover max-h-40" />

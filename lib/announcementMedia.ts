@@ -18,3 +18,15 @@ export function resolveAnnouncementMedia(announcement: {
   if (i) return { videoSrc: null, imageSrc: i };
   return { videoSrc: null, imageSrc: null };
 }
+
+/** Pick <source type="..."> for streaming (mobile Safari needs a sensible type on source). */
+export function videoMimeTypeForUrl(url: string): string {
+  const base = url.split('?')[0].split('#')[0].toLowerCase();
+  if (base.endsWith('.webm')) return 'video/webm';
+  if (base.endsWith('.mov')) return 'video/quicktime';
+  if (base.endsWith('.ogv') || base.endsWith('.ogg')) return 'video/ogg';
+  if (base.endsWith('.m4v') || base.endsWith('.mp4')) return 'video/mp4';
+  if (base.includes('.webm')) return 'video/webm';
+  if (base.includes('.mov')) return 'video/quicktime';
+  return 'video/mp4';
+}

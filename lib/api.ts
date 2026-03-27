@@ -321,17 +321,31 @@ export async function deleteAnnouncement(id: string): Promise<void> {
   }
 }
 
+/** Client-side: match server inference so we hit /api/upload-video vs /api/announcements/upload */
+function isAnnouncementVideoFile(file: File): boolean {
+  const t = (file.type || '').trim().toLowerCase();
+  if (t.startsWith('video/')) return true;
+  const ext = (file.name.split('.').pop() || '').toLowerCase();
+  return ['mp4', 'webm', 'mov', 'mkv', 'avi', 'm4v', 'ogv', '3gp'].includes(ext);
+}
+
+/**
+ * Upload announcement media to ImageKit (no local disk).
+ * Videos → POST /api/upload-video · Images → POST /api/announcements/upload
+ */
 export async function uploadAnnouncementMedia(
   file: File
 ): Promise<{ fileUrl: string; mediaType: 'image' | 'video' }> {
+  const isVideo = isAnnouncementVideoFile(file);
+  const endpoint = isVideo ? '/api/upload-video' : '/api/announcements/upload';
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), 120000);
+  const timeoutId = setTimeout(() => controller.abort(), isVideo ? 300000 : 120000);
 
   try {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_BASE_URL}/api/announcements/upload`, {
+    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
       method: 'POST',
       body: formData,
       signal: controller.signal,
@@ -351,15 +365,21 @@ export async function uploadAnnouncementMedia(
     const data = await response.json();
     return {
       fileUrl: data.fileUrl as string,
-      mediaType: data.mediaType as 'image' | 'video',
+      mediaType: (data.mediaType as 'image' | 'video') || (isVideo ? 'video' : 'image'),
     };
   } catch (error: unknown) {
     clearTimeout(timeoutId);
     if (error instanceof Error && error.name === 'AbortError') {
-      throw new Error('Upload timed out. Try a smaller file.');
+      throw new Error('Upload timed out. Try a smaller file or check your connection.');
     }
     throw error;
   }
+}
+
+/** Dedicated video upload — same as uploadAnnouncementMedia for video files; useful for admin UI clarity */
+export async function uploadVideoToImageKit(file: File): Promise<{ videoUrl: string; fileUrl: string }> {
+  const r = await uploadAnnouncementMedia(file);
+  return { videoUrl: r.fileUrl, fileUrl: r.fileUrl };
 }
 
 // Admin API

@@ -1,16 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server';
 import {
-  ANNOUNCEMENT_IMAGE_MAX,
+  ANNOUNCEMENT_VIDEO_MAX,
   inferAnnouncementMedia,
   uploadBufferToImageKit,
 } from '@/lib/announcementMediaUpload';
 
 /**
- * POST /api/announcements/upload
- * Images only → ImageKit. Videos must use POST /api/upload-video.
- * Field name: "file" (same as multer.single('file') in Express).
+ * POST /api/upload-video
+ * Multipart form field: "file" (same convention as Express + multer.single('file')).
+ * Streams bytes to ImageKit — no local uploads/ folder. Returns HTTPS URL for <video src>.
  */
-export const maxDuration = 120;
+export const maxDuration = 300;
 export const dynamic = 'force-dynamic';
 
 export async function POST(request: NextRequest) {
@@ -23,28 +23,19 @@ export async function POST(request: NextRequest) {
     }
 
     const inferred = inferAnnouncementMedia(file);
-    if (!inferred) {
+    if (!inferred || inferred.kind !== 'video') {
       return NextResponse.json(
         {
           error:
-            'Could not detect file type. Use JPG/PNG/… for this endpoint, or POST /api/upload-video for video.',
+            'Not a video file. Use MP4, WebM, MOV, etc., or use POST /api/announcements/upload for images.',
         },
         { status: 400 },
       );
     }
 
-    if (inferred.kind === 'video') {
-      return NextResponse.json(
-        {
-          error: 'Use POST /api/upload-video for video files (ImageKit streaming).',
-        },
-        { status: 400 },
-      );
-    }
-
-    if (file.size > ANNOUNCEMENT_IMAGE_MAX) {
-      const mb = Math.floor(ANNOUNCEMENT_IMAGE_MAX / (1024 * 1024));
-      return NextResponse.json({ error: `Image too large. Max ${mb}MB.` }, { status: 400 });
+    if (file.size > ANNOUNCEMENT_VIDEO_MAX) {
+      const mb = Math.floor(ANNOUNCEMENT_VIDEO_MAX / (1024 * 1024));
+      return NextResponse.json({ error: `Video too large. Max ~${mb}MB for this app (adjust ANNOUNCEMENT_VIDEO_MAX / ImageKit plan).` }, { status: 400 });
     }
 
     const bytes = await file.arrayBuffer();
@@ -52,22 +43,23 @@ export async function POST(request: NextRequest) {
 
     const { url } = await uploadBufferToImageKit({
       buffer,
-      originalFileName: file.name || 'image.jpg',
-      folder: '/announcements/images',
+      originalFileName: file.name || 'video.mp4',
+      folder: '/announcements/videos',
       mimeType: inferred.mime,
     });
 
     return NextResponse.json(
       {
-        message: 'Image uploaded successfully',
+        message: 'Video uploaded successfully',
         fileUrl: url,
-        mediaType: 'image' as const,
+        videoUrl: url,
+        mediaType: 'video' as const,
       },
       { status: 201 },
     );
   } catch (error: unknown) {
     const message = error instanceof Error ? error.message : 'Upload failed';
-    console.error('❌ /api/announcements/upload:', error);
+    console.error('❌ /api/upload-video:', error);
     const status = message.includes('IMAGEKIT') || message.includes('ImageKit') ? 503 : 500;
     return NextResponse.json({ error: message }, { status });
   }

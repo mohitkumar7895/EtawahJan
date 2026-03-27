@@ -3,7 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Megaphone, ExternalLink } from 'lucide-react';
 import { getAnnouncements, type Announcement } from '@/lib/api';
-import { resolveAnnouncementMedia } from '@/lib/announcementMedia';
+import { resolveAnnouncementMedia, videoMimeTypeForUrl } from '@/lib/announcementMedia';
 import Link from 'next/link';
 
 export default function Announcements() {
@@ -96,12 +96,13 @@ export default function Announcements() {
                   {videoSrc ? (
                     <video
                       key={videoSrc}
-                      src={videoSrc}
                       className="absolute inset-0 w-full h-full object-contain bg-black/80"
                       controls
                       playsInline
                       preload="metadata"
-                    />
+                    >
+                      <source src={videoSrc} type={videoMimeTypeForUrl(videoSrc)} />
+                    </video>
                   ) : (
                     // eslint-disable-next-line @next/next/no-img-element
                     <img
