@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import type { LucideIcon } from 'lucide-react';
 import {
   Trash2,
@@ -30,6 +30,8 @@ import {
   BookOpen,
   Database,
   Menu,
+  LayoutDashboard,
+  Zap,
   Briefcase,
   Megaphone,
   Shield,
@@ -51,6 +53,7 @@ import {
 } from '@/lib/admin-form-styles';
 import { resolveAnnouncementMedia, videoMimeTypeForUrl } from '@/lib/announcementMedia';
 import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, uploadAnnouncementMedia, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog } from '@/lib/api';
+import { getElectricityPage, getEdistrictPage, getWithdrawalPage } from '@/lib/janSevaApi';
 
 const ADMIN_LOGO_SRC = '/jan-seva-logo-1.png';
 
@@ -79,6 +82,7 @@ const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'adminmohit1234';
 
 type AdminTab =
+  | 'dashboard'
   | 'vacancies'
   | 'announcements'
   | 'admins'
@@ -89,7 +93,25 @@ type AdminTab =
   | 'blogs'
   | 'jan-seva-data';
 
+type DashboardSnapshot = {
+  vacancies: number;
+  announcements: number;
+  admins: number;
+  chats: number;
+  payments: number;
+  paymentSuccessAmount: number;
+  visitorsTotal: number;
+  visitorsActive: number;
+  visitorsToday: number;
+  governmentLinks: number;
+  blogs: number;
+  electricity: number;
+  edistrict: number;
+  withdrawal: number;
+};
+
 const ADMIN_NAV: { id: AdminTab; label: string; description: string; icon: LucideIcon }[] = [
+  { id: 'dashboard', label: 'Dashboard', description: 'Overview & counts', icon: LayoutDashboard },
   { id: 'vacancies', label: 'Vacancies', description: 'Job listings & results', icon: Briefcase },
   { id: 'announcements', label: 'Announcements', description: 'News & media', icon: Megaphone },
   { id: 'admins', label: 'Administrators', description: 'Access control', icon: Shield },
@@ -127,7 +149,9 @@ export default function AdminPage() {
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [adminForm, setAdminForm] = useState({ username: '', password: '' });
   
-  const [activeTab, setActiveTab] = useState<AdminTab>('vacancies');
+  const [activeTab, setActiveTab] = useState<AdminTab>('dashboard');
+  const [dashboardStats, setDashboardStats] = useState<DashboardSnapshot | null>(null);
+  const [dashboardLoading, setDashboardLoading] = useState(false);
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
 
   const setTab = (id: AdminTab) => {
@@ -180,10 +204,83 @@ export default function AdminPage() {
   const [blogImageFile, setBlogImageFile] = useState<File | null>(null);
   const [blogImagePreview, setBlogImagePreview] = useState<string>('');
 
+  const loadDashboardStats = useCallback(async () => {
+    setDashboardLoading(true);
+    try {
+      const [
+        vacancies,
+        announcements,
+        admins,
+        chats,
+        paymentsList,
+        visitorPayload,
+        govLinks,
+        blogPayload,
+        elec,
+        edis,
+        withd,
+      ] = await Promise.all([
+        getVacancies().then((a) => a.length).catch(() => 0),
+        getAnnouncements().then((a) => a.length).catch(() => 0),
+        getAdmins().then((a) => a.length).catch(() => 0),
+        getAllChats().then((a) => a.length).catch(() => 0),
+        getAllPayments().catch(() => [] as Payment[]),
+        getVisitors().catch(() => ({
+          success: false,
+          activeVisitors: [] as Visitor[],
+          allVisitors: [] as Visitor[],
+          stats: { total: 0, active: 0, today: 0 },
+        })),
+        getGovernmentLinks(false).then((a) => a.length).catch(() => 0),
+        getBlogs({ page: 1, limit: 1 }).catch(() => ({ blogs: [] as Blog[], pagination: { total: 0 } })),
+        getElectricityPage(1, 1).then((r) => r.total).catch(() => 0),
+        getEdistrictPage(1, 1).then((r) => r.total).catch(() => 0),
+        getWithdrawalPage(1, 1).then((r) => r.total).catch(() => 0),
+      ]);
+
+      const successfulPayments = paymentsList.filter((p) => p.status === 'success');
+      const paymentSuccessAmount = successfulPayments.reduce((sum, p) => sum + (p.amount || 0), 0);
+      const blogTotal =
+        blogPayload.pagination && typeof blogPayload.pagination.total === 'number'
+          ? blogPayload.pagination.total
+          : blogPayload.blogs.length;
+
+      setDashboardStats({
+        vacancies,
+        announcements,
+        admins,
+        chats,
+        payments: paymentsList.length,
+        paymentSuccessAmount,
+        visitorsTotal: visitorPayload.stats?.total ?? visitorPayload.allVisitors?.length ?? 0,
+        visitorsActive: visitorPayload.stats?.active ?? visitorPayload.activeVisitors?.length ?? 0,
+        visitorsToday: visitorPayload.stats?.today ?? 0,
+        governmentLinks: govLinks,
+        blogs: blogTotal,
+        electricity: elec,
+        edistrict: edis,
+        withdrawal: withd,
+      });
+    } catch (e) {
+      console.error('Dashboard stats error:', e);
+    } finally {
+      setDashboardLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthed || activeTab !== 'dashboard') return;
+    void loadDashboardStats();
+  }, [isAuthed, activeTab, loadDashboardStats]);
+
   useEffect(() => {
     if (isAuthed) {
-      loadVacanciesFromAPI();
-      loadAdminsFromAPI();
+      if (activeTab !== 'dashboard') {
+        loadVacanciesFromAPI();
+      }
+      if (activeTab !== 'dashboard') {
+        loadAdminsFromAPI();
+      }
       if (activeTab === 'chats') {
         loadChatsFromAPI();
       }
@@ -1083,6 +1180,190 @@ export default function AdminPage() {
                     <span>{error}</span>
                   </div>
                 ) : null}
+
+            {activeTab === 'dashboard' && (
+              <div className="space-y-6">
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-lg font-semibold tracking-tight text-zinc-900 dark:text-zinc-50">Overview</h2>
+                    <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+                      Totals across modules. Open a section by tapping a card.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void loadDashboardStats()}
+                    disabled={dashboardLoading}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-medium text-zinc-700 shadow-sm transition hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                  >
+                    {dashboardLoading ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden /> : null}
+                    Refresh counts
+                  </button>
+                </div>
+
+                {dashboardLoading && !dashboardStats ? (
+                  <div className="flex justify-center py-20">
+                    <Loader2 className="h-10 w-10 animate-spin text-indigo-600 dark:text-indigo-400" aria-hidden />
+                  </div>
+                ) : dashboardStats ? (
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    <button
+                      type="button"
+                      onClick={() => setTab('vacancies')}
+                      className="group text-left rounded-xl border border-indigo-200/80 bg-gradient-to-br from-indigo-50 to-violet-100/90 p-4 shadow-sm transition hover:border-indigo-300 hover:shadow-md dark:border-indigo-900/50 dark:from-indigo-950/40 dark:to-violet-950/30 dark:hover:border-indigo-800"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium text-indigo-800 dark:text-indigo-200">Vacancies</p>
+                        <Briefcase className="h-7 w-7 shrink-0 text-indigo-600 dark:text-indigo-400" aria-hidden />
+                      </div>
+                      <p className="mt-2 text-3xl font-bold tabular-nums text-indigo-950 dark:text-indigo-50">
+                        {dashboardStats.vacancies}
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTab('blogs')}
+                      className="group text-left rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50 to-orange-100/90 p-4 shadow-sm transition hover:border-amber-300 hover:shadow-md dark:border-amber-900/50 dark:from-amber-950/40 dark:to-orange-950/30 dark:hover:border-amber-800"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium text-amber-900 dark:text-amber-200">Blog posts</p>
+                        <BookOpen className="h-7 w-7 shrink-0 text-amber-700 dark:text-amber-400" aria-hidden />
+                      </div>
+                      <p className="mt-2 text-3xl font-bold tabular-nums text-amber-950 dark:text-amber-50">
+                        {dashboardStats.blogs}
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTab('payments')}
+                      className="group text-left rounded-xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50 to-teal-100/90 p-4 shadow-sm transition hover:border-emerald-300 hover:shadow-md dark:border-emerald-900/50 dark:from-emerald-950/40 dark:to-teal-950/30 dark:hover:border-emerald-800"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium text-emerald-800 dark:text-emerald-200">Payments</p>
+                        <CreditCard className="h-7 w-7 shrink-0 text-emerald-600 dark:text-emerald-400" aria-hidden />
+                      </div>
+                      <p className="mt-2 text-3xl font-bold tabular-nums text-emerald-950 dark:text-emerald-50">
+                        {dashboardStats.payments}
+                      </p>
+                      <p className="mt-1 text-xs text-emerald-800/90 dark:text-emerald-300/90">
+                        Successful total:{' '}
+                        <span className="inline-flex items-center gap-0.5 font-medium">
+                          <IndianRupee className="h-3 w-3" aria-hidden />
+                          {dashboardStats.paymentSuccessAmount.toLocaleString('en-IN')}
+                        </span>
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTab('chats')}
+                      className="group text-left rounded-xl border border-sky-200/80 bg-gradient-to-br from-sky-50 to-cyan-100/90 p-4 shadow-sm transition hover:border-sky-300 hover:shadow-md dark:border-sky-900/50 dark:from-sky-950/40 dark:to-cyan-950/30 dark:hover:border-sky-800"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium text-sky-900 dark:text-sky-200">Chat threads</p>
+                        <MessageCircle className="h-7 w-7 shrink-0 text-sky-600 dark:text-sky-400" aria-hidden />
+                      </div>
+                      <p className="mt-2 text-3xl font-bold tabular-nums text-sky-950 dark:text-sky-50">
+                        {dashboardStats.chats}
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTab('announcements')}
+                      className="group text-left rounded-xl border border-fuchsia-200/80 bg-gradient-to-br from-fuchsia-50 to-pink-100/90 p-4 shadow-sm transition hover:border-fuchsia-300 hover:shadow-md dark:border-fuchsia-900/50 dark:from-fuchsia-950/40 dark:to-pink-950/30 dark:hover:border-fuchsia-800"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium text-fuchsia-900 dark:text-fuchsia-200">Announcements</p>
+                        <Megaphone className="h-7 w-7 shrink-0 text-fuchsia-600 dark:text-fuchsia-400" aria-hidden />
+                      </div>
+                      <p className="mt-2 text-3xl font-bold tabular-nums text-fuchsia-950 dark:text-fuchsia-50">
+                        {dashboardStats.announcements}
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTab('visitors')}
+                      className="group text-left rounded-xl border border-blue-200/80 bg-gradient-to-br from-blue-50 to-slate-100/90 p-4 shadow-sm transition hover:border-blue-300 hover:shadow-md dark:border-blue-900/50 dark:from-blue-950/40 dark:to-slate-950/30 dark:hover:border-blue-800"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium text-blue-900 dark:text-blue-200">Visitors (all time)</p>
+                        <Users className="h-7 w-7 shrink-0 text-blue-600 dark:text-blue-400" aria-hidden />
+                      </div>
+                      <p className="mt-2 text-3xl font-bold tabular-nums text-blue-950 dark:text-blue-50">
+                        {dashboardStats.visitorsTotal}
+                      </p>
+                      <p className="mt-1 text-xs text-blue-800/90 dark:text-blue-300/90">
+                        Live: {dashboardStats.visitorsActive} · Today: {dashboardStats.visitorsToday}
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTab('government-links')}
+                      className="group text-left rounded-xl border border-lime-200/80 bg-gradient-to-br from-lime-50 to-emerald-100/80 p-4 shadow-sm transition hover:border-lime-300 hover:shadow-md dark:border-lime-900/50 dark:from-lime-950/35 dark:to-emerald-950/30 dark:hover:border-lime-800"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium text-lime-900 dark:text-lime-200">Gov links</p>
+                        <Link2 className="h-7 w-7 shrink-0 text-lime-700 dark:text-lime-400" aria-hidden />
+                      </div>
+                      <p className="mt-2 text-3xl font-bold tabular-nums text-lime-950 dark:text-lime-50">
+                        {dashboardStats.governmentLinks}
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTab('admins')}
+                      className="group text-left rounded-xl border border-zinc-300/80 bg-gradient-to-br from-zinc-100 to-zinc-200/90 p-4 shadow-sm transition hover:border-zinc-400 hover:shadow-md dark:border-zinc-600 dark:from-zinc-800/80 dark:to-zinc-900/80 dark:hover:border-zinc-500"
+                    >
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-medium text-zinc-700 dark:text-zinc-300">Administrators</p>
+                        <Shield className="h-7 w-7 shrink-0 text-zinc-600 dark:text-zinc-400" aria-hidden />
+                      </div>
+                      <p className="mt-2 text-3xl font-bold tabular-nums text-zinc-900 dark:text-zinc-50">
+                        {dashboardStats.admins}
+                      </p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setTab('jan-seva-data')}
+                      className="group text-left rounded-xl border border-violet-200/80 bg-gradient-to-br from-violet-50 to-purple-100/90 p-4 shadow-sm transition hover:border-violet-300 hover:shadow-md dark:border-violet-900/50 dark:from-violet-950/40 dark:to-purple-950/30 sm:col-span-2 lg:col-span-3 xl:col-span-4 dark:hover:border-violet-800"
+                    >
+                      <div className="flex flex-wrap items-center justify-between gap-3">
+                        <div className="flex items-center gap-2">
+                          <p className="text-xs font-medium text-violet-900 dark:text-violet-200">Jan Seva registry</p>
+                          <Database className="h-6 w-6 text-violet-600 dark:text-violet-400" aria-hidden />
+                        </div>
+                        <div className="flex w-full flex-wrap gap-4 sm:w-auto sm:justify-end">
+                          <div className="flex items-baseline gap-2">
+                            <Zap className="h-4 w-4 text-amber-600 dark:text-amber-400" aria-hidden />
+                            <span className="text-xs text-violet-800 dark:text-violet-300">Electricity</span>
+                            <span className="text-xl font-bold tabular-nums text-violet-950 dark:text-violet-50">
+                              {dashboardStats.electricity}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <Globe className="h-4 w-4 text-sky-600 dark:text-sky-400" aria-hidden />
+                            <span className="text-xs text-violet-800 dark:text-violet-300">eDistrict</span>
+                            <span className="text-xl font-bold tabular-nums text-violet-950 dark:text-violet-50">
+                              {dashboardStats.edistrict}
+                            </span>
+                          </div>
+                          <div className="flex items-baseline gap-2">
+                            <IndianRupee className="h-4 w-4 text-emerald-600 dark:text-emerald-400" aria-hidden />
+                            <span className="text-xs text-violet-800 dark:text-violet-300">Withdrawal</span>
+                            <span className="text-xl font-bold tabular-nums text-violet-950 dark:text-violet-50">
+                              {dashboardStats.withdrawal}
+                            </span>
+                          </div>
+                        </div>
+                      </div>
+                    </button>
+                  </div>
+                ) : (
+                  <p className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-8 text-center text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
+                    Could not load overview. Use Refresh to try again.
+                  </p>
+                )}
+              </div>
+            )}
 
             {/* Payments Tab */}
             {activeTab === 'payments' && (
