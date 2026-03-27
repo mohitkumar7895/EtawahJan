@@ -217,6 +217,8 @@ export interface Announcement {
   title: string;
   description?: string;
   link?: string;
+  imageUrl?: string;
+  videoUrl?: string;
   isActive?: boolean;
   expiresAt?: string;
   createdAt?: string;
@@ -316,6 +318,47 @@ export async function deleteAnnouncement(id: string): Promise<void> {
 
   if (!response.ok) {
     throw new Error('Failed to delete announcement');
+  }
+}
+
+export async function uploadAnnouncementMedia(
+  file: File
+): Promise<{ fileUrl: string; mediaType: 'image' | 'video' }> {
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 120000);
+
+  try {
+    const formData = new FormData();
+    formData.append('file', file);
+
+    const response = await fetch(`${API_BASE_URL}/api/announcements/upload`, {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+    });
+
+    clearTimeout(timeoutId);
+
+    if (!response.ok) {
+      const errorData = await response.json().catch(() => ({}));
+      const errorMessage =
+        (errorData as { message?: string; error?: string }).message ||
+        (errorData as { error?: string }).error ||
+        'Failed to upload file';
+      throw new Error(errorMessage);
+    }
+
+    const data = await response.json();
+    return {
+      fileUrl: data.fileUrl as string,
+      mediaType: data.mediaType as 'image' | 'video',
+    };
+  } catch (error: unknown) {
+    clearTimeout(timeoutId);
+    if (error instanceof Error && error.name === 'AbortError') {
+      throw new Error('Upload timed out. Try a smaller file.');
+    }
+    throw error;
   }
 }
 

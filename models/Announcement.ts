@@ -13,6 +13,14 @@ const announcementSchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  imageUrl: {
+    type: String,
+    default: '',
+  },
+  videoUrl: {
+    type: String,
+    default: '',
+  },
   isActive: {
     type: Boolean,
     default: true,

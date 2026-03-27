@@ -44,7 +44,7 @@ export async function POST(request: NextRequest) {
     await connectDB();
     
     const body = await request.json();
-    const { title, description, link, expiresAt } = body;
+    const { title, description, link, imageUrl, videoUrl, expiresAt } = body;
 
     if (!title || !title.trim()) {
       return NextResponse.json(
@@ -59,6 +59,8 @@ export async function POST(request: NextRequest) {
       title: title.trim(),
       description: description ? description.trim() : '',
       link: link ? link.trim() : '',
+      imageUrl: typeof imageUrl === 'string' ? imageUrl.trim() : '',
+      videoUrl: typeof videoUrl === 'string' ? videoUrl.trim() : '',
       expiresAt: expiresAt ? new Date(expiresAt) : null,
       isActive: true,
     });

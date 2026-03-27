@@ -3,7 +3,8 @@
 import { useEffect, useState } from 'react';
 import { Trash2, Edit, Plus, Loader2, MessageCircle, Send, Image, Video, Phone, Clock, User, Search, Paperclip, Download, X, CreditCard, IndianRupee, CheckCircle, XCircle, Eye, Globe, Monitor, Smartphone, Tablet, BookOpen, Database } from 'lucide-react';
 import JanSevaDataModule from '@/components/admin/JanSevaDataModule';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog } from '@/lib/api';
+import { resolveAnnouncementMedia } from '@/lib/announcementMedia';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, uploadAnnouncementMedia, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog } from '@/lib/api';
 
 const ADMIN_USER = 'admin';
 const ADMIN_PASS = 'adminmohit1234';
@@ -21,8 +22,15 @@ export default function AdminPage() {
 
   // Announcements state
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
-  const [announcementForm, setAnnouncementForm] = useState({ title: '', description: '', link: '' });
+  const [announcementForm, setAnnouncementForm] = useState({
+    title: '',
+    description: '',
+    link: '',
+    imageUrl: '',
+    videoUrl: '',
+  });
   const [editingAnnouncementId, setEditingAnnouncementId] = useState<string | null>(null);
+  const [announcementMediaBusy, setAnnouncementMediaBusy] = useState(false);
 
   const [admins, setAdmins] = useState<Admin[]>([]);
   const [adminForm, setAdminForm] = useState({ username: '', password: '' });
@@ -165,6 +173,28 @@ export default function AdminPage() {
     setAnnouncementForm({ ...announcementForm, [e.target.name]: e.target.value });
   };
 
+  const handleAnnouncementFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    e.target.value = '';
+    if (!file) return;
+
+    setAnnouncementMediaBusy(true);
+    setError(null);
+    try {
+      const { fileUrl, mediaType } = await uploadAnnouncementMedia(file);
+      if (mediaType === 'video') {
+        setAnnouncementForm((f) => ({ ...f, videoUrl: fileUrl, imageUrl: '' }));
+      } else {
+        setAnnouncementForm((f) => ({ ...f, imageUrl: fileUrl, videoUrl: '' }));
+      }
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Upload failed';
+      setError(msg);
+    } finally {
+      setAnnouncementMediaBusy(false);
+    }
+  };
+
   const handleAddAnnouncement = async () => {
     if (!announcementForm.title.trim()) {
       alert('Title is required');
@@ -175,22 +205,30 @@ export default function AdminPage() {
     setError(null);
 
     try {
-      const announcementData = {
+      const trimmedImage = announcementForm.imageUrl.trim();
+      const trimmedVideo = announcementForm.videoUrl.trim();
+      const basePayload = {
         title: announcementForm.title.trim(),
         description: announcementForm.description.trim() || undefined,
         link: announcementForm.link.trim() || undefined,
+        imageUrl: trimmedImage,
+        videoUrl: trimmedVideo,
       };
 
       if (editingAnnouncementId) {
-        await updateAnnouncement(editingAnnouncementId, announcementData);
+        await updateAnnouncement(editingAnnouncementId, basePayload);
       } else {
-        await createAnnouncement(announcementData);
+        await createAnnouncement({
+          ...basePayload,
+          imageUrl: trimmedImage || undefined,
+          videoUrl: trimmedVideo || undefined,
+        });
         // Notification will be created automatically in the API route
         window.dispatchEvent(new CustomEvent('janseva:notifications:updated'));
       }
 
       await loadAnnouncementsFromAPI();
-      setAnnouncementForm({ title: '', description: '', link: '' });
+      setAnnouncementForm({ title: '', description: '', link: '', imageUrl: '', videoUrl: '' });
       setEditingAnnouncementId(null);
     } catch (err: any) {
       const errorMsg = err?.message || (editingAnnouncementId ? 'Failed to update announcement' : 'Failed to create announcement');
@@ -205,10 +243,12 @@ export default function AdminPage() {
     const a = announcements.find((x) => (x.id || x._id) === id);
     if (!a) return;
     setEditingAnnouncementId(id);
-    setAnnouncementForm({ 
-      title: a.title || '', 
-      description: a.description || '', 
-      link: a.link || '' 
+    setAnnouncementForm({
+      title: a.title || '',
+      description: a.description || '',
+      link: a.link || '',
+      imageUrl: a.imageUrl || '',
+      videoUrl: a.videoUrl || '',
     });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
@@ -224,7 +264,7 @@ export default function AdminPage() {
       await loadAnnouncementsFromAPI();
       if (editingAnnouncementId === id) {
         setEditingAnnouncementId(null);
-        setAnnouncementForm({ title: '', description: '', link: '' });
+        setAnnouncementForm({ title: '', description: '', link: '', imageUrl: '', videoUrl: '' });
       }
     } catch (err) {
       setError('Failed to delete announcement');
@@ -1287,6 +1327,75 @@ export default function AdminPage() {
                         className="w-full px-4 py-3 border-2 border-gray-300 rounded-lg text-sm sm:text-base text-gray-900 placeholder-gray-500 focus:outline-none focus:border-blue-500 focus:ring-2 focus:ring-blue-200" 
                       />
 
+                      <div className="space-y-2 border border-gray-200 rounded-lg p-3 bg-gray-50">
+                        <p className="text-xs font-medium text-gray-700">Photo or video (optional)</p>
+                        <p className="text-xs text-gray-500">Image up to 5MB · Video up to 25MB (MP4, MOV, WebM, …). Windows: file must have an extension like .mp4. Only one media item shows on the card.</p>
+                        <div className="flex flex-wrap gap-2">
+                          <label className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs sm:text-sm cursor-pointer hover:bg-gray-50">
+                            <Image className="w-4 h-4 text-gray-600" />
+                            <span>Upload image</span>
+                            <input
+                              type="file"
+                              accept="image/*"
+                              className="hidden"
+                              disabled={loading || announcementMediaBusy}
+                              onChange={handleAnnouncementFileUpload}
+                            />
+                          </label>
+                          <label className="inline-flex items-center gap-1.5 px-3 py-2 bg-white border border-gray-300 rounded-lg text-xs sm:text-sm cursor-pointer hover:bg-gray-50">
+                            <Video className="w-4 h-4 text-gray-600" />
+                            <span>Upload video</span>
+                            <input
+                              type="file"
+                              accept="video/*,.mp4,.webm,.mov,.mkv"
+                              className="hidden"
+                              disabled={loading || announcementMediaBusy}
+                              onChange={handleAnnouncementFileUpload}
+                            />
+                          </label>
+                          {(announcementForm.imageUrl || announcementForm.videoUrl) && (
+                            <button
+                              type="button"
+                              onClick={() => setAnnouncementForm((f) => ({ ...f, imageUrl: '', videoUrl: '' }))}
+                              disabled={loading || announcementMediaBusy}
+                              className="inline-flex items-center gap-1 px-3 py-2 text-xs sm:text-sm text-red-600 border border-red-200 rounded-lg hover:bg-red-50 disabled:opacity-50"
+                            >
+                              <X className="w-4 h-4" />
+                              Remove media
+                            </button>
+                          )}
+                        </div>
+                        {announcementMediaBusy && (
+                          <p className="text-xs text-blue-600 inline-flex items-center gap-1">
+                            <Loader2 className="w-3 h-3 animate-spin" /> Uploading…
+                          </p>
+                        )}
+                        {(() => {
+                          const { videoSrc, imageSrc } = resolveAnnouncementMedia(announcementForm);
+                          if (!videoSrc && !imageSrc) return null;
+                          return (
+                          <div className="mt-2 rounded-lg overflow-hidden border border-gray-200 bg-black/5 aspect-video max-h-48 flex items-center justify-center">
+                            {videoSrc ? (
+                              <video
+                                key={videoSrc}
+                                src={videoSrc}
+                                className="w-full h-full max-h-48 object-contain"
+                                controls
+                                playsInline
+                              />
+                            ) : (
+                              // eslint-disable-next-line @next/next/no-img-element
+                              <img
+                                src={imageSrc!}
+                                alt="Announcement preview"
+                                className="w-full h-full max-h-48 object-contain"
+                              />
+                            )}
+                          </div>
+                          );
+                        })()}
+                      </div>
+
                       <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                         <button 
                           onClick={handleAddAnnouncement} 
@@ -1303,9 +1412,9 @@ export default function AdminPage() {
 
                         {editingAnnouncementId && (
                           <button 
-                            onClick={() => { 
-                              setEditingAnnouncementId(null); 
-                              setAnnouncementForm({ title: '', description: '', link: '' }); 
+                            onClick={() => {
+                              setEditingAnnouncementId(null);
+                              setAnnouncementForm({ title: '', description: '', link: '', imageUrl: '', videoUrl: '' });
                             }} 
                             disabled={loading}
                             className="w-full sm:w-auto px-4 sm:px-6 py-3 border-2 border-gray-300 hover:border-gray-400 rounded-lg disabled:opacity-50 text-sm sm:text-base font-medium transition-colors"
@@ -1338,6 +1447,26 @@ export default function AdminPage() {
                         {announcements.map((a) => (
                           <div key={a.id || a._id} className="p-3 sm:p-4 border-2 border-gray-200 rounded-lg hover:border-blue-300 hover:shadow-md transition-all flex flex-col gap-3 sm:gap-4">
                             <div className="flex-1 min-w-0">
+                              {(() => {
+                                const { videoSrc, imageSrc } = resolveAnnouncementMedia(a);
+                                if (!videoSrc && !imageSrc) return null;
+                                return (
+                                <div className="mb-3 rounded-md overflow-hidden border border-gray-200 aspect-video max-h-40 bg-gray-100">
+                                  {videoSrc ? (
+                                    <video
+                                      key={videoSrc}
+                                      src={videoSrc}
+                                      className="w-full h-full object-contain max-h-40"
+                                      controls
+                                      playsInline
+                                    />
+                                  ) : (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={imageSrc!} alt="" className="w-full h-full object-cover max-h-40" />
+                                  )}
+                                </div>
+                                );
+                              })()}
                               <div className="font-semibold text-sm sm:text-base md:text-lg mb-2 text-gray-900 break-words">{a.title}</div>
                               {a.description && (
                                 <div className="text-xs sm:text-sm text-gray-700 mb-2 break-words">{a.description}</div>

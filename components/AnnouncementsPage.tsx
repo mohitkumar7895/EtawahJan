@@ -3,6 +3,7 @@
 import { useEffect, useState } from 'react';
 import { Megaphone, ExternalLink, Calendar } from 'lucide-react';
 import { getAnnouncements, type Announcement } from '@/lib/api';
+import { resolveAnnouncementMedia } from '@/lib/announcementMedia';
 import Link from 'next/link';
 
 export default function AnnouncementsPage() {
@@ -101,6 +102,32 @@ export default function AnnouncementsPage() {
                       </h3>
                     </div>
                   </div>
+
+                  {(() => {
+                    const { videoSrc, imageSrc } = resolveAnnouncementMedia(announcement);
+                    if (!videoSrc && !imageSrc) return null;
+                    return (
+                    <div className="relative z-10 mb-3 w-full rounded-lg overflow-hidden border border-pink-100 bg-gray-900/5 aspect-video shadow-inner">
+                      {videoSrc ? (
+                        <video
+                          key={videoSrc}
+                          src={videoSrc}
+                          className="absolute inset-0 w-full h-full object-contain bg-black/80"
+                          controls
+                          playsInline
+                          preload="metadata"
+                        />
+                      ) : (
+                        // eslint-disable-next-line @next/next/no-img-element
+                        <img
+                          src={imageSrc!}
+                          alt={announcement.title}
+                          className="absolute inset-0 w-full h-full object-cover"
+                        />
+                      )}
+                    </div>
+                    );
+                  })()}
 
                   {/* Description Section */}
                   {announcement.description && (
