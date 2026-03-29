@@ -334,6 +334,26 @@ function isAnnouncementVideoFile(file: File): boolean {
 
 type ImageKitAuthPayload = { token: string; expire: number; signature: string; publicKey: string };
 
+/** Matches ImageKit upload rules (alphanumeric, `.`, `-`); mirrors server sanitizer. */
+function sanitizeImageKitClientFileName(originalName: string, fallbackExt: string): string {
+  let base = (originalName.split(/[/\\]/).pop() || originalName).trim() || `upload.${fallbackExt}`;
+  base = base.replace(/[^a-zA-Z0-9.\-_]/g, '_');
+  if (!base.includes('.')) {
+    base = `${base}.${fallbackExt}`;
+  }
+  return base.slice(0, 180);
+}
+
+function imageKitUploadErrorMessage(data: unknown, status: number): string {
+  const d = data as Record<string, unknown>;
+  const msg = d?.message;
+  if (typeof msg === 'string' && msg.trim()) return msg.trim();
+  if (Array.isArray(msg) && msg.length && typeof msg[0] === 'string') return msg.join(' ');
+  const help = d?.help;
+  if (typeof help === 'string' && help.trim()) return help.trim();
+  return `ImageKit upload failed (${status})`;
+}
+
 /**
  * Large videos bypass the Next.js API (413 on Vercel / low proxy body limits).
  * Browser POSTs directly to ImageKit using a short-lived signature from /api/imagekit-auth.
@@ -358,9 +378,13 @@ async function uploadAnnouncementVideoViaImageKit(file: File): Promise<{ fileUrl
     throw new Error('Invalid upload credentials from server.');
   }
 
+  const rawExt =
+    (file.name.split('.').pop() || 'mp4').replace(/[^a-zA-Z0-9]/g, '').toLowerCase() || 'mp4';
+  const safeFileName = sanitizeImageKitClientFileName(file.name || '', rawExt);
+
   const formData = new FormData();
-  formData.append('file', file);
-  formData.append('fileName', file.name?.trim() || 'video.mp4');
+  formData.append('file', file, safeFileName);
+  formData.append('fileName', safeFileName);
   formData.append('publicKey', auth.publicKey);
   formData.append('signature', auth.signature);
   formData.append('token', auth.token);
@@ -381,11 +405,7 @@ async function uploadAnnouncementVideoViaImageKit(file: File): Promise<{ fileUrl
     const data = await response.json().catch(() => ({}));
 
     if (!response.ok) {
-      const msg =
-        (data as { message?: string }).message ||
-        (data as { help?: string }).help ||
-        `ImageKit upload failed (${response.status})`;
-      throw new Error(msg);
+      throw new Error(imageKitUploadErrorMessage(data, response.status));
     }
 
     const url = (data as { url?: string }).url?.trim();

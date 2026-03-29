@@ -22,7 +22,8 @@ export async function GET() {
     }
 
     const client = new ImageKit({ privateKey });
-    const expireAt = Math.floor(Date.now() / 1000) + 7200;
+    // ImageKit rejects signatures when expire is more than ~1 hour ahead (400 on upload).
+    const expireAt = Math.floor(Date.now() / 1000) + 30 * 60;
     const auth = client.helper.getAuthenticationParameters(undefined, expireAt);
 
     return NextResponse.json({ ...auth, publicKey });
