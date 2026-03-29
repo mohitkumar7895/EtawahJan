@@ -1715,7 +1715,7 @@ export default function AdminPage() {
                       <div className="space-y-2 border border-gray-200 dark:border-zinc-700 rounded-lg p-3 bg-gray-50 dark:bg-zinc-800/50 transition-colors duration-200">
                         <p className="text-xs font-medium text-gray-700 dark:text-zinc-300">Photo or video (optional)</p>
                         <p className="text-xs text-gray-500 dark:text-zinc-500">
-                          Stored on ImageKit (HTTPS URLs — works on production). Image up to 5MB · Video up to ~95MB per your plan. Use .mp4/.mov if type is missing. Set IMAGEKIT_PRIVATE_KEY in server env.
+                          Stored on ImageKit (HTTPS URLs — works on production). Image up to 5MB · Video up to ~95MB per your plan. Use .mp4/.mov if type is missing. Set IMAGEKIT_PRIVATE_KEY and IMAGEKIT_PUBLIC_KEY in server env (public key required for video).
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <label className="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-600 rounded-lg text-xs sm:text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-700 text-gray-800 dark:text-zinc-200 transition-colors duration-200">

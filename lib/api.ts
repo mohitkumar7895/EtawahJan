@@ -1,5 +1,8 @@
+import { ANNOUNCEMENT_VIDEO_MAX } from '@/lib/announcementUploadConstants';
+
 // API functions for Next.js - using relative API routes
 const API_BASE_URL = '';
+const IMAGEKIT_UPLOAD_URL = 'https://upload.imagekit.io/api/v1/files/upload';
 
 export interface ContactFormData {
   name: string;
@@ -329,23 +332,102 @@ function isAnnouncementVideoFile(file: File): boolean {
   return ['mp4', 'webm', 'mov', 'mkv', 'avi', 'm4v', 'ogv', '3gp'].includes(ext);
 }
 
+type ImageKitAuthPayload = { token: string; expire: number; signature: string; publicKey: string };
+
+/**
+ * Large videos bypass the Next.js API (413 on Vercel / low proxy body limits).
+ * Browser POSTs directly to ImageKit using a short-lived signature from /api/imagekit-auth.
+ */
+async function uploadAnnouncementVideoViaImageKit(file: File): Promise<{ fileUrl: string }> {
+  if (file.size > ANNOUNCEMENT_VIDEO_MAX) {
+    const mb = Math.floor(ANNOUNCEMENT_VIDEO_MAX / (1024 * 1024));
+    throw new Error(`Video too large. Max ~${mb}MB for this app (adjust limits / ImageKit plan).`);
+  }
+
+  const authRes = await fetch(`${API_BASE_URL}/api/imagekit-auth`, { cache: 'no-store' });
+  if (!authRes.ok) {
+    const err = await authRes.json().catch(() => ({}));
+    const msg =
+      (err as { error?: string }).error ||
+      'Could not start upload. Set IMAGEKIT_PUBLIC_KEY on the server (see .env.example).';
+    throw new Error(msg);
+  }
+
+  const auth = (await authRes.json()) as ImageKitAuthPayload;
+  if (!auth.token || !auth.signature || !auth.publicKey) {
+    throw new Error('Invalid upload credentials from server.');
+  }
+
+  const formData = new FormData();
+  formData.append('file', file);
+  formData.append('fileName', file.name?.trim() || 'video.mp4');
+  formData.append('publicKey', auth.publicKey);
+  formData.append('signature', auth.signature);
+  formData.append('token', auth.token);
+  formData.append('expire', String(auth.expire));
+  formData.append('folder', '/announcements/videos');
+  formData.append('useUniqueFileName', 'true');
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), 300000);
+
+  try {
+    const response = await fetch(IMAGEKIT_UPLOAD_URL, {
+      method: 'POST',
+      body: formData,
+      signal: controller.signal,
+    });
+
+    const data = await response.json().catch(() => ({}));
+
+    if (!response.ok) {
+      const msg =
+        (data as { message?: string }).message ||
+        (data as { help?: string }).help ||
+        `ImageKit upload failed (${response.status})`;
+      throw new Error(msg);
+    }
+
+    const url = (data as { url?: string }).url?.trim();
+    if (!url) {
+      throw new Error('ImageKit did not return a file URL.');
+    }
+
+    return { fileUrl: url };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
 /**
  * Upload announcement media to ImageKit (no local disk).
- * Videos → POST /api/upload-video · Images → POST /api/announcements/upload
+ * Videos → browser → ImageKit (auth from /api/imagekit-auth) · Images → POST /api/announcements/upload
  */
 export async function uploadAnnouncementMedia(
   file: File
 ): Promise<{ fileUrl: string; mediaType: 'image' | 'video' }> {
   const isVideo = isAnnouncementVideoFile(file);
-  const endpoint = isVideo ? '/api/upload-video' : '/api/announcements/upload';
+
+  if (isVideo) {
+    try {
+      const { fileUrl } = await uploadAnnouncementVideoViaImageKit(file);
+      return { fileUrl, mediaType: 'video' };
+    } catch (error: unknown) {
+      if (error instanceof Error && error.name === 'AbortError') {
+        throw new Error('Upload timed out. Try a smaller file or check your connection.');
+      }
+      throw error;
+    }
+  }
+
   const controller = new AbortController();
-  const timeoutId = setTimeout(() => controller.abort(), isVideo ? 300000 : 120000);
+  const timeoutId = setTimeout(() => controller.abort(), 120000);
 
   try {
     const formData = new FormData();
     formData.append('file', file);
 
-    const response = await fetch(`${API_BASE_URL}${endpoint}`, {
+    const response = await fetch(`${API_BASE_URL}/api/announcements/upload`, {
       method: 'POST',
       body: formData,
       signal: controller.signal,
@@ -365,7 +447,7 @@ export async function uploadAnnouncementMedia(
     const data = await response.json();
     return {
       fileUrl: data.fileUrl as string,
-      mediaType: (data.mediaType as 'image' | 'video') || (isVideo ? 'video' : 'image'),
+      mediaType: (data.mediaType as 'image' | 'video') || 'image',
     };
   } catch (error: unknown) {
     clearTimeout(timeoutId);

@@ -4,15 +4,9 @@
  */
 
 import ImageKit, { toFile } from '@imagekit/nodejs';
+import { ANNOUNCEMENT_IMAGE_MAX, ANNOUNCEMENT_VIDEO_MAX } from '@/lib/announcementUploadConstants';
 
-/** ImageKit free tier: 20MB images; keep under that unless plan allows more */
-export const ANNOUNCEMENT_IMAGE_MAX = 5 * 1024 * 1024;
-
-/**
-  * ImageKit free tier: up to 100MB for video. Slight margin for overhead.
-  * Increase if your ImageKit plan allows larger uploads.
-  */
-export const ANNOUNCEMENT_VIDEO_MAX = 95 * 1024 * 1024;
+export { ANNOUNCEMENT_IMAGE_MAX, ANNOUNCEMENT_VIDEO_MAX };
 
 const VIDEO_EXT = new Set(['mp4', 'webm', 'mov', 'mkv', 'avi', 'm4v', 'ogv', '3gp']);
 const IMAGE_EXT = new Set(['jpg', 'jpeg', 'png', 'gif', 'webp', 'bmp']);
