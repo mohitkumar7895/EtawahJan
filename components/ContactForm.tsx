@@ -105,24 +105,26 @@ const serviceOptions = [
   'Skill Development Courses',
   'Digital Literacy',
   
-  // CSC Services - Legal & Court
+  // Legal & Court
   'Court Case Status',
   'Legal Aid Services',
   
   // IT Services
   'IT Services',
+  'Website, Mobile App, Custom Software',
 ];
 
 type ContactFormProps = {
   embedded?: boolean;
+  preselectedService?: string;
 };
 
-export default function ContactForm({ embedded }: ContactFormProps) {
+export default function ContactForm({ embedded, preselectedService }: ContactFormProps) {
   const [formData, setFormData] = useState({
     name: '',
     mobile: '',
     address: '',
-    service_type: '',
+    service_type: preselectedService || '',
   });
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isSuccess, setIsSuccess] = useState(false);

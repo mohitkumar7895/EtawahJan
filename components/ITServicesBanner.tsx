@@ -1,8 +1,20 @@
 'use client';
 
-import { MonitorSmartphone, Code2, Gamepad2, Rocket, PhoneCall, ArrowRight, CheckCircle2, Sparkles } from 'lucide-react';
+import { MonitorSmartphone, Code2, Gamepad2, Rocket, PhoneCall, ArrowRight, CheckCircle2, Sparkles, X, FileText } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import ContactForm from './ContactForm';
 
 export default function ITServicesBanner() {
+  const [showModal, setShowModal] = useState(false);
+
+  useEffect(() => {
+    if (!showModal) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setShowModal(false);
+    };
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [showModal]);
   return (
     <section className="w-full bg-slate-950 relative overflow-hidden py-10 md:py-16 border-y border-white/10">
       {/* Premium Background Effects */}
@@ -75,6 +87,14 @@ export default function ITServicesBanner() {
                     <span>WhatsApp Now</span>
                     <ArrowRight className="w-5 h-5" />
                   </a>
+
+                  <button
+                    onClick={() => setShowModal(true)}
+                    className="flex items-center justify-center gap-3 w-full bg-gradient-to-r from-yellow-400 to-yellow-500 text-blue-950 px-6 py-4 rounded-xl font-extrabold text-lg hover:from-yellow-300 hover:to-yellow-400 transition-all shadow-[0_0_20px_rgba(250,204,21,0.3)] hover:shadow-[0_0_25px_rgba(250,204,21,0.5)] hover:-translate-y-0.5"
+                  >
+                    <FileText className="w-5 h-5" />
+                    <span>Apply for Services</span>
+                  </button>
                 </div>
 
                 <div className="mt-6 pt-6 border-t border-slate-700/50 flex flex-col gap-3">
@@ -91,6 +111,62 @@ export default function ITServicesBanner() {
           
         </div>
       </div>
+
+      {/* Modal */}
+      {showModal && (
+        <div className="fixed inset-0 z-[100] flex items-center justify-center px-3 sm:px-4 animate-fade-in overflow-y-auto py-4">
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-md transition-opacity"
+            onClick={() => setShowModal(false)}
+            aria-hidden
+          />
+          <div 
+            role="dialog" 
+            aria-modal="true" 
+            className="relative z-10 w-full max-w-lg animate-scale-in my-auto"
+            onClick={(e) => e.stopPropagation()}
+          >
+            <div className="bg-white rounded-xl sm:rounded-2xl shadow-2xl overflow-hidden border-2 border-yellow-400/20">
+              <div className="relative bg-gradient-to-r from-blue-900 via-indigo-900 to-purple-900 px-4 sm:px-5 py-3 sm:py-4">
+                <div className="absolute top-0 right-0 w-32 h-32 bg-yellow-400/20 rounded-full blur-3xl -mr-16 -mt-16"></div>
+                <div className="absolute bottom-0 left-0 w-24 h-24 bg-white/10 rounded-full blur-2xl -ml-12 -mb-12"></div>
+                
+                <div className="relative z-10 flex items-start justify-between">
+                  <div className="text-white">
+                    <div className="flex items-center gap-2 mb-1">
+                      <div className="w-2 h-2 bg-yellow-400 rounded-full animate-pulse"></div>
+                      <span className="text-xs font-semibold text-yellow-300 uppercase tracking-wide">IT Service Application</span>
+                    </div>
+                    <h3 className="text-lg sm:text-xl font-extrabold mb-1">Start Your Project</h3>
+                    <p className="text-xs text-blue-200">Fill the form below to get a free quote</p>
+                  </div>
+                  <button
+                    onClick={() => setShowModal(false)}
+                    aria-label="Close dialog"
+                    className="text-white hover:text-yellow-300 hover:bg-white/10 transition-all p-1.5 sm:p-2 rounded-lg hover:scale-110 active:scale-95 flex-shrink-0"
+                  >
+                    <X className="w-5 h-5 sm:w-6 sm:h-6" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-4 sm:p-5 bg-gradient-to-br from-gray-50 via-white to-blue-50/30">
+                <ContactForm embedded preselectedService="Website, Mobile App, Custom Software" />
+              </div>
+
+              <div className="px-4 sm:px-5 py-2 sm:py-3 bg-slate-900 border-t border-slate-800">
+                <div className="flex flex-wrap items-center justify-center gap-1.5 sm:gap-2 text-xs text-slate-300">
+                  <PhoneCall className="w-3.5 h-3.5 text-yellow-400 flex-shrink-0" />
+                  <span>Need help? Call us at</span>
+                  <a href="tel:9193898182" className="font-bold text-yellow-400 hover:text-yellow-300 transition break-all">
+                    9193898182, 7895094129
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes wiggle {
