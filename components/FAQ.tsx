@@ -15,8 +15,8 @@ const faqs: FAQItem[] = [
   {
     question: 'What services does Jan Seva Kendra provide?',
     questionHindi: 'जन सेवा केंद्र कौन-कौन सी सेवाएं प्रदान करता है?',
-    answer: 'We provide all government and private services including Aadhaar Card, PAN Card, Voter ID, Ration Card, Certificates (Birth, Death, Marriage, Income, Caste, Domicile), Driving License, Vehicle Registration, Insurance, Government Schemes (PM Awas, Ujjwala, PM Kisan), Bill Payments, Banking Services, and many more.',
-    answerHindi: 'हम सभी सरकारी और निजी सेवाएं प्रदान करते हैं जैसे आधार कार्ड, पैन कार्ड, वोटर आईडी, राशन कार्ड, प्रमाणपत्र (जन्म, मृत्यु, विवाह, आय, जाति, डोमिसाइल), ड्राइविंग लाइसेंस, वाहन पंजीकरण, बीमा, सरकारी योजनाएं (पीएम आवास, उज्ज्वला, पीएम किसान), बिल भुगतान, बैंकिंग सेवाएं और बहुत कुछ।',
+    answer: 'We provide all government and private services including PAN Card, Voter ID, Ration Card, Certificates (Birth, Death, Marriage, Income, Caste, Domicile), Driving License, Vehicle Registration, Insurance, Government Schemes (PM Awas, Ujjwala, PM Kisan), Bill Payments, Banking Services, and many more.',
+    answerHindi: 'हम सभी सरकारी और निजी सेवाएं प्रदान करते हैं जैसे पैन कार्ड, वोटर आईडी, राशन कार्ड, प्रमाणपत्र (जन्म, मृत्यु, विवाह, आय, जाति, डोमिसाइल), ड्राइविंग लाइसेंस, वाहन पंजीकरण, बीमा, सरकारी योजनाएं (पीएम आवास, उज्ज्वला, पीएम किसान), बिल भुगतान, बैंकिंग सेवाएं और बहुत कुछ।',
     category: 'General',
   },
   {
@@ -26,13 +26,7 @@ const faqs: FAQItem[] = [
     answerHindi: 'आप हमारी वेबसाइट पर जाकर, अपनी आवश्यक सेवा का चयन करके, अपनी जानकारी के साथ आवेदन फॉर्म भरकर और सबमिट करके किसी भी सेवा के लिए आवेदन कर सकते हैं। हमारी टीम जल्द ही आपसे संपर्क करेगी। आप सीधे हमारे केंद्र पर भी जा सकते हैं या हमें 9193898182, 7895094129 पर कॉल कर सकते हैं।',
     category: 'General',
   },
-  {
-    question: 'What documents are required for Aadhaar Card?',
-    questionHindi: 'आधार कार्ड के लिए कौन से दस्तावेज आवश्यक हैं?',
-    answer: 'For Aadhaar Card, you need Proof of Identity (POI), Proof of Address (POA), Date of Birth Proof, and a passport size photo. Common documents include Voter ID, PAN Card, Driving License, Bank Passbook, etc.',
-    answerHindi: 'आधार कार्ड के लिए, आपको पहचान प्रमाण (POI), पता प्रमाण (POA), जन्म तिथि प्रमाण और पासपोर्ट साइज फोटो की आवश्यकता होती है। सामान्य दस्तावेजों में वोटर आईडी, पैन कार्ड, ड्राइविंग लाइसेंस, बैंक पासबुक आदि शामिल हैं।',
-    category: 'Documents',
-  },
+
   {
     question: 'How long does it take to process an application?',
     questionHindi: 'आवेदन प्रसंस्करण में कितना समय लगता है?',
@@ -68,13 +62,7 @@ const faqs: FAQItem[] = [
     answerHindi: 'पीएम किसान एक सरकारी योजना है जो छोटे और सीमांत किसानों को प्रति वर्ष ₹6,000 की वित्तीय सहायता तीन समान किस्तों में प्रदान करती है। आवेदन करने के लिए, आपको आधार कार्ड, बैंक खाता विवरण और भूमि दस्तावेजों की आवश्यकता होती है। हम आपको पूरी आवेदन प्रक्रिया में मदद कर सकते हैं।',
     category: 'Schemes',
   },
-  {
-    question: 'How to update Aadhaar Card details?',
-    questionHindi: 'आधार कार्ड विवरण कैसे अपडेट करें?',
-    answer: 'To update Aadhaar Card details, you need to visit an Aadhaar Enrollment Center with your existing Aadhaar Card, supporting documents for the changes you want to make, and proof of identity/address. We can help you with the complete update process.',
-    answerHindi: 'आधार कार्ड विवरण अपडेट करने के लिए, आपको अपने मौजूदा आधार कार्ड, बदलाव के लिए सहायक दस्तावेज और पहचान/पता प्रमाण के साथ आधार नामांकन केंद्र पर जाना होगा। हम आपको पूरी अपडेट प्रक्रिया में मदद कर सकते हैं।',
-    category: 'Documents',
-  },
+
   {
     question: 'Can I apply for multiple services at once?',
     questionHindi: 'क्या मैं एक साथ कई सेवाओं के लिए आवेदन कर सकता हूं?',
@@ -104,10 +92,10 @@ const faqs: FAQItem[] = [
     category: 'General',
   },
   {
-    question: 'Aadhaar update near me same day? PAN card apply near Etawah?',
-    questionHindi: 'आधार अपडेट नजदीक समान दिन? पैन कार्ड इटावा के पास?',
-    answer: 'Yes. We do Aadhaar update, correction, photo update same day at our center. PAN card apply near Etawah—we help with form fill, submission and fast approval. Official process, no agent required. Bring documents and visit Mandi Trihaa, Bidhuna Road, Bharthana. Call now 9193898182.',
-    answerHindi: 'हाँ। हम आधार अपडेट, सुधार, फोटो अपडेट समान दिन करते हैं। पैन कार्ड इटावा के पास—फॉर्म भरना, सबमिशन और फास्ट अप्रूवल में मदद। ऑफिशियल प्रोसेस, एजेंट की जरूरत नहीं। दस्तावेज लेकर मंडी त्रिहा, बिदूना रोड, भरथाना आएं। अभी कॉल 9193898182।',
+    question: 'PAN card apply near Etawah?',
+    questionHindi: 'पैन कार्ड इटावा के पास?',
+    answer: 'PAN card apply near Etawah—we help with form fill, submission and fast approval. Official process, no agent required. Bring documents and visit Mandi Trihaa, Bidhuna Road, Bharthana. Call now 9193898182.',
+    answerHindi: 'पैन कार्ड इटावा के पास—फॉर्म भरना, सबमिशन और फास्ट अप्रूवल में मदद। ऑफिशियल प्रोसेस, एजेंट की जरूरत नहीं। दस्तावेज लेकर मंडी त्रिहा, बिदूना रोड, भरथाना आएं। अभी कॉल 9193898182।',
     category: 'Documents',
   },
   {
@@ -116,6 +104,13 @@ const faqs: FAQItem[] = [
     answer: 'Income certificate, ration card apply, and Ayushman card apply—all available at Jan Seva Kendra, Bharthana (Mandi Trihaa, Bidhuna Road). Same day application, official process, fast approval help. No agent required. Call 9193898182, 7895094129 or WhatsApp now. Visit today.',
     answerHindi: 'आय प्रमाणपत्र, राशन कार्ड और आयुष्मान कार्ड—सब जन सेवा केंद्र भरथाना (मंडी त्रिहा, बिदूना रोड) पर। समान दिन आवेदन, ऑफिशियल प्रोसेस। एजेंट की जरूरत नहीं। कॉल 9193898182, 7895094129 या अभी WhatsApp। आज ही आएं।',
     category: 'General',
+  },
+  {
+    question: 'Do you provide Website, App, and Game Development services?',
+    questionHindi: 'क्या आप वेबसाइट, ऐप और गेम डेवलपमेंट सर्विस देते हैं?',
+    answer: 'Yes! We provide premium IT services including custom Website Development, Mobile App Development (Android & iOS), Game Development, and custom Business Software to help you grow your business 10x. Call 9193898182 for a free consultation.',
+    answerHindi: 'हाँ! हम आपके बिज़नेस को ग्रो करने के लिए बेहतरीन वेबसाइट डेवलपमेंट, मोबाइल ऐप, गेम डेवलपमेंट और कस्टम सॉफ्टवेयर बनाते हैं। ज्यादा जानकारी और फ्री कंसल्टेशन के लिए अभी 9193898182 पर कॉल करें।',
+    category: 'IT Services',
   },
 ];
 

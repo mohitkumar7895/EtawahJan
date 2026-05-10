@@ -1,19 +1,34 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Hero from '@/components/Hero'
+import ITServicesBanner from '@/components/ITServicesBanner'
 import Services from '@/components/Services'
 import Announcements from '@/components/Announcements'
 import Reviews from '@/components/Reviews'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
-  title: 'Jan Seva Kendra Near Me | CSC Center Etawah, Bharthana | Same Day Aadhaar, PAN, Ration Card',
-  description: 'Jan Seva Kendra & CSC center near me—Etawah, Bharthana, Agra, Kanpur, Lucknow. Aadhaar update, PAN card apply, income certificate, birth certificate, ration card, Ayushman card. Same day work, official process. Call 9193898182, 7895094129 | WhatsApp Now.',
+  title: 'Jan Seva Kendra Near Me | CSC Center Etawah | Website & App Development',
+  description: 'Jan Seva Kendra & CSC center near me—Etawah, Bharthana. PAN card, certificates. Premium IT Services: Website Development, Mobile Apps, Games, Custom Software. Grow your business 10x! Call 9193898182 | WhatsApp Now.',
   keywords: [
     'jan seva kendra near me',
     'csc center near me',
     'jan seva kendra Etawah',
-    'aadhar update near me',
+    'website development company in UP',
+    'best software company Uttar Pradesh',
+    'mobile app developer UP',
+    'game development agency UP',
+    'IT company Lucknow Kanpur Agra',
+    'website development company Etawah',
+    'app development near me',
+    'game development services',
+    'custom software builder Etawah',
+    'website development company in India',
+    'best software company in India',
+    'outsource mobile app development India',
+    'affordable website development USA',
+    'hire dedicated developers India',
+    'IT outsourcing company India',
     'pan card apply near me',
     'income certificate apply near me',
     'birth certificate online near me',
@@ -27,8 +42,8 @@ export const metadata: Metadata = {
     'Best Service Center Etawah',
   ],
   openGraph: {
-    title: 'Jan Seva Kendra Near Me | CSC Etawah | Same Day Aadhaar, PAN, Certificates',
-    description: 'CSC center near Etawah, Bharthana. Aadhaar update, PAN, certificates—same day, official process. Call 9193898182.',
+    title: 'Jan Seva Kendra Near Me | CSC Etawah | Website & App Development',
+    description: 'CSC center near Etawah. PAN, certificates. Premium Website, App, Game, & Software Development. Call 9193898182.',
     type: 'website',
     url: 'https://www.jan-seva.site/',
     images: ['https://www.jan-seva.site/jan-seva-logo-1.png'],
@@ -46,6 +61,7 @@ export default function Home() {
     <>
       <Header />
       <Hero />
+      <ITServicesBanner />
       <Announcements />
       <Services />
       <Reviews />

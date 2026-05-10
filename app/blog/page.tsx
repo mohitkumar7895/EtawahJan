@@ -15,7 +15,6 @@ export const metadata: Metadata = {
     'Government Schemes Information',
     'Etawah Services Blog',
     'CSC Services Blog',
-    'Aadhaar Card Guide',
     'PAN Card Information',
     'Voter ID Guide',
     'सरकारी सेवाएं ब्लॉग',

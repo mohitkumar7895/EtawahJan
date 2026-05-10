@@ -10,10 +10,10 @@ import VisitorTracker from '@/components/VisitorTracker'
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.jan-seva.site/'),
   title: {
-    default: 'Jan Seva Kendra Near Me | CSC Center Etawah Bharthana | Same Day Aadhaar PAN Ration Card Certificate',
+    default: 'Jan Seva Kendra Near Me | CSC Center Etawah Bharthana | Website & App Development',
     template: '%s | Jan Seva Kendra - CSC Center UP'
   },
-  description: 'Jan Seva Kendra & CSC Center near me — Etawah, Bharthana, Agra, Kanpur, Lucknow, Mathura, Aligarh, Firozabad, Mainpuri, Auraiya, Jalaun, Jhansi, Gwalior, Farrukhabad, Kannauj. Aadhaar update, PAN card apply, income certificate, birth certificate, caste certificate, ration card, Ayushman card, voter ID — same day service, official process. Call: 9193898182 | WhatsApp: 7895094129. Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP 206241.',
+  description: 'Jan Seva Kendra & CSC Center near me — Etawah, Bharthana. PAN card apply, income certificate, ration card. We also provide premium IT services: Website Development, Mobile App Development, Game Development, and Custom Software to grow your business. Call: 9193898182 | WhatsApp: 7895094129. Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP 206241.',
   keywords: [
     // PRIMARY — HIGH VOLUME
     'jan seva kendra near me',
@@ -35,11 +35,103 @@ export const metadata: Metadata = {
     'best csc center Etawah',
     'same day service Etawah',
 
+    // IT & SOFTWARE SERVICES — BUSINESS GROWTH
+    'website development company Etawah',
+    'app development company near me',
+    'game development services',
+    'custom software development Etawah',
+    'website developer near me',
+    'ecommerce website design',
+    'mobile app maker Etawah',
+    'software banwane ke liye',
+    'website banwane ke liye',
+    'business website builder',
+    'game developer in UP',
+    'IT agency Etawah',
+
+    // IT & SOFTWARE SERVICES — FULL UP TARGETING
+    'website development company in UP',
+    'best software company in Uttar Pradesh',
+    'mobile app developer UP',
+    'game development agency UP',
+    'software developer in UP',
+    'website maker in UP',
+    'IT company Lucknow',
+    'website development company Kanpur',
+    'app developer Agra',
+    'software company Noida',
+    'website builder Ghaziabad',
+    'IT services in Meerut',
+    'website developer Varanasi',
+    'software agency Prayagraj',
+    'website development company Gorakhpur',
+    'mobile app development company Bareilly',
+    'software development company Aligarh',
+    'web design company Moradabad',
+    'ecommerce website developer Saharanpur',
+    'game development company Jhansi',
+    'custom software developer Mathura',
+    'IT agency Firozabad',
+    'website maker Ayodhya',
+    'app developer Shahjahanpur',
+    'software company Muzaffarnagar',
+    'website banwane wali company UP',
+    'app banwane wali company UP',
+    'software banwane wali company UP',
+    'game banwane wali company UP',
+    'online business website UP',
+    'startup app developer UP',
+    'top IT company in Uttar Pradesh',
+    'best website designer in UP',
+
+    // IT & SOFTWARE SERVICES — PAN INDIA
+    'website development company in India',
+    'best software company in India',
+    'mobile app development India',
+    'game development agency India',
+    'top IT company in India',
+    'affordable website builder India',
+    'custom software developer India',
+    'app developer Delhi',
+    'website maker Mumbai',
+    'software company Bangalore',
+    'app development Pune',
+    'IT services Hyderabad',
+    'ecommerce website developer India',
+    'startup website development India',
+    'low cost website design India',
+
+    // IT & SOFTWARE SERVICES — GLOBAL & OUTSOURCING
+    'hire dedicated developers India',
+    'affordable website development USA',
+    'outsource mobile app development India',
+    'software development company USA',
+    'offshore software development India',
+    'cheap website developer UK',
+    'custom game development services global',
+    'top app developers Dubai',
+    'website design company Canada',
+    'mobile app maker Australia',
+    'IT outsourcing company India',
+    'freelance website developer India',
+    'remote software team India',
+
+    // INDUSTRY-SPECIFIC SOFTWARE & APPS (HIGH INTENT/CONVERSION)
+    'school management software UP',
+    'school management system India',
+    'hospital management software India',
+    'clinic management app developer',
+    'restaurant billing software UP',
+    'ecommerce app developer India',
+    'real estate website builder India',
+    'grocery delivery app developer',
+    'gym management software',
+    'salon booking app development',
+    'pharmacy billing software UP',
+    'custom CRM software developer',
+    'business ERP software India',
+
     // SERVICES — HIGH SEARCH
-    'aadhaar update near me',
-    'aadhaar card update Etawah',
-    'aadhaar correction near me',
-    'aadhar update kaise kare',
     'pan card apply near me',
     'pan card apply Etawah',
     'pan card online apply UP',
@@ -160,8 +252,6 @@ export const metadata: Metadata = {
     'जन सेवा केंद्र इटावा',
     'जन सेवा केंद्र भरथाना',
     'सीएससी सेंटर इटावा',
-    'आधार अपडेट इटावा',
-    'आधार कार्ड सुधार',
     'पैन कार्ड आवेदन',
     'पैन कार्ड इटावा',
     'आय प्रमाण पत्र ऑनलाइन',
@@ -178,7 +268,6 @@ export const metadata: Metadata = {
 
     // LONG TAIL
     'how to apply pan card in Etawah UP',
-    'aadhaar update center Etawah Uttar Pradesh',
     'income certificate same day Etawah',
     'csc center Bidhuna Road Bharthana',
     'government document service Etawah',
@@ -211,22 +300,22 @@ export const metadata: Metadata = {
     alternateLocale: ['en_IN'],
     url: 'https://www.jan-seva.site/',
     siteName: 'Jan Seva Kendra - CSC Center Etawah',
-    title: 'Jan Seva Kendra Near Me | CSC Center Etawah Bharthana | Aadhaar PAN Ration Card Same Day',
-    description: 'UP ka sabse trusted Jan Seva Kendra. Etawah, Bharthana, Agra, Kanpur, Lucknow aur poore UP mein service. Aadhaar update, PAN card, income certificate, ration card, Ayushman card — same day help. Call 9193898182. Mandi Trihaa, Bidhuna Road, Bharthana.',
+    title: 'Jan Seva Kendra Near Me | CSC Center Etawah Bharthana | PAN Ration Card Same Day',
+    description: 'UP ka sabse trusted Jan Seva Kendra. Etawah, Bharthana, Agra, Kanpur, Lucknow aur poore UP mein service. PAN card, income certificate, ration card, Ayushman card — same day help. Call 9193898182. Mandi Trihaa, Bidhuna Road, Bharthana.',
     images: [
       {
         url: 'https://www.jan-seva.site/jan-seva-logo-1.png',
         width: 1200,
         height: 630,
-        alt: 'Jan Seva Kendra CSC Center Etawah Bharthana UP - Aadhaar PAN Certificate Services',
+        alt: 'Jan Seva Kendra CSC Center Etawah Bharthana UP - PAN Certificate Services',
         type: 'image/png',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'Jan Seva Kendra Near Me | CSC Etawah | Same Day Aadhaar PAN Ration Card',
-    description: 'UP ka #1 Jan Seva Kendra. Etawah, Bharthana, Agra, Kanpur. Aadhaar, PAN, certificates same day. Call: 9193898182 | WA: 7895094129',
+    title: 'Jan Seva Kendra Near Me | CSC Etawah | Same Day PAN Ration Card',
+    description: 'UP ka #1 Jan Seva Kendra. Etawah, Bharthana, Agra, Kanpur. PAN, certificates same day. Call: 9193898182 | WA: 7895094129',
     images: ['https://www.jan-seva.site/jan-seva-logo-1.png'],
     site: '@JanSevaKendra',
     creator: '@JanSevaKendra',
@@ -271,7 +360,7 @@ export const metadata: Metadata = {
     'geo.position': '26.7855;79.0290',
     'ICBM': '26.7855, 79.0290',
     'DC.title': 'Jan Seva Kendra - CSC Center Etawah UP',
-    'DC.subject': 'Government Services, CSC Center, Aadhaar, PAN Card, Certificates',
+    'DC.subject': 'Government Services, CSC Center, PAN Card, Certificates',
     'DC.description': 'Jan Seva Kendra CSC Center near Etawah, Bharthana. All government services same day.',
     'DC.creator': 'Jan Seva Kendra',
     'DC.language': 'hi',
@@ -314,7 +403,7 @@ const localBusinessSchema = {
     "width": 512,
     "height": 512
   },
-  "description": "Jan Seva Kendra — Government authorized CSC (Common Service Centre) near Etawah, Bharthana, Uttar Pradesh. We provide same-day Aadhaar update, PAN card apply, income certificate, birth certificate, caste certificate, ration card, Ayushman card, voter ID, e-Shram card, driving license, and 100+ government & private services. Official process, trusted service, no agent required.",
+  "description": "Jan Seva Kendra — Government authorized CSC (Common Service Centre) near Etawah, Bharthana, Uttar Pradesh. We provide same-day PAN card apply, income certificate, birth certificate, caste certificate, ration card, Ayushman card, voter ID, e-Shram card, driving license, and 100+ government & private services. Official process, trusted service, no agent required.",
   "address": {
     "@type": "PostalAddress",
     "streetAddress": "Mandi Trihaa, Bidhuna Road",
@@ -437,8 +526,16 @@ const localBusinessSchema = {
         "@type": "Offer",
         "itemOffered": {
           "@type": "Service",
-          "name": "Aadhaar Card Update / Correction",
-          "description": "Address update, name correction, DOB update, mobile number link — same day service"
+          "name": "Website & Mobile App Development",
+          "description": "Professional website design, e-commerce, Android & iOS mobile app development services."
+        }
+      },
+      {
+        "@type": "Offer",
+        "itemOffered": {
+          "@type": "Service",
+          "name": "Software & Game Development",
+          "description": "Custom software for business growth, billing software, and interactive game development."
         }
       },
       {
@@ -565,7 +662,7 @@ const localBusinessSchema = {
       "@type": "Review",
       "author": { "@type": "Person", "name": "Sunita Devi" },
       "reviewRating": { "@type": "Rating", "ratingValue": "5" },
-      "reviewBody": "Aadhaar update aur ration card ka kaam ek hi din mein ho gaya. Bahut helpful staff. Best CSC center Bharthana."
+      "reviewBody": "Ration card ka kaam ek hi din mein ho gaya. Bahut helpful staff. Best CSC center Bharthana."
     }
   ],
   "sameAs": [
@@ -591,14 +688,6 @@ const faqSchema = {
       "acceptedAnswer": {
         "@type": "Answer",
         "text": "Jan Seva Kendra Bharthana, Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, Uttar Pradesh 206241 mein sthit hai."
-      }
-    },
-    {
-      "@type": "Question",
-      "name": "Kya Aadhaar update same day ho sakta hai?",
-      "acceptedAnswer": {
-        "@type": "Answer",
-        "text": "Haan, Jan Seva Kendra par Aadhaar address update, name correction, mobile link same day process kiya jaata hai."
       }
     },
     {
@@ -630,7 +719,7 @@ const faqSchema = {
       "name": "Ayushman card kaise apply karein?",
       "acceptedAnswer": {
         "@type": "Answer",
-        "text": "Ayushman Bharat card ke liye Jan Seva Kendra par aayein. Aadhaar card aur ration card saath laayen. Call: 9193898182."
+        "text": "Ayushman Bharat card ke liye Jan Seva Kendra par aayein. Ration card saath laayen. Call: 9193898182."
       }
     }
   ]
@@ -667,7 +756,7 @@ const websiteSchema = {
   "@id": "https://www.jan-seva.site/#website",
   "url": "https://www.jan-seva.site/",
   "name": "Jan Seva Kendra",
-  "description": "Jan Seva Kendra - CSC Center Etawah UP. Aadhaar, PAN, Certificates, all government services.",
+  "description": "Jan Seva Kendra - CSC Center Etawah UP. PAN, Certificates, all government services.",
   "potentialAction": {
     "@type": "SearchAction",
     "target": {

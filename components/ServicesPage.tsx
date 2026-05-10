@@ -18,8 +18,6 @@ type Vacancy = {
 
 const services = [
   // Documents
-  { icon: FileText, name: 'Aadhaar Card', category: 'Documents', description: 'Aadhaar card enrollment, update, and correction services' },
-  { icon: FileEdit, name: 'Aadhaar Update/Correction', category: 'Documents', description: 'Aadhaar details update, correction, and biometric update' },
   { icon: CreditCard, name: 'PAN Card', category: 'Documents', description: 'PAN card application and correction services' },
   { icon: User, name: 'Voter ID Card', category: 'Documents', description: 'Voter ID card application and update services' },
   { icon: FileText, name: 'Ration Card', category: 'Documents', description: 'Ration card application and family member addition' },
@@ -139,8 +137,6 @@ const services = [
 
 // Documents required mapping for each service
 const serviceDocuments: Record<string, string[]> = {
-  'Aadhaar Card': ['Proof of Identity (POI)', 'Proof of Address (POA)', 'Date of Birth Proof', 'Passport size photo'],
-  'Aadhaar Update/Correction': ['Existing Aadhaar Card', 'Supporting document for correction', 'Proof of Identity', 'Proof of Address'],
   'PAN Card': ['Aadhaar Card', 'Proof of Identity', 'Proof of Address', 'Date of Birth Proof', 'Passport size photo'],
   'Voter ID Card': ['Proof of Identity', 'Proof of Address', 'Date of Birth Proof', 'Passport size photo'],
   'Ration Card': ['Aadhaar Card of all family members', 'Proof of Address', 'Family photo', 'Income certificate'],

@@ -7,7 +7,6 @@ import { getVacancies, type Vacancy, submitServiceApplication } from '@/lib/api'
 
 const services = [
   // Documents
-  { icon: FileText, name: 'Aadhaar Card', category: 'Documents' },
   { icon: CreditCard, name: 'PAN Card', category: 'Documents' },
   { icon: User, name: 'Voter ID Card', category: 'Documents' },
   { icon: FileText, name: 'Ration Card', category: 'Documents' },
@@ -110,8 +109,6 @@ const services = [
 
 // Documents required mapping for each service
 const serviceDocuments: Record<string, string[]> = {
-  'Aadhaar Card': ['Proof of Identity (POI)', 'Proof of Address (POA)', 'Date of Birth Proof', 'Passport size photo'],
-  'Aadhaar Update/Correction': ['Existing Aadhaar Card', 'Supporting document for correction', 'Proof of Identity', 'Proof of Address'],
   'PAN Card': ['Aadhaar Card', 'Proof of Identity', 'Proof of Address', 'Date of Birth Proof', 'Passport size photo'],
   'Voter ID Card': ['Proof of Identity', 'Proof of Address', 'Date of Birth Proof', 'Passport size photo'],
   'Ration Card': ['Aadhaar Card of all family members', 'Proof of Address', 'Family photo', 'Income certificate'],
