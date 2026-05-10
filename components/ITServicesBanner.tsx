@@ -53,7 +53,7 @@ export default function ITServicesBanner() {
               
               <div className="relative z-10">
                 <div className="text-center mb-6">
-                  <h3 className="text-2xl font-bold text-white mb-2">Let's Build It!</h3>
+                  <h3 className="text-2xl font-bold text-white mb-2">Let&apos;s Build It!</h3>
                   <p className="text-slate-400 text-sm">Get a free consultation for your project today.</p>
                 </div>
 
