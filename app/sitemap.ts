@@ -3,11 +3,11 @@ import { connectDB, isDBConnected } from '@/lib/db'
 import Blog from '@/models/Blog'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://www.jan-seva.site/'
+  const baseUrl = 'https://www.jan-seva.site'
   
   const staticPages: MetadataRoute.Sitemap = [
     {
-      url: baseUrl,
+      url: `${baseUrl}/`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 1,
@@ -79,7 +79,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         .lean() as any[]
 
       const blogPages: MetadataRoute.Sitemap = blogs.map((blog: any) => ({
-        url: `${baseUrl}blog/${blog.slug}`,
+        url: `${baseUrl}/blog/${blog.slug}`,
         lastModified: blog.updatedAt || blog.publishedAt || new Date(),
         changeFrequency: 'weekly' as const,
         priority: 0.8,

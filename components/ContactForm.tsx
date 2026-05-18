@@ -288,7 +288,7 @@ export default function ContactForm({ embedded, preselectedService }: ContactFor
           <div className="relative">
             <label htmlFor="address" className="flex items-center text-xs font-bold text-gray-800 mb-1.5">
               <MapPin className="w-4 h-4 mr-2 text-blue-600" />
-              Address / पता <span className="text-red-500 ml-1">*</span>
+              Address / पता <span className="text-gray-500 font-normal ml-1">(Optional / ऐच्छिक)</span>
             </label>
             <div className="relative">
               <div className="absolute top-3 left-4 pointer-events-none">
@@ -297,7 +297,6 @@ export default function ContactForm({ embedded, preselectedService }: ContactFor
               <textarea
                 id="address"
                 name="address"
-                required
                 value={formData.address}
                 onChange={handleChange}
                 rows={3}
@@ -329,9 +328,27 @@ export default function ContactForm({ embedded, preselectedService }: ContactFor
               )}
               </span>
             </button>
-            <p className="text-xs text-center text-gray-500 mt-2">
+            <p className="text-xs text-center text-gray-500 mt-2 mb-4">
               By submitting, you agree to our terms and conditions
             </p>
+
+            <div className="relative flex items-center py-2">
+              <div className="flex-grow border-t border-gray-300"></div>
+              <span className="flex-shrink-0 mx-4 text-gray-400 text-sm font-medium">OR / या</span>
+              <div className="flex-grow border-t border-gray-300"></div>
+            </div>
+
+            <a
+              href="https://wa.me/917895094129?text=Hello%20Jan%20Seva%20Kendra,%20I%20need%20help%20with%20a%20service."
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`mt-4 w-full bg-[#25D366] hover:bg-[#128C7E] text-white ${embedded ? 'px-4 py-2.5 text-sm' : 'px-4 sm:px-6 md:px-8 py-3 sm:py-3.5 md:py-4'} rounded-lg font-bold ${embedded ? 'text-sm' : 'text-base sm:text-lg'} shadow-lg hover:shadow-xl transition-all duration-300 transform hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center space-x-2`}
+            >
+              <svg className={embedded ? 'w-4 h-4' : 'w-6 h-6'} fill="currentColor" viewBox="0 0 24 24">
+                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/>
+              </svg>
+              <span>Message on WhatsApp</span>
+            </a>
           </div>
         </div>
       </form>
