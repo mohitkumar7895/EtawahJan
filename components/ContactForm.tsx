@@ -170,6 +170,14 @@ export default function ContactForm({ embedded, preselectedService }: ContactFor
             <p className="text-xl text-blue-100">हमसे संपर्क करें - Fill the form to apply for services</p>
           </>
         )}
+        <div className="mt-4 flex flex-wrap justify-center gap-2 sm:gap-4">
+          <span className="inline-flex items-center text-xs sm:text-sm bg-green-100 text-green-800 px-3 py-1 rounded-full font-semibold border border-green-200">
+            <CheckCircle className="w-4 h-4 mr-1" /> 100% Secure
+          </span>
+          <span className="inline-flex items-center text-xs sm:text-sm bg-blue-100 text-blue-800 px-3 py-1 rounded-full font-semibold border border-blue-200">
+            <Send className="w-4 h-4 mr-1" /> Fast Processing
+          </span>
+        </div>
       </div>
 
       {isSuccess && (
@@ -198,9 +206,12 @@ export default function ContactForm({ embedded, preselectedService }: ContactFor
 
       <form
         onSubmit={handleSubmit}
-        className={embedded ? 'bg-transparent' : 'bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-2xl border border-blue-100 p-4 sm:p-6 md:p-8'}
+        className={embedded ? 'bg-transparent relative' : 'bg-gradient-to-br from-white to-blue-50 rounded-xl shadow-2xl border border-blue-100 p-4 sm:p-6 md:p-8 relative'}
       >
-        <div className={embedded ? 'space-y-3' : 'space-y-4 sm:space-y-5 md:space-y-6'}>
+        <div className="absolute -top-3 right-4 bg-gradient-to-r from-red-500 to-red-600 text-white text-[10px] sm:text-xs font-bold px-3 py-1 rounded-full shadow-md animate-pulse">
+          🔥 Fill form for PRIORITY service!
+        </div>
+        <div className={embedded ? 'space-y-3 pt-2' : 'space-y-4 sm:space-y-5 md:space-y-6 pt-2'}>
           {/* Full Name Field */}
           <div className="relative">
             <label htmlFor="name" className="flex items-center text-xs font-bold text-gray-800 mb-1.5">
@@ -323,7 +334,7 @@ export default function ContactForm({ embedded, preselectedService }: ContactFor
               ) : (
                 <>
                   <Send className={embedded ? 'w-4 h-4' : 'w-6 h-6'} />
-                  <span>{embedded ? 'Submit Application' : 'Submit Application & Get Started'}</span>
+                  <span>{embedded ? 'Submit Application' : 'Submit Application (Fast Track)'}</span>
                 </>
               )}
               </span>

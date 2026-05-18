@@ -668,8 +668,18 @@ export default function ServicesPageComponent() {
                       </div>
 
                       <div className="mb-4 sm:mb-6">
-                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2">Apply for {selectedService.name}</h3>
-                        <p className="text-gray-600 text-sm sm:text-base">कृपया अपनी जानकारी भरें (Please fill in your details)</p>
+                        <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-gray-900 mb-2 flex items-center gap-2">
+                          Apply for {selectedService.name}
+                        </h3>
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="inline-flex items-center text-[10px] sm:text-xs bg-green-100 text-green-800 px-2 py-0.5 rounded border border-green-200 font-bold">
+                            100% Secure
+                          </span>
+                          <span className="inline-flex items-center text-[10px] sm:text-xs bg-red-100 text-red-800 px-2 py-0.5 rounded border border-red-200 font-bold animate-pulse">
+                            🔥 Priority Processing
+                          </span>
+                        </div>
+                        <p className="text-gray-600 text-sm sm:text-base">कृपया अपनी जानकारी भरें (Please fill in your details for fast-track service)</p>
                       </div>
 
                       <form onSubmit={handleFormSubmit} className="space-y-3 sm:space-y-4">
@@ -753,7 +763,7 @@ export default function ServicesPageComponent() {
                             ) : (
                               <>
                                 <CheckCircle className="w-4 h-4 sm:w-5 sm:h-5" />
-                                <span className="text-sm">Submit Application</span>
+                                <span className="text-sm">Submit (Fast Track)</span>
                               </>
                             )}
                           </button>
