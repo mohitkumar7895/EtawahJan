@@ -52,7 +52,7 @@ import {
   adminSelectClass,
 } from '@/lib/admin-form-styles';
 import { resolveAnnouncementMedia, videoMimeTypeForUrl } from '@/lib/announcementMedia';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, uploadAnnouncementMedia, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog, getSitemapData, type SitemapPayload, type SitemapUrl } from '@/lib/api';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, uploadAnnouncementMedia, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog, getSitemapData, type SitemapPayload, type SitemapUrl, getCustomSitemapLinks, createCustomSitemapLink, updateCustomSitemapLink, deleteCustomSitemapLink, type CustomSitemapLink } from '@/lib/api';
 import { getElectricityPage, getEdistrictPage, getWithdrawalPage } from '@/lib/janSevaApi';
 
 const ADMIN_LOGO_SRC = '/jan-seva-logo-1.png';
@@ -211,6 +211,17 @@ export default function AdminPage() {
   const [sitemapLoading, setSitemapLoading] = useState(false);
   const [sitemapSearch, setSitemapSearch] = useState('');
   const [selectedSitemapUrl, setSelectedSitemapUrl] = useState<SitemapUrl | null>(null);
+  const [customSitemapLinks, setCustomSitemapLinks] = useState<CustomSitemapLink[]>([]);
+  const [customSitemapLoading, setCustomSitemapLoading] = useState(false);
+  const [editingCustomSitemapLink, setEditingCustomSitemapLink] = useState<CustomSitemapLink | null>(null);
+  const [customSitemapForm, setCustomSitemapForm] = useState({
+    url: '',
+    title: '',
+    description: '',
+    changeFrequency: 'weekly',
+    priority: 0.5,
+    isActive: true,
+  });
 
   const loadDashboardStats = useCallback(async () => {
     setDashboardLoading(true);
@@ -1011,15 +1022,94 @@ export default function AdminPage() {
     setSitemapLoading(true);
     setError(null);
     try {
-      const data = await getSitemapData();
-      setSitemapData(data);
-      if (data.urls.length > 0) {
-        setSelectedSitemapUrl(data.urls[0]);
+      const [sitemapDataPayload, customLinksPayload] = await Promise.all([
+        getSitemapData(),
+        getCustomSitemapLinks(),
+      ]);
+      setSitemapData(sitemapDataPayload);
+      setCustomSitemapLinks(customLinksPayload);
+      if (sitemapDataPayload.urls.length > 0) {
+        setSelectedSitemapUrl(sitemapDataPayload.urls[0]);
       }
     } catch (err: any) {
       setError(err.message || 'Failed to load sitemap data');
     } finally {
       setSitemapLoading(false);
+    }
+  };
+
+  const handleSubmitCustomSitemapLink = async () => {
+    if (!customSitemapForm.url.trim() || !customSitemapForm.title.trim()) {
+      setError('URL and Title are required');
+      return;
+    }
+
+    setCustomSitemapLoading(true);
+    setError(null);
+
+    try {
+      if (editingCustomSitemapLink?.id) {
+        await updateCustomSitemapLink(editingCustomSitemapLink.id, customSitemapForm);
+      } else {
+        await createCustomSitemapLink(customSitemapForm);
+      }
+      
+      await loadSitemapFromAPI();
+      
+      setCustomSitemapForm({
+        url: '',
+        title: '',
+        description: '',
+        changeFrequency: 'weekly',
+        priority: 0.5,
+        isActive: true,
+      });
+      setEditingCustomSitemapLink(null);
+    } catch (err: any) {
+      setError(err.message || 'Failed to save custom sitemap link');
+    } finally {
+      setCustomSitemapLoading(false);
+    }
+  };
+
+  const handleEditCustomSitemapLink = (link: CustomSitemapLink) => {
+    setCustomSitemapForm({
+      url: link.url,
+      title: link.title,
+      description: link.description || '',
+      changeFrequency: link.changeFrequency || 'weekly',
+      priority: link.priority !== undefined ? link.priority : 0.5,
+      isActive: link.isActive !== undefined ? link.isActive : true,
+    });
+    setEditingCustomSitemapLink(link);
+  };
+
+  const handleDeleteCustomSitemapLink = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this custom sitemap link?')) {
+      return;
+    }
+
+    setCustomSitemapLoading(true);
+    setError(null);
+
+    try {
+      await deleteCustomSitemapLink(id);
+      await loadSitemapFromAPI();
+      if (editingCustomSitemapLink?.id === id) {
+        setEditingCustomSitemapLink(null);
+        setCustomSitemapForm({
+          url: '',
+          title: '',
+          description: '',
+          changeFrequency: 'weekly',
+          priority: 0.5,
+          isActive: true,
+        });
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to delete custom sitemap link');
+    } finally {
+      setCustomSitemapLoading(false);
     }
   };
 
@@ -3460,6 +3550,232 @@ export default function AdminPage() {
                           <div className="text-[10px] text-zinc-400">
                             Status: <span className="text-emerald-600 font-semibold">Active & verified in layout.tsx</span>
                           </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Dynamic Custom Sitemap Links Creator & Manager */}
+                    <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 transition-colors duration-200">
+                      <div className="border-b border-zinc-100 dark:border-zinc-800 pb-4 mb-6">
+                        <h3 className="text-sm font-bold text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+                          <Plus className="w-5 h-5 text-blue-600 dark:text-blue-400" />
+                          Custom Sitemap URL Submitter (कस्टम यूआरएल जोड़ें)
+                        </h3>
+                        <p className="text-xs text-zinc-500 dark:text-zinc-400 mt-1">
+                          Submit new custom sub-pages, external landing pages, or local campaigns directly to your indexable Google Sitemap.
+                        </p>
+                      </div>
+
+                      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
+                        {/* Form to submit/fill */}
+                        <div className="lg:col-span-5 bg-zinc-50 dark:bg-zinc-950/40 border border-zinc-200/80 dark:border-zinc-800 rounded-xl p-5">
+                          <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-450 dark:text-zinc-400 mb-4">
+                            {editingCustomSitemapLink ? '📝 Edit Custom Link' : '➕ Add Custom Link'}
+                          </h4>
+                          
+                          <div className="space-y-4">
+                            <div>
+                              <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                                URL Path / लिंक पाथ <span className="text-red-500">*</span>
+                              </label>
+                              <div className="flex rounded-lg shadow-sm">
+                                <span className="inline-flex items-center px-3 rounded-l-lg border border-r-0 border-zinc-300 bg-zinc-150 text-zinc-500 text-xs dark:border-zinc-750 dark:bg-zinc-800 dark:text-zinc-400">
+                                  /
+                                </span>
+                                <input
+                                  type="text"
+                                  placeholder="services/custom-landing"
+                                  value={customSitemapForm.url.startsWith('/') ? customSitemapForm.url.substring(1) : customSitemapForm.url}
+                                  onChange={(e) => {
+                                    const val = e.target.value;
+                                    setCustomSitemapForm({ ...customSitemapForm, url: val.startsWith('/') ? val : '/' + val });
+                                  }}
+                                  className="flex-1 block w-full min-w-0 rounded-none rounded-r-lg border border-zinc-300 px-3 py-2 text-xs bg-white text-zinc-950 focus:outline-none focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                                />
+                              </div>
+                              <p className="text-[10px] text-zinc-400 mt-1">E.g., services/custom-campaign or contact</p>
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                                SEO Meta Title / एसईओ टाइटल <span className="text-red-500">*</span>
+                              </label>
+                              <input
+                                type="text"
+                                placeholder="Best Service in Bharthana | Etawah"
+                                value={customSitemapForm.title}
+                                onChange={(e) => setCustomSitemapForm({ ...customSitemapForm, title: e.target.value })}
+                                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-xs bg-white text-zinc-950 focus:outline-none focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                              />
+                            </div>
+
+                            <div>
+                              <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                                SEO Meta Description / एसईओ विवरण
+                              </label>
+                              <textarea
+                                rows={3}
+                                placeholder="Enter page search snippet description for google indexer..."
+                                value={customSitemapForm.description}
+                                onChange={(e) => setCustomSitemapForm({ ...customSitemapForm, description: e.target.value })}
+                                className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-xs bg-white text-zinc-950 focus:outline-none focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100 resize-none"
+                              />
+                            </div>
+
+                            <div className="grid grid-cols-2 gap-4">
+                              <div>
+                                <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                                  Frequency / क्रॉल आवृत्ति
+                                </label>
+                                <select
+                                  value={customSitemapForm.changeFrequency}
+                                  onChange={(e) => setCustomSitemapForm({ ...customSitemapForm, changeFrequency: e.target.value })}
+                                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-xs bg-white text-zinc-950 focus:outline-none focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                                >
+                                  <option value="always">Always</option>
+                                  <option value="hourly">Hourly</option>
+                                  <option value="daily">Daily</option>
+                                  <option value="weekly">Weekly</option>
+                                  <option value="monthly">Monthly</option>
+                                  <option value="yearly">Yearly</option>
+                                  <option value="never">Never</option>
+                                </select>
+                              </div>
+
+                              <div>
+                                <label className="block text-[11px] font-semibold text-zinc-700 dark:text-zinc-300 mb-1.5">
+                                  Priority Weight
+                                </label>
+                                <select
+                                  value={customSitemapForm.priority}
+                                  onChange={(e) => setCustomSitemapForm({ ...customSitemapForm, priority: Number(e.target.value) })}
+                                  className="w-full rounded-lg border border-zinc-300 px-3 py-2 text-xs bg-white text-zinc-950 focus:outline-none focus:border-blue-500 dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                                >
+                                  <option value="1.0">1.0 (Critical)</option>
+                                  <option value="0.8">0.8 (High)</option>
+                                  <option value="0.5">0.5 (Medium)</option>
+                                  <option value="0.3">0.3 (Low)</option>
+                                </select>
+                              </div>
+                            </div>
+
+                            <div className="flex items-center gap-2 pt-2">
+                              <input
+                                type="checkbox"
+                                id="is_active_sitemap"
+                                checked={customSitemapForm.isActive}
+                                onChange={(e) => setCustomSitemapForm({ ...customSitemapForm, isActive: e.target.checked })}
+                                className="rounded text-blue-600 focus:ring-blue-500 h-3.5 w-3.5"
+                              />
+                              <label htmlFor="is_active_sitemap" className="text-xs font-semibold text-zinc-700 dark:text-zinc-300 cursor-pointer select-none">
+                                Active & Visible in Sitemap.xml
+                              </label>
+                            </div>
+
+                            <div className="flex gap-2 pt-2 border-t border-zinc-200/60 dark:border-zinc-800">
+                              <button
+                                type="button"
+                                onClick={() => void handleSubmitCustomSitemapLink()}
+                                disabled={customSitemapLoading}
+                                className="flex-1 inline-flex justify-center items-center gap-1.5 rounded-lg bg-blue-600 px-3 py-2 text-xs font-semibold text-white shadow hover:bg-blue-500 disabled:opacity-50"
+                              >
+                                {customSitemapLoading ? (
+                                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                                ) : editingCustomSitemapLink ? (
+                                  'Save Changes'
+                                ) : (
+                                  'Submit Link'
+                                )}
+                              </button>
+                              {editingCustomSitemapLink && (
+                                <button
+                                  type="button"
+                                  onClick={() => {
+                                    setEditingCustomSitemapLink(null);
+                                    setCustomSitemapForm({
+                                      url: '',
+                                      title: '',
+                                      description: '',
+                                      changeFrequency: 'weekly',
+                                      priority: 0.5,
+                                      isActive: true,
+                                    });
+                                  }}
+                                  className="px-3 py-2 text-xs font-semibold rounded-lg border border-zinc-300 dark:border-zinc-700 text-zinc-700 dark:text-zinc-300 hover:bg-zinc-50 dark:hover:bg-zinc-800"
+                                >
+                                  Cancel
+                                </button>
+                              )}
+                            </div>
+                          </div>
+                        </div>
+
+                        {/* List of dynamic links */}
+                        <div className="lg:col-span-7 flex flex-col border border-zinc-200/80 dark:border-zinc-800 rounded-xl overflow-hidden bg-zinc-50/50 dark:bg-zinc-950/20">
+                          <div className="border-b border-zinc-200/80 px-4 py-3 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950">
+                            <h4 className="text-xs font-bold uppercase tracking-wider text-zinc-500">
+                              Active Submitted Sitemap Links ({customSitemapLinks.length})
+                            </h4>
+                          </div>
+
+                          {customSitemapLoading && customSitemapLinks.length === 0 ? (
+                            <div className="flex justify-center py-12">
+                              <Loader2 className="h-6 w-6 animate-spin text-blue-600" />
+                            </div>
+                          ) : customSitemapLinks.length === 0 ? (
+                            <div className="flex-1 flex flex-col items-center justify-center p-8 text-center text-xs text-zinc-400">
+                              <Globe className="w-8 h-8 text-zinc-300 mb-2" />
+                              No custom dynamic sitemap links added yet. Add your first link in the left panel!
+                            </div>
+                          ) : (
+                            <div className="overflow-y-auto max-h-[350px] divide-y divide-zinc-200 dark:divide-zinc-800">
+                              {customSitemapLinks.map((link) => (
+                                <div key={link.id} className="p-4 flex items-center justify-between gap-4 hover:bg-white dark:hover:bg-zinc-900 transition-colors">
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <span className="text-xs font-bold text-zinc-800 dark:text-zinc-200 truncate">
+                                        {link.url}
+                                      </span>
+                                      <span className={`px-1.5 py-0.5 rounded text-[9px] font-semibold ${
+                                        link.isActive
+                                          ? 'bg-emerald-100 text-emerald-800 dark:bg-emerald-950/50 dark:text-emerald-300'
+                                          : 'bg-zinc-100 text-zinc-600 dark:bg-zinc-850 dark:text-zinc-400'
+                                      }`}>
+                                        {link.isActive ? 'Active' : 'Draft'}
+                                      </span>
+                                    </div>
+                                    <h5 className="text-[11px] font-medium text-zinc-600 dark:text-zinc-400 mt-1 truncate">{link.title}</h5>
+                                    {link.description && (
+                                      <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-0.5 line-clamp-1">{link.description}</p>
+                                    )}
+                                    <div className="flex items-center gap-3 text-[9px] text-zinc-400 mt-2">
+                                      <span>Freq: <b className="capitalize">{link.changeFrequency}</b></span>
+                                      <span>Priority: <b>{link.priority}</b></span>
+                                    </div>
+                                  </div>
+
+                                  <div className="flex items-center gap-1 shrink-0">
+                                    <button
+                                      type="button"
+                                      onClick={() => handleEditCustomSitemapLink(link)}
+                                      className="p-1.5 text-zinc-600 hover:text-blue-600 hover:bg-blue-50 dark:text-zinc-400 dark:hover:bg-blue-950/40 rounded-lg transition-colors"
+                                      title="Edit"
+                                    >
+                                      <Edit className="w-3.5 h-3.5" />
+                                    </button>
+                                    <button
+                                      type="button"
+                                      onClick={() => void handleDeleteCustomSitemapLink(link.id || '')}
+                                      className="p-1.5 text-zinc-600 hover:text-red-600 hover:bg-red-50 dark:text-zinc-400 dark:hover:bg-red-950/40 rounded-lg transition-colors"
+                                      title="Delete"
+                                    >
+                                      <Trash2 className="w-3.5 h-3.5" />
+                                    </button>
+                                  </div>
+                                </div>
+                              ))}
+                            </div>
+                          )}
                         </div>
                       </div>
                     </div>

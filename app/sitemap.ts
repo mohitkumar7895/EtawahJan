@@ -1,6 +1,7 @@
 import { MetadataRoute } from 'next'
 import { connectDB, isDBConnected } from '@/lib/db'
 import Blog from '@/models/Blog'
+import SitemapLink from '@/models/SitemapLink'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.jan-seva.site'
@@ -85,7 +86,27 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         priority: 0.8,
       }))
 
-      return [...staticPages, ...blogPages]
+      // Fetch custom admin sitemap links dynamically
+      let customPages: MetadataRoute.Sitemap = []
+      try {
+        const customLinks = await SitemapLink.find({ isActive: true }).lean() as any[]
+        customPages = customLinks.map((link: any) => {
+          let url = link.url;
+          if (!url.startsWith('http://') && !url.startsWith('https://')) {
+            url = `${baseUrl}${url.startsWith('/') ? '' : '/'}${url}`;
+          }
+          return {
+            url,
+            lastModified: link.updatedAt || new Date(),
+            changeFrequency: (link.changeFrequency || 'weekly') as any,
+            priority: link.priority !== undefined ? link.priority : 0.5,
+          }
+        })
+      } catch (customErr) {
+        console.error('Error fetching custom sitemap links:', customErr)
+      }
+
+      return [...staticPages, ...blogPages, ...customPages]
     }
   } catch (error) {
     console.error('Error fetching blogs for sitemap:', error)

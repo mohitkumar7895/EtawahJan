@@ -1372,3 +1372,87 @@ export async function getSitemapData(): Promise<SitemapPayload> {
   return response.json();
 }
 
+// Custom Sitemap Links CRUD API
+export interface CustomSitemapLink {
+  id?: string;
+  _id?: string;
+  url: string;
+  title: string;
+  description?: string;
+  changeFrequency?: string;
+  priority?: number;
+  isActive?: boolean;
+  createdAt?: string;
+  updatedAt?: string;
+}
+
+export async function getCustomSitemapLinks(): Promise<CustomSitemapLink[]> {
+  const response = await fetch(`${API_BASE_URL}/api/admin/sitemap-links`, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to fetch custom sitemap links');
+  }
+
+  const data = await response.json();
+  return data.links.map((link: any) => ({ ...link, id: link._id || link.id }));
+}
+
+export async function createCustomSitemapLink(
+  link: Omit<CustomSitemapLink, 'id' | '_id' | 'createdAt' | 'updatedAt'>
+): Promise<CustomSitemapLink> {
+  const response = await fetch(`${API_BASE_URL}/api/admin/sitemap-links`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(link),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to create sitemap link');
+  }
+
+  const data = await response.json();
+  return { ...data.link, id: data.link._id || data.link.id };
+}
+
+export async function updateCustomSitemapLink(
+  id: string,
+  link: Partial<CustomSitemapLink>
+): Promise<CustomSitemapLink> {
+  const response = await fetch(`${API_BASE_URL}/api/admin/sitemap-links/${id}`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(link),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to update sitemap link');
+  }
+
+  const data = await response.json();
+  return { ...data.link, id: data.link._id || data.link.id };
+}
+
+export async function deleteCustomSitemapLink(id: string): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/admin/sitemap-links/${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to delete sitemap link');
+  }
+}
+
+
