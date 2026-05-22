@@ -14,7 +14,7 @@ export default function About() {
 
           <div className="bg-white rounded-lg shadow-xl p-5 sm:p-6 md:p-8 mb-6 sm:mb-7 md:mb-8">
             <p className="text-base sm:text-lg text-gray-700 leading-relaxed mb-4 sm:mb-5 md:mb-6">
-              जन सेवा केंद्र एक विश्वसनीय सेवा केंद्र है जो सभी प्रकार की सरकारी और निजी सेवाएं एक ही छत के नीचे प्रदान करता है।
+              जन सेवा केंद्र एक विश्वसनीय सेवा केंद्र है सभी प्रकार की सरकारी और निजी सेवाएं एक ही छत के नीचे प्रदान करता है।
               हम अपने ग्राहकों को तेज, सटीक और पारदर्शी सेवा देने के लिए प्रतिबद्ध हैं।
             </p>
             <p className="text-base sm:text-lg text-gray-700 leading-relaxed">
