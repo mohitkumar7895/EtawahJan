@@ -1336,3 +1336,39 @@ export async function uploadBlogImage(file: File): Promise<string> {
     throw error;
   }
 }
+
+// Sitemap API
+export interface SitemapUrl {
+  url: string;
+  lastModified: string;
+  changeFrequency: string;
+  priority: number;
+}
+
+export interface SitemapPayload {
+  success: boolean;
+  baseUrl: string;
+  stats: {
+    total: number;
+    staticCount: number;
+    blogCount: number;
+  };
+  urls: SitemapUrl[];
+}
+
+export async function getSitemapData(): Promise<SitemapPayload> {
+  const response = await fetch(`${API_BASE_URL}/api/admin/sitemap`, {
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    cache: 'no-store',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to fetch sitemap data');
+  }
+
+  return response.json();
+}
+

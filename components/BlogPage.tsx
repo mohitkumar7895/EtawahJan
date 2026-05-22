@@ -84,7 +84,7 @@ export default function BlogPageComponent() {
               <BookOpen className="w-12 h-12 sm:w-16 sm:h-16 text-yellow-300" />
             </div>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-4">
-              Jan Seva Kendra Blog
+              जन सेवा केंद्र ब्लॉग Jan seva kendra Blog
             </h1>
             <p className="text-lg sm:text-xl text-blue-100 mb-2">
               सरकारी सेवाओं के बारे में जानकारी और गाइड
@@ -126,11 +126,10 @@ export default function BlogPageComponent() {
                     setSelectedCategory(category);
                     setCurrentPage(1);
                   }}
-                  className={`px-4 py-2 rounded-lg font-semibold text-sm sm:text-base transition ${
-                    selectedCategory === category
+                  className={`px-4 py-2 rounded-lg font-semibold text-sm sm:text-base transition ${selectedCategory === category
                       ? 'bg-blue-600 text-white shadow-lg dark:bg-blue-600'
                       : 'bg-gray-100 text-gray-700 hover:bg-gray-200 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-700'
-                  }`}
+                    }`}
                 >
                   {category}
                 </button>
@@ -261,11 +260,10 @@ export default function BlogPageComponent() {
                       <button
                         key={page}
                         onClick={() => setCurrentPage(page)}
-                        className={`px-4 py-2 rounded-lg font-semibold ${
-                          currentPage === page
+                        className={`px-4 py-2 rounded-lg font-semibold ${currentPage === page
                             ? 'bg-blue-600 text-white dark:bg-blue-600'
                             : 'bg-white border border-gray-300 text-gray-700 hover:bg-gray-50 dark:bg-zinc-900 dark:border-zinc-700 dark:text-zinc-200 dark:hover:bg-zinc-800'
-                        }`}
+                          }`}
                       >
                         {page}
                       </button>

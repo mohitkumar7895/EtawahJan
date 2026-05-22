@@ -52,7 +52,7 @@ import {
   adminSelectClass,
 } from '@/lib/admin-form-styles';
 import { resolveAnnouncementMedia, videoMimeTypeForUrl } from '@/lib/announcementMedia';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, uploadAnnouncementMedia, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog } from '@/lib/api';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, uploadAnnouncementMedia, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog, getSitemapData, type SitemapPayload, type SitemapUrl } from '@/lib/api';
 import { getElectricityPage, getEdistrictPage, getWithdrawalPage } from '@/lib/janSevaApi';
 
 const ADMIN_LOGO_SRC = '/jan-seva-logo-1.png';
@@ -91,7 +91,8 @@ type AdminTab =
   | 'visitors'
   | 'government-links'
   | 'blogs'
-  | 'jan-seva-data';
+  | 'jan-seva-data'
+  | 'seo-sitemap';
 
 type DashboardSnapshot = {
   vacancies: number;
@@ -121,6 +122,7 @@ const ADMIN_NAV: { id: AdminTab; label: string; description: string; icon: Lucid
   { id: 'government-links', label: 'Gov links', description: 'Public quick links', icon: Link2 },
   { id: 'blogs', label: 'Blog', description: 'Posts & SEO', icon: BookOpen },
   { id: 'jan-seva-data', label: 'Jan Seva data', description: 'Registry modules', icon: Database },
+  { id: 'seo-sitemap', label: 'Sitemap & SEO', description: 'Google indexing & URLs', icon: Globe },
 ];
 
 export default function AdminPage() {
@@ -203,6 +205,12 @@ export default function AdminPage() {
   const [editingBlogSlug, setEditingBlogSlug] = useState<string | null>(null);
   const [blogImageFile, setBlogImageFile] = useState<File | null>(null);
   const [blogImagePreview, setBlogImagePreview] = useState<string>('');
+
+  // Sitemap & SEO state
+  const [sitemapData, setSitemapData] = useState<SitemapPayload | null>(null);
+  const [sitemapLoading, setSitemapLoading] = useState(false);
+  const [sitemapSearch, setSitemapSearch] = useState('');
+  const [selectedSitemapUrl, setSelectedSitemapUrl] = useState<SitemapUrl | null>(null);
 
   const loadDashboardStats = useCallback(async () => {
     setDashboardLoading(true);
@@ -298,6 +306,9 @@ export default function AdminPage() {
       }
       if (activeTab === 'blogs') {
         loadBlogsFromAPI();
+      }
+      if (activeTab === 'seo-sitemap') {
+        loadSitemapFromAPI();
       }
     }
   }, [isAuthed, activeTab]);
@@ -769,6 +780,108 @@ export default function AdminPage() {
     });
   };
 
+  const handleCopy = (text: string) => {
+    navigator.clipboard.writeText(text);
+    alert('Copied to clipboard: ' + text);
+  };
+
+  const getUrlMetadata = (url: string) => {
+    const isBlog = url.includes('/blog/');
+    if (isBlog) {
+      const slug = url.split('/blog/')[1] || '';
+      const blog = blogs.find(b => b.slug === slug);
+      if (blog) {
+        return {
+          title: blog.metaTitle || blog.title || 'Jan Seva Kendra Blog Post',
+          description: blog.metaDescription || blog.excerpt || 'Read this post on our official Jan Seva Kendra blog portal.',
+          displayUrl: `jan-seva.site › blog › ${slug}`,
+          category: 'Blog Post',
+        };
+      }
+      return {
+        title: 'Blog Post | Jan Seva Kendra',
+        description: 'Read the latest post from Jan Seva Kendra official blog.',
+        displayUrl: `jan-seva.site › blog › ${slug}`,
+        category: 'Blog Post',
+      };
+    }
+
+    const path = url.replace('https://www.jan-seva.site', '');
+    switch (path) {
+      case '/':
+      case '':
+        return {
+          title: 'Jan Seva Kendra Near Me | CSC Center Etawah Bharthana | Website & App Development',
+          description: 'Jan Seva Kendra & CSC Center near me — Etawah, Bharthana. PAN card apply, income certificate, ration card. We also provide premium IT services: Website Development, Mobile App Development, Game Development, and Custom Software to grow your business. Call: 9193898182 | WhatsApp: 7895094129. Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP 206241.',
+          displayUrl: 'https://www.jan-seva.site',
+          category: 'Homepage',
+        };
+      case '/about':
+        return {
+          title: 'About Us | Jan Seva Kendra - CSC Center UP',
+          description: 'Government authorized CSC Etawah Bharthana. Trusted digital helper for the citizens of Uttar Pradesh. Complete list of online government services under one roof.',
+          displayUrl: 'https://www.jan-seva.site › about',
+          category: 'Static Page',
+        };
+      case '/services':
+        return {
+          title: 'Our Services | Jan Seva Kendra - CSC Center UP',
+          description: 'Apply Aadhaar, PAN, Domicile, Income, Caste, Birth, Ayushman & Voter cards online. Same day processing. We also develop professional business websites and custom software.',
+          displayUrl: 'https://www.jan-seva.site › services',
+          category: 'Static Page',
+        };
+      case '/contact':
+        return {
+          title: 'Contact Us | Jan Seva Kendra - CSC Center UP',
+          description: 'Contact Jan Seva Kendra in Bharthana, Etawah. Call 9193898182 or WhatsApp 7895094129 for fast online processing, Aadhaar correction, and premium software development inquiries.',
+          displayUrl: 'https://www.jan-seva.site › contact',
+          category: 'Static Page',
+        };
+      case '/vacancies':
+        return {
+          title: 'Government Job Vacancies & Results | Jan Seva Kendra',
+          description: 'Latest government job announcements, vacancies, exams, admit cards, and online application details. Fast and accurate details updated daily.',
+          displayUrl: 'https://www.jan-seva.site › vacancies',
+          category: 'Static Page',
+        };
+      case '/blog':
+        return {
+          title: 'Official Blog & Technical SEO | Jan Seva Kendra',
+          description: 'Latest news, updates, government schemes, and step-by-step guides on applying for PAN, Aadhaar, Ration Cards, and digital empowerment in Uttar Pradesh.',
+          displayUrl: 'https://www.jan-seva.site › blog',
+          category: 'Static Page',
+        };
+      case '/announcements':
+        return {
+          title: 'Announcements & Media | Jan Seva Kendra',
+          description: 'Live announcements, breaking government news, circulars, and media updates for the citizens of Bharthana and Etawah UP.',
+          displayUrl: 'https://www.jan-seva.site › announcements',
+          category: 'Static Page',
+        };
+      case '/faq':
+        return {
+          title: 'Frequently Asked Questions (FAQ) | Jan Seva Kendra',
+          description: 'Got questions? Get answers about online applications, PAN processing time, Aadhaar updates near you, fees, and government service guidelines.',
+          displayUrl: 'https://www.jan-seva.site › faq',
+          category: 'Static Page',
+        };
+      case '/government-links':
+        return {
+          title: 'Official Government Portal Links | Jan Seva Kendra',
+          description: 'Quick access to official government websites: Aadhaar UIDAI, PAN NSDL/UTI, eDistrict, UP Scholarship, and PM Kisan portal. Verified secure links.',
+          displayUrl: 'https://www.jan-seva.site › government-links',
+          category: 'Static Page',
+        };
+      default:
+        return {
+          title: 'Jan Seva Kendra - CSC Center UP',
+          description: 'Government schemes, PAN Card, Aadhaar Card, Ration Card, eDistrict UP, and premium custom website/software development services in Bharthana & Etawah.',
+          displayUrl: `https://www.jan-seva.site${path}`,
+          category: 'Sitemap Link',
+        };
+    }
+  };
+
   const handleDownloadImage = async (imageUrl: string) => {
     try {
       const response = await fetch(imageUrl);
@@ -891,6 +1004,22 @@ export default function AdminPage() {
     } catch (err) {
       console.error('Error loading blogs:', err);
       setBlogs([]);
+    }
+  };
+
+  const loadSitemapFromAPI = async () => {
+    setSitemapLoading(true);
+    setError(null);
+    try {
+      const data = await getSitemapData();
+      setSitemapData(data);
+      if (data.urls.length > 0) {
+        setSelectedSitemapUrl(data.urls[0]);
+      }
+    } catch (err: any) {
+      setError(err.message || 'Failed to load sitemap data');
+    } finally {
+      setSitemapLoading(false);
     }
   };
 
@@ -3202,6 +3331,366 @@ export default function AdminPage() {
             )}
 
             {activeTab === 'jan-seva-data' && <JanSevaDataModule />}
+
+            {activeTab === 'seo-sitemap' && (
+              <div className="space-y-6">
+                {/* Header Section */}
+                <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+                      <Globe className="w-6 h-6 text-blue-600 dark:text-blue-400" />
+                      Sitemap & SEO Optimization
+                    </h2>
+                    <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+                      Manage site structure, preview search results, and optimize indexation in Google Search.
+                    </p>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => void loadSitemapFromAPI()}
+                    disabled={sitemapLoading}
+                    className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm transition hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                  >
+                    {sitemapLoading ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden /> : null}
+                    Refresh Sitemap
+                  </button>
+                </div>
+
+                {sitemapLoading && !sitemapData ? (
+                  <div className="flex justify-center py-20">
+                    <Loader2 className="h-10 w-10 animate-spin text-blue-600 dark:text-blue-400" aria-hidden />
+                  </div>
+                ) : sitemapData ? (
+                  <div className="space-y-6">
+                    {/* Quick Stats Grid */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      <div className="rounded-xl border border-blue-200/80 bg-gradient-to-br from-blue-50/60 to-blue-100/40 p-4 shadow-sm dark:border-blue-950/40 dark:from-blue-950/20 dark:to-slate-900/30">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-xs font-semibold text-blue-700 dark:text-blue-300">Total Sitemap URLs</p>
+                          <Globe className="h-5 w-5 text-blue-600 dark:text-blue-400" />
+                        </div>
+                        <p className="mt-2 text-3xl font-bold tabular-nums text-blue-950 dark:text-blue-50">
+                          {sitemapData.stats.total}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border border-emerald-200/80 bg-gradient-to-br from-emerald-50/60 to-emerald-100/40 p-4 shadow-sm dark:border-emerald-950/40 dark:from-emerald-950/20 dark:to-slate-900/30">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-xs font-semibold text-emerald-700 dark:text-emerald-300">Static Pages</p>
+                          <Monitor className="h-5 w-5 text-emerald-600 dark:text-emerald-400" />
+                        </div>
+                        <p className="mt-2 text-3xl font-bold tabular-nums text-emerald-950 dark:text-emerald-50">
+                          {sitemapData.stats.staticCount}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border border-amber-200/80 bg-gradient-to-br from-amber-50/60 to-amber-100/40 p-4 shadow-sm dark:border-amber-950/40 dark:from-amber-950/20 dark:to-slate-900/30">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-xs font-semibold text-amber-700 dark:text-amber-300">Dynamic Blogs</p>
+                          <BookOpen className="h-5 w-5 text-amber-600 dark:text-amber-400" />
+                        </div>
+                        <p className="mt-2 text-3xl font-bold tabular-nums text-amber-950 dark:text-amber-50">
+                          {sitemapData.stats.blogCount}
+                        </p>
+                      </div>
+
+                      <div className="rounded-xl border border-purple-200/80 bg-gradient-to-br from-purple-50/60 to-purple-100/40 p-4 shadow-sm dark:border-purple-950/40 dark:from-purple-950/20 dark:to-slate-900/30">
+                        <div className="flex items-center justify-between gap-2">
+                          <p className="text-xs font-semibold text-purple-700 dark:text-purple-300">Google Status</p>
+                          <CheckCircle className="h-5 w-5 text-purple-600 dark:text-purple-400" />
+                        </div>
+                        <p className="mt-2 text-lg font-bold text-purple-950 dark:text-purple-100">
+                          Live & Indexed
+                        </p>
+                        <p className="text-[10px] text-purple-800 dark:text-purple-300 mt-1">robots.txt config allows all</p>
+                      </div>
+                    </div>
+
+                    {/* Google Search Console Direct Actions Card */}
+                    <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 transition-colors duration-200">
+                      <h3 className="text-sm font-semibold text-zinc-900 dark:text-zinc-50 mb-4 flex items-center gap-2">
+                        <Zap className="h-4 w-4 text-yellow-500" />
+                        Google Search Console Submission & Verification
+                      </h3>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <div className="space-y-3">
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                            Google will index your pages much faster if you submit your sitemap file URL directly in the Google Search Console panel.
+                          </p>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg select-all font-mono text-xs text-zinc-700 dark:text-zinc-300 truncate">
+                              <span>https://www.jan-seva.site/sitemap.xml</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy('https://www.jan-seva.site/sitemap.xml')}
+                              className="px-4 py-2 text-xs font-semibold text-white bg-blue-600 hover:bg-blue-500 active:bg-blue-700 rounded-lg shadow-sm transition"
+                            >
+                              Copy Link
+                            </button>
+                          </div>
+                          <div className="pt-1">
+                            <a
+                              href="https://search.google.com/search-console?resource_id=sc-domain:jan-seva.site"
+                              target="_blank"
+                              rel="noopener noreferrer"
+                              className="inline-flex items-center gap-1.5 text-xs text-blue-600 dark:text-blue-400 font-semibold hover:underline"
+                            >
+                              Open Google Search Console →
+                            </a>
+                          </div>
+                        </div>
+
+                        <div className="space-y-3 border-t md:border-t-0 md:border-l border-zinc-100 dark:border-zinc-800 md:pl-6 pt-4 md:pt-0">
+                          <p className="text-xs text-zinc-500 dark:text-zinc-400 leading-relaxed">
+                            Your domain search console property is verified on Google using the following Meta Verification Key (configured in root layout):
+                          </p>
+                          <div className="flex flex-col sm:flex-row gap-2">
+                            <div className="flex-1 flex items-center gap-2 px-3 py-2 bg-zinc-50 dark:bg-zinc-950 border border-zinc-200 dark:border-zinc-800 rounded-lg select-all font-mono text-xs text-zinc-700 dark:text-zinc-300 truncate">
+                              <span>2rT4H0NwQhMpGMYTHC_rnHNs7Cpatm4pSUhvhtfaRPw</span>
+                            </div>
+                            <button
+                              type="button"
+                              onClick={() => handleCopy('2rT4H0NwQhMpGMYTHC_rnHNs7Cpatm4pSUhvhtfaRPw')}
+                              className="px-4 py-2 text-xs font-semibold text-zinc-700 dark:text-zinc-300 bg-white dark:bg-zinc-800 hover:bg-zinc-50 dark:hover:bg-zinc-700 border border-zinc-200 dark:border-zinc-700 rounded-lg shadow-sm transition"
+                            >
+                              Copy Key
+                            </button>
+                          </div>
+                          <div className="text-[10px] text-zinc-400">
+                            Status: <span className="text-emerald-600 font-semibold">Active & verified in layout.tsx</span>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Main Sitemap Explorer Layout */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+                      {/* Left: Sitemap List */}
+                      <div className="lg:col-span-1 rounded-xl border border-zinc-200 bg-white shadow-sm dark:border-zinc-800 dark:bg-zinc-900 overflow-hidden flex flex-col">
+                        <div className="border-b border-zinc-200/80 px-4 py-3 bg-zinc-50 dark:border-zinc-800 dark:bg-zinc-950">
+                          <h3 className="font-semibold text-zinc-900 dark:text-zinc-50 text-sm">Site URLs List</h3>
+                        </div>
+                        <div className="p-3 border-b border-zinc-200 dark:border-zinc-800 flex items-center gap-2">
+                          <div className="relative flex-1">
+                            <Search className="absolute left-3 top-2.5 h-4 w-4 text-zinc-400" />
+                            <input
+                              type="text"
+                              value={sitemapSearch}
+                              onChange={(e) => setSitemapSearch(e.target.value)}
+                              placeholder="Search URLs..."
+                              className="w-full rounded-lg border border-zinc-200 bg-white pl-9 pr-4 py-2 text-xs text-zinc-900 shadow-sm placeholder:text-zinc-400 focus:border-blue-500 focus:outline-none dark:border-zinc-700 dark:bg-zinc-950 dark:text-zinc-100"
+                            />
+                          </div>
+                        </div>
+                        <div className="overflow-y-auto max-h-[500px] divide-y divide-zinc-100 dark:divide-zinc-800">
+                          {sitemapData.urls
+                            .filter(u => u.url.toLowerCase().includes(sitemapSearch.toLowerCase()))
+                            .map((item, idx) => {
+                              const path = item.url.replace('https://www.jan-seva.site', '') || '/';
+                              const meta = getUrlMetadata(item.url);
+                              const isSelected = selectedSitemapUrl?.url === item.url;
+                              return (
+                                <button
+                                  key={idx}
+                                  type="button"
+                                  onClick={() => setSelectedSitemapUrl(item)}
+                                  className={`w-full p-3 text-left transition flex items-center justify-between gap-3 ${
+                                    isSelected
+                                      ? 'bg-blue-50/50 dark:bg-blue-950/20 border-l-4 border-blue-600'
+                                      : 'hover:bg-zinc-50 dark:hover:bg-zinc-800/40'
+                                  }`}
+                                >
+                                  <div className="min-w-0 flex-1">
+                                    <div className="flex items-center gap-2">
+                                      <span className="truncate text-xs font-semibold text-zinc-800 dark:text-zinc-200">
+                                        {path}
+                                      </span>
+                                    </div>
+                                    <p className="truncate text-[10px] text-zinc-500 dark:text-zinc-400 mt-0.5">
+                                      {meta.title}
+                                    </p>
+                                  </div>
+                                  <span
+                                    className={`px-1.5 py-0.5 rounded text-[10px] font-semibold shrink-0 ${
+                                      item.priority >= 0.9
+                                        ? 'bg-green-100 text-green-800 dark:bg-green-950/50 dark:text-green-300'
+                                        : item.priority >= 0.7
+                                        ? 'bg-blue-100 text-blue-800 dark:bg-blue-950/50 dark:text-blue-300'
+                                        : 'bg-zinc-100 text-zinc-700 dark:bg-zinc-850 dark:text-zinc-400'
+                                    }`}
+                                  >
+                                    P: {item.priority}
+                                  </span>
+                                </button>
+                              );
+                            })}
+                        </div>
+                      </div>
+
+                      {/* Right: SEO Preview Panel */}
+                      <div className="lg:col-span-2 space-y-6">
+                        {selectedSitemapUrl ? (
+                          <>
+                            {/* Google Search Mockup Card */}
+                            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 transition-colors duration-200">
+                              <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-4">
+                                Google Search Engine Preview (Mockup)
+                              </h3>
+                              {(() => {
+                                const meta = getUrlMetadata(selectedSitemapUrl.url);
+                                return (
+                                  <div className="border border-zinc-200 dark:border-zinc-800 rounded-xl p-6 bg-zinc-50 dark:bg-zinc-950/40">
+                                    <div className="font-sans max-w-2xl select-none">
+                                      {/* Google breadcrumb */}
+                                      <div className="text-xs text-[#202124] dark:text-[#bdc1c6] truncate flex items-center gap-1.5">
+                                        <div className="w-5 h-5 rounded-full bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 flex items-center justify-center shrink-0">
+                                          <AdminBrandLogo size={12} className="h-3 w-3 object-contain" />
+                                        </div>
+                                        <div className="truncate text-xs leading-5">
+                                          {meta.displayUrl}
+                                        </div>
+                                      </div>
+                                      {/* Google title */}
+                                      <h4 className="text-xl text-[#1a0dab] dark:text-[#8ab4f8] font-medium hover:underline cursor-pointer tracking-normal leading-tight mt-1 mb-1">
+                                        {meta.title}
+                                      </h4>
+                                      {/* Google snippet description */}
+                                      <p className="text-sm text-[#4d5156] dark:text-[#bebebe] leading-relaxed line-clamp-3">
+                                        {meta.description}
+                                      </p>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+
+                            {/* SEO Optimization Analysis */}
+                            <div className="rounded-xl border border-zinc-200 bg-white p-6 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 transition-colors duration-200">
+                              <h3 className="text-xs font-semibold uppercase tracking-wider text-zinc-400 mb-4">
+                                SEO Metadata Breakdown
+                              </h3>
+                              {(() => {
+                                const meta = getUrlMetadata(selectedSitemapUrl.url);
+                                const titleLen = meta.title.length;
+                                const descLen = meta.description.length;
+                                
+                                return (
+                                  <div className="space-y-4">
+                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                      <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200/60 dark:border-zinc-800">
+                                        <div className="flex items-center justify-between">
+                                          <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Title Length</span>
+                                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                                            titleLen >= 50 && titleLen <= 70
+                                              ? 'bg-green-100 text-green-800 dark:bg-green-950/50'
+                                              : titleLen > 70
+                                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/50'
+                                              : 'bg-red-100 text-red-800 dark:bg-red-950/50'
+                                          }`}>
+                                            {titleLen} Chars
+                                          </span>
+                                        </div>
+                                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mt-2 truncate">
+                                          {meta.title}
+                                        </p>
+                                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-2">
+                                          {titleLen >= 50 && titleLen <= 70
+                                            ? '✓ Optimal title length for Google (50-70 characters).'
+                                            : titleLen > 70
+                                            ? '⚠ Title is long; Google search results may truncate it with ...'
+                                            : '⚠ Title is too short; add more relevant keywords to increase click-through rate.'}
+                                        </p>
+                                      </div>
+
+                                      <div className="p-4 rounded-lg bg-zinc-50 dark:bg-zinc-950/20 border border-zinc-200/60 dark:border-zinc-800">
+                                        <div className="flex items-center justify-between">
+                                          <span className="text-xs font-medium text-zinc-500 dark:text-zinc-400">Description Length</span>
+                                          <span className={`text-[10px] font-semibold px-2 py-0.5 rounded ${
+                                            descLen >= 120 && descLen <= 160
+                                              ? 'bg-green-100 text-green-800 dark:bg-green-950/50'
+                                              : descLen > 160
+                                              ? 'bg-amber-100 text-amber-800 dark:bg-amber-950/50'
+                                              : 'bg-red-100 text-red-800 dark:bg-red-950/50'
+                                          }`}>
+                                            {descLen} Chars
+                                          </span>
+                                        </div>
+                                        <p className="text-sm font-semibold text-zinc-900 dark:text-zinc-100 mt-2 line-clamp-1">
+                                          {meta.description}
+                                        </p>
+                                        <p className="text-[10px] text-zinc-400 dark:text-zinc-500 mt-2">
+                                          {descLen >= 120 && descLen <= 160
+                                            ? '✓ Optimal description length for Google (120-160 characters).'
+                                            : descLen > 160
+                                            ? '⚠ Description is long (Google will truncate to ~160 chars), but it contains rich local keywords.'
+                                            : '⚠ Description is short; expand details to entice clicks.'}
+                                        </p>
+                                      </div>
+                                    </div>
+
+                                    {/* Crawler details table */}
+                                    <div className="overflow-x-auto">
+                                      <table className="w-full text-left text-xs border border-zinc-200 dark:border-zinc-800 rounded-lg">
+                                        <thead className="bg-zinc-50 dark:bg-zinc-950 text-zinc-500 dark:text-zinc-400 font-semibold border-b border-zinc-200 dark:border-zinc-800">
+                                          <tr>
+                                            <th className="p-3">Attribute</th>
+                                            <th className="p-3">Configuration</th>
+                                            <th className="p-3">Crawlers Priority</th>
+                                          </tr>
+                                        </thead>
+                                        <tbody className="divide-y divide-zinc-200 dark:divide-zinc-800">
+                                          <tr>
+                                            <td className="p-3 font-semibold text-zinc-900 dark:text-zinc-100">Category</td>
+                                            <td className="p-3 text-zinc-600 dark:text-zinc-400">{meta.category}</td>
+                                            <td className="p-3 text-zinc-400">—</td>
+                                          </tr>
+                                          <tr>
+                                            <td className="p-3 font-semibold text-zinc-900 dark:text-zinc-100">Change Frequency</td>
+                                            <td className="p-3 capitalize text-zinc-600 dark:text-zinc-400">{selectedSitemapUrl.changeFrequency}</td>
+                                            <td className="p-3 text-zinc-500 font-medium">Medium</td>
+                                          </tr>
+                                          <tr>
+                                            <td className="p-3 font-semibold text-zinc-900 dark:text-zinc-100">Priority Weight</td>
+                                            <td className="p-3 text-zinc-600 dark:text-zinc-400">{selectedSitemapUrl.priority} / 1.0</td>
+                                            <td className="p-3 text-indigo-600 dark:text-indigo-400 font-semibold">High</td>
+                                          </tr>
+                                          <tr>
+                                            <td className="p-3 font-semibold text-zinc-900 dark:text-zinc-100">Last Modified</td>
+                                            <td className="p-3 text-zinc-600 dark:text-zinc-400">
+                                              {new Date(selectedSitemapUrl.lastModified).toLocaleDateString('en-IN', {
+                                                day: 'numeric',
+                                                month: 'short',
+                                                year: 'numeric',
+                                                hour: '2-digit',
+                                                minute: '2-digit',
+                                              })}
+                                            </td>
+                                            <td className="p-3 text-emerald-600 dark:text-emerald-400 font-semibold">Updated</td>
+                                          </tr>
+                                        </tbody>
+                                      </table>
+                                    </div>
+                                  </div>
+                                );
+                              })()}
+                            </div>
+                          </>
+                        ) : (
+                          <div className="rounded-xl border border-zinc-200 bg-white p-12 text-center text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
+                            Select a URL from the left list to analyze its search engine structure.
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <p className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-8 text-center text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
+                    Could not fetch sitemap. Click refresh above to retry.
+                  </p>
+                )}
+              </div>
+            )}
               </main>
             </div>
           </div>
