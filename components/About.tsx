@@ -9,7 +9,7 @@ export default function About() {
         <div className="max-w-4xl mx-auto">
           <div className="text-center mb-8 sm:mb-10 md:mb-12">
             <h2 className="text-2xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-3 sm:mb-4">About Us</h2>
-            <p className="text-lg sm:text-xl text-gray-600">हमारे बारे में</p>
+            <p className="text-lg sm:text-xl text-gray-600 font-medium">हमारे बारे में</p>
           </div>
 
           <div className="bg-white rounded-lg shadow-xl p-5 sm:p-6 md:p-8 mb-6 sm:mb-7 md:mb-8">
