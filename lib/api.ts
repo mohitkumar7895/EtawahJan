@@ -1455,4 +1455,57 @@ export async function deleteCustomSitemapLink(id: string): Promise<void> {
   }
 }
 
+// Service Application Interfaces & Call helpers
+export interface ServiceApplication {
+  id: string;
+  name: string;
+  email: string;
+  mobile: string;
+  address: string;
+  service_type: string;
+  status: 'pending' | 'in_progress' | 'completed' | 'rejected';
+  trackingId: string;
+  remarks?: string;
+  adminNotes?: string;
+  submittedAt: string;
+  updatedAt: string;
+  completedAt?: string | null;
+}
+
+export async function getAdminApplications(
+  filter = 'all',
+  status = 'all'
+): Promise<ServiceApplication[]> {
+  const query = new URLSearchParams({ filter, status });
+  const response = await fetch(`${API_BASE_URL}/api/admin/applications?${query.toString()}`, {
+    method: 'GET',
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to fetch applications');
+  }
+
+  return response.json();
+}
+
+export async function updateAdminApplication(
+  id: string,
+  payload: { status?: string; remarks?: string; adminNotes?: string }
+): Promise<void> {
+  const response = await fetch(`${API_BASE_URL}/api/admin/applications`, {
+    method: 'PUT',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify({ id, ...payload }),
+  });
+
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.error || 'Failed to update application');
+  }
+}
+
+
 

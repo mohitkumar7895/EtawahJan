@@ -69,14 +69,6 @@ export async function POST(request: NextRequest) {
       address,
     });
 
-    // Send emails sequentially to admin recipients
-    const results = [];
-    for (const to of RECIPIENTS) {
-      const result = await sendEmail({ to, subject, html });
-      results.push({ to, ...result });
-      await new Promise((r) => setTimeout(r, 1000)); // wait 1s between sends
-    }
-
     // Save application to database and user as subscriber
     let trackingId = '';
     try {
@@ -84,6 +76,11 @@ export async function POST(request: NextRequest) {
         await connectDB();
       }
       
+      // Generate tracking ID: JSK + timestamp + random 4 digits
+      const timestamp = Date.now().toString().slice(-8);
+      const random = Math.floor(1000 + Math.random() * 9000);
+      const generatedTrackingId = `JSK${timestamp}${random}`;
+
       // Save application to database
       const application = new Application({
         name: name.trim(),
@@ -92,6 +89,7 @@ export async function POST(request: NextRequest) {
         address: address.trim(),
         service_type: service.trim(),
         status: 'pending',
+        trackingId: generatedTrackingId,
       });
       await application.save();
       trackingId = application.trackingId;
@@ -128,6 +126,14 @@ export async function POST(request: NextRequest) {
     } catch (dbError: any) {
       console.error('❌ Error saving application/subscriber:', dbError);
       // Don't fail the request if database save fails
+    }
+
+    // Send emails sequentially to admin recipients
+    const results = [];
+    for (const to of RECIPIENTS) {
+      const result = await sendEmail({ to, subject, html });
+      results.push({ to, ...result });
+      await new Promise((r) => setTimeout(r, 1000)); // wait 1s between sends
     }
 
     // Send confirmation email to user if email is provided

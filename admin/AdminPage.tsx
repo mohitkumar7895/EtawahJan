@@ -38,6 +38,7 @@ import {
   Users,
   Link2,
   LogOut,
+  FileText,
 } from 'lucide-react';
 import NextImage from 'next/image';
 import JanSevaDataModule from '@/components/admin/JanSevaDataModule';
@@ -52,8 +53,9 @@ import {
   adminSelectClass,
 } from '@/lib/admin-form-styles';
 import { resolveAnnouncementMedia, videoMimeTypeForUrl } from '@/lib/announcementMedia';
-import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, uploadAnnouncementMedia, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog, getSitemapData, type SitemapPayload, type SitemapUrl, getCustomSitemapLinks, createCustomSitemapLink, updateCustomSitemapLink, deleteCustomSitemapLink, type CustomSitemapLink } from '@/lib/api';
+import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, uploadAnnouncementMedia, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog, getSitemapData, type SitemapPayload, type SitemapUrl, getCustomSitemapLinks, createCustomSitemapLink, updateCustomSitemapLink, deleteCustomSitemapLink, type CustomSitemapLink, getAdminApplications, updateAdminApplication, type ServiceApplication } from '@/lib/api';
 import { getElectricityPage, getEdistrictPage, getWithdrawalPage } from '@/lib/janSevaApi';
+import DashboardCharts from '@/components/DashboardCharts';
 
 const ADMIN_LOGO_SRC = '/jan-seva-logo-1.png';
 
@@ -92,7 +94,8 @@ type AdminTab =
   | 'government-links'
   | 'blogs'
   | 'jan-seva-data'
-  | 'seo-sitemap';
+  | 'seo-sitemap'
+  | 'applications';
 
 type DashboardSnapshot = {
   vacancies: number;
@@ -113,6 +116,7 @@ type DashboardSnapshot = {
 
 const ADMIN_NAV: { id: AdminTab; label: string; description: string; icon: LucideIcon }[] = [
   { id: 'dashboard', label: 'Dashboard', description: 'Overview & counts', icon: LayoutDashboard },
+  { id: 'applications', label: 'Service Forms', description: 'User submissions & Excel', icon: FileText },
   { id: 'vacancies', label: 'Vacancies', description: 'Job listings & results', icon: Briefcase },
   { id: 'announcements', label: 'Announcements', description: 'News & media', icon: Megaphone },
   { id: 'admins', label: 'Administrators', description: 'Access control', icon: Shield },
@@ -127,6 +131,16 @@ const ADMIN_NAV: { id: AdminTab; label: string; description: string; icon: Lucid
 
 export default function AdminPage() {
   const [isAuthed, setIsAuthed] = useState<boolean>(false);
+
+  // Persist session across refreshes
+  useEffect(() => {
+    if (typeof window !== 'undefined') {
+      const cachedAuth = localStorage.getItem('etawah_admin_authed');
+      if (cachedAuth === 'true') {
+        setIsAuthed(true);
+      }
+    }
+  }, []);
   const [user, setUser] = useState('');
   const [pass, setPass] = useState('');
   const [loading, setLoading] = useState(false);
@@ -222,6 +236,15 @@ export default function AdminPage() {
     priority: 0.5,
     isActive: true,
   });
+
+  // Service Applications state
+  const [applications, setApplications] = useState<ServiceApplication[]>([]);
+  const [applicationsLoading, setApplicationsLoading] = useState(false);
+  const [applicationsFilter, setApplicationsFilter] = useState<'all' | 'weekly' | 'monthly' | 'yearly'>('all');
+  const [applicationsStatusFilter, setApplicationsStatusFilter] = useState<string>('all');
+  const [editingApplication, setEditingApplication] = useState<ServiceApplication | null>(null);
+  const [appUpdateLoading, setAppUpdateLoading] = useState(false);
+  const [appForm, setAppForm] = useState({ status: 'pending', remarks: '', adminNotes: '' });
 
   const loadDashboardStats = useCallback(async () => {
     setDashboardLoading(true);
@@ -323,6 +346,13 @@ export default function AdminPage() {
       }
     }
   }, [isAuthed, activeTab]);
+
+  // Load applications when tab or filters change
+  useEffect(() => {
+    if (isAuthed && activeTab === 'applications') {
+      loadApplicationsFromAPI();
+    }
+  }, [isAuthed, activeTab, applicationsFilter, applicationsStatusFilter]);
   
   // Poll for new chats when on chats tab
   useEffect(() => {
@@ -494,6 +524,9 @@ export default function AdminPage() {
   const handleLogin = () => {
     if (user === ADMIN_USER && pass === ADMIN_PASS) {
       setIsAuthed(true);
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('etawah_admin_authed', 'true');
+      }
     } else {
       alert('Invalid credentials');
     }
@@ -503,6 +536,9 @@ export default function AdminPage() {
     setIsAuthed(false);
     setUser('');
     setPass('');
+    if (typeof window !== 'undefined') {
+      localStorage.removeItem('etawah_admin_authed');
+    }
   };
 
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -1113,6 +1149,96 @@ export default function AdminPage() {
     }
   };
 
+  // Service Applications operations
+  const loadApplicationsFromAPI = async (dateFilter = applicationsFilter, statusFilter = applicationsStatusFilter) => {
+    setApplicationsLoading(true);
+    setError(null);
+    try {
+      const data = await getAdminApplications(dateFilter, statusFilter);
+      setApplications(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load applications');
+      setApplications([]);
+    } finally {
+      setApplicationsLoading(false);
+    }
+  };
+
+  const handleUpdateApplicationStatus = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingApplication) return;
+    setAppUpdateLoading(true);
+    setError(null);
+    try {
+      await updateAdminApplication(editingApplication.id, appForm);
+      await loadApplicationsFromAPI();
+      setEditingApplication(null);
+      setAppForm({ status: 'pending', remarks: '', adminNotes: '' });
+    } catch (err: any) {
+      setError(err.message || 'Failed to update application status');
+    } finally {
+      setAppUpdateLoading(false);
+    }
+  };
+
+  const handleEditApplicationClick = (app: ServiceApplication) => {
+    setEditingApplication(app);
+    setAppForm({
+      status: app.status,
+      remarks: app.remarks || '',
+      adminNotes: app.adminNotes || '',
+    });
+  };
+
+  const handleDownloadExcel = () => {
+    if (applications.length === 0) {
+      alert('No data to export!');
+      return;
+    }
+
+    const headers = [
+      'Tracking ID',
+      'Applicant Name',
+      'Mobile Number',
+      'Email Address',
+      'Service Type',
+      'Status',
+      'Submission Date',
+      'Complete Address',
+      'Remarks',
+      'Admin Notes',
+    ];
+
+    const rows = applications.map((app) => [
+      app.trackingId,
+      `"${app.name.replace(/"/g, '""')}"`,
+      `"${app.mobile}"`,
+      `"${(app.email || '').replace(/"/g, '""')}"`,
+      `"${app.service_type.replace(/"/g, '""')}"`,
+      app.status.toUpperCase(),
+      new Date(app.submittedAt).toLocaleString('en-IN'),
+      `"${app.address.replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`,
+      `"${(app.remarks || '').replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`,
+      `"${(app.adminNotes || '').replace(/"/g, '""').replace(/\r?\n/g, ' ')}"`,
+    ]);
+
+    const csvContent = 
+      '\uFEFF' +
+      [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
+
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    const url = URL.createObjectURL(blob);
+    
+    const dateStr = new Date().toISOString().slice(0, 10);
+    link.setAttribute('href', url);
+    link.setAttribute('download', `jan_seva_applications_${applicationsFilter}_${dateStr}.csv`);
+    link.style.visibility = 'hidden';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleSubmitBlog = async () => {
     if (!blogForm.title.trim() || !blogForm.slug.trim() || !blogForm.excerpt.trim() || !blogForm.content.trim()) {
       setError('Title, Slug, Excerpt, and Content are required');
@@ -1421,11 +1547,20 @@ export default function AdminPage() {
                 </div>
 
                 {dashboardLoading && !dashboardStats ? (
-                  <div className="flex justify-center py-20">
-                    <Loader2 className="h-10 w-10 animate-spin text-indigo-600 dark:text-indigo-400" aria-hidden />
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                    {Array.from({ length: 8 }).map((_, idx) => (
+                      <div key={idx} className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm animate-pulse dark:border-zinc-800 dark:bg-zinc-900">
+                        <div className="flex items-center justify-between gap-2">
+                          <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2"></div>
+                          <div className="h-6 w-6 rounded bg-zinc-200 dark:bg-zinc-800"></div>
+                        </div>
+                        <div className="mt-3 h-8 bg-zinc-200 dark:bg-zinc-800 rounded w-1/3"></div>
+                      </div>
+                    ))}
                   </div>
                 ) : dashboardStats ? (
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
+                  <>
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4">
                     <button
                       type="button"
                       onClick={() => setTab('vacancies')}
@@ -1576,6 +1711,8 @@ export default function AdminPage() {
                       </div>
                     </button>
                   </div>
+                  <DashboardCharts stats={dashboardStats} />
+                  </>
                 ) : (
                   <p className="rounded-xl border border-zinc-200 bg-zinc-50 px-4 py-8 text-center text-sm text-zinc-600 dark:border-zinc-800 dark:bg-zinc-900/50 dark:text-zinc-400">
                     Could not load overview. Use Refresh to try again.
@@ -3420,6 +3557,225 @@ export default function AdminPage() {
               </div>
             )}
 
+            {activeTab === 'applications' && (
+              <div className="space-y-6 animate-in fade-in duration-200">
+                {/* Header Section */}
+                <div className="flex flex-col gap-4 md:flex-row md:items-center md:justify-between">
+                  <div>
+                    <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-zinc-50 flex items-center gap-2">
+                      <FileText className="w-6 h-6 text-indigo-600 dark:text-indigo-400" />
+                      Service Applications (सेवा आवेदन फॉर्म)
+                    </h2>
+                    <p className="mt-0.5 text-sm text-zinc-500 dark:text-zinc-400">
+                      Manage, filter, search, and export customer service request submissions.
+                    </p>
+                  </div>
+                  <div className="flex flex-wrap items-center gap-3">
+                    <button
+                      type="button"
+                      onClick={() => void loadApplicationsFromAPI()}
+                      disabled={applicationsLoading}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-sm font-semibold text-zinc-700 shadow-sm transition hover:bg-zinc-50 disabled:opacity-50 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200 dark:hover:bg-zinc-800"
+                    >
+                      {applicationsLoading ? <Loader2 className="h-4 w-4 shrink-0 animate-spin" aria-hidden /> : null}
+                      Refresh List
+                    </button>
+                    <button
+                      type="button"
+                      onClick={handleDownloadExcel}
+                      disabled={applications.length === 0}
+                      className="inline-flex items-center justify-center gap-2 rounded-xl bg-emerald-600 px-4 py-2.5 text-sm font-bold text-white shadow-md transition hover:bg-emerald-750 disabled:opacity-50 disabled:cursor-not-allowed hover:shadow-lg active:scale-95"
+                    >
+                      <Download className="w-4 h-4" />
+                      Excel / CSV Download ({applicationsFilter.toUpperCase()})
+                    </button>
+                  </div>
+                </div>
+
+                {/* Filters Widget Panel */}
+                <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                  <div className="flex flex-wrap items-center gap-4">
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Time Duration</label>
+                      <select
+                        value={applicationsFilter}
+                        onChange={(e) => {
+                          const val = e.target.value as any;
+                          setApplicationsFilter(val);
+                        }}
+                        className="rounded-lg border border-zinc-250 bg-white px-3 py-1.5 text-sm font-semibold text-zinc-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-900 dark:text-zinc-200"
+                      >
+                        <option value="all">All Time (जब से चालू है)</option>
+                        <option value="weekly">Weekly (पिछले 7 दिन)</option>
+                        <option value="monthly">Monthly (पिछले 30 दिन)</option>
+                        <option value="yearly">Yearly (पिछले 1 साल)</option>
+                      </select>
+                    </div>
+
+                    <div className="space-y-1">
+                      <label className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Status Filter</label>
+                      <select
+                        value={applicationsStatusFilter}
+                        onChange={(e) => {
+                          const val = e.target.value;
+                          setApplicationsStatusFilter(val);
+                        }}
+                        className="rounded-lg border border-zinc-250 bg-white px-3 py-1.5 text-sm font-semibold text-zinc-700 focus:border-indigo-500 focus:ring-1 focus:ring-indigo-500 dark:border-zinc-700 dark:bg-zinc-900/50 dark:text-zinc-255"
+                      >
+                        <option value="all">All Statuses (सभी)</option>
+                        <option value="pending">Pending (लंबित)</option>
+                        <option value="in_progress">In Progress (प्रक्रिया में)</option>
+                        <option value="completed">Completed (पूर्ण)</option>
+                        <option value="rejected">Rejected (अस्वीकृत)</option>
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="text-right text-xs font-semibold text-zinc-450">
+                    Total Loaded Records: <b className="text-indigo-600 dark:text-indigo-400 font-bold font-mono text-sm">{applications.length}</b>
+                  </div>
+                </div>
+
+                {/* Submissions List Container */}
+                {applicationsLoading ? (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {Array.from({ length: 4 }).map((_, idx) => (
+                      <div key={idx} className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 animate-pulse space-y-4">
+                        <div className="flex justify-between items-center border-b border-zinc-105 dark:border-zinc-800 pb-3">
+                          <div className="space-y-2 w-1/2">
+                            <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-3/4"></div>
+                            <div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2"></div>
+                          </div>
+                          <div className="h-5 bg-zinc-250 dark:bg-zinc-800 rounded-full w-20"></div>
+                        </div>
+                        <div className="space-y-2.5 pt-1">
+                          <div className="flex justify-between"><div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/4"></div><div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/3"></div></div>
+                          <div className="flex justify-between"><div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/3"></div><div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/4"></div></div>
+                          <div className="flex justify-between"><div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/4"></div><div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2"></div></div>
+                        </div>
+                        <div className="h-8 bg-zinc-200 dark:bg-zinc-800 rounded-lg w-1/3 ml-auto mt-4"></div>
+                      </div>
+                    ))}
+                  </div>
+                ) : applications.length === 0 ? (
+                  <div className="rounded-2xl border border-dashed border-zinc-250 bg-zinc-50/50 py-16 text-center dark:border-zinc-800 dark:bg-zinc-900/20">
+                    <FileText className="mx-auto h-12 w-12 text-zinc-350 dark:text-zinc-700" />
+                    <h3 className="mt-4 text-sm font-bold text-zinc-900 dark:text-zinc-200">No applications found</h3>
+                    <p className="mt-1 text-xs text-zinc-500">
+                      No service request submissions were found for the selected time filter.
+                    </p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                    {applications.map((app) => (
+                      <div 
+                        key={app.id} 
+                        className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 transition-all flex flex-col justify-between"
+                      >
+                        <div>
+                          {/* Card Header */}
+                          <div className="flex items-start justify-between gap-2 border-b border-zinc-100 dark:border-zinc-800 pb-3 mb-3">
+                            <div>
+                              <h4 className="font-bold text-sm text-zinc-900 dark:text-zinc-50 mt-0.5">{app.name}</h4>
+                              <span className="text-[10px] font-mono font-bold text-zinc-450 dark:text-zinc-500 uppercase tracking-wider block">ID: {app.trackingId}</span>
+                            </div>
+                            <span 
+                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                                app.status === 'completed'
+                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-450 dark:border-emerald-900/50'
+                                  : app.status === 'in_progress'
+                                  ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-450 dark:border-indigo-900/50'
+                                  : app.status === 'rejected'
+                                  ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-450 dark:border-rose-900/50'
+                                  : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-450 dark:border-amber-900/50'
+                              }`}
+                            >
+                              <span className={`w-1.5 h-1.5 rounded-full ${
+                                app.status === 'completed' ? 'bg-emerald-500' : app.status === 'in_progress' ? 'bg-indigo-500' : app.status === 'rejected' ? 'bg-rose-500' : 'bg-amber-500'
+                              }`} />
+                              {app.status.replace('_', ' ').toUpperCase()}
+                            </span>
+                          </div>
+
+                          {/* Details List */}
+                          <div className="space-y-2 text-xs">
+                            <div className="flex items-center justify-between">
+                              <span className="text-zinc-450 font-semibold">Service Requested:</span>
+                              <span className="font-bold text-zinc-805 dark:text-zinc-200">{app.service_type}</span>
+                            </div>
+                            <div className="flex items-center justify-between">
+                              <span className="text-zinc-455 font-semibold">Mobile Number:</span>
+                              <div className="flex items-center gap-2">
+                                <a href={`tel:${app.mobile}`} className="font-bold font-mono text-indigo-600 dark:text-indigo-400 hover:underline">
+                                  {app.mobile}
+                                </a>
+                                <a 
+                                  href={`https://wa.me/91${app.mobile}?text=Hello%20${app.name},%20we%20received%20your%20application%2520for%2520${app.service_type}%2520at%2520Jan%2520Seva%2520Kendra.`}
+                                  target="_blank" 
+                                  rel="noopener noreferrer" 
+                                  className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-450 font-semibold"
+                                >
+                                  (WhatsApp)
+                                </a>
+                              </div>
+                            </div>
+                            {app.email && (
+                              <div className="flex items-center justify-between">
+                                <span className="text-zinc-450 font-semibold">Email Address:</span>
+                                <span className="font-mono text-zinc-700 dark:text-zinc-300">{app.email}</span>
+                              </div>
+                            )}
+                            <div className="flex items-start justify-between gap-4">
+                              <span className="text-zinc-450 font-semibold shrink-0">Address:</span>
+                              <span className="text-zinc-700 dark:text-zinc-300 text-right leading-relaxed">{app.address}</span>
+                            </div>
+                            <div className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/60 pt-2 mt-2">
+                              <span className="text-zinc-450 font-semibold">Submitted On:</span>
+                              <span className="text-zinc-600 dark:text-zinc-400 font-semibold">
+                                {new Date(app.submittedAt).toLocaleString('en-IN', {
+                                  day: '2-digit',
+                                  month: 'short',
+                                  year: 'numeric',
+                                  hour: '2-digit',
+                                  minute: '2-digit'
+                                })}
+                              </span>
+                            </div>
+                            
+                            {/* Remarks & Private Notes */}
+                            {app.remarks && (
+                              <div className="rounded-lg bg-zinc-50 p-2.5 border border-zinc-100 dark:bg-zinc-800/40 dark:border-zinc-800 mt-2">
+                                <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Remarks (Public)</span>
+                                <p className="text-zinc-700 dark:text-zinc-300 mt-0.5 leading-relaxed">{app.remarks}</p>
+                              </div>
+                            )}
+                            {app.adminNotes && (
+                              <div className="rounded-lg bg-indigo-50/40 p-2.5 border border-indigo-100/50 dark:bg-indigo-950/20 dark:border-indigo-900/30 mt-2">
+                                <span className="text-[10px] font-bold text-indigo-400 dark:text-indigo-500 uppercase tracking-wider block">Admin Notes (Private)</span>
+                                <p className="text-indigo-950 dark:text-indigo-200 mt-0.5 leading-relaxed">{app.adminNotes}</p>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+
+                        {/* Card Action */}
+                        <div className="mt-5 pt-3 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-end">
+                          <button
+                            type="button"
+                            onClick={() => handleEditApplicationClick(app)}
+                            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-750"
+                          >
+                            <Edit className="w-3.5 h-3.5" />
+                            Edit Status & Remarks
+                          </button>
+                        </div>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
             {activeTab === 'jan-seva-data' && <JanSevaDataModule />}
 
             {activeTab === 'seo-sitemap' && (
@@ -3447,8 +3803,35 @@ export default function AdminPage() {
                 </div>
 
                 {sitemapLoading && !sitemapData ? (
-                  <div className="flex justify-center py-20">
-                    <Loader2 className="h-10 w-10 animate-spin text-blue-600 dark:text-blue-400" aria-hidden />
+                  <div className="space-y-6">
+                    {/* Quick Stats Grid Skeleton */}
+                    <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                      {Array.from({ length: 4 }).map((_, idx) => (
+                        <div key={idx} className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm animate-pulse dark:border-zinc-800 dark:bg-zinc-900">
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-1/2"></div>
+                            <div className="h-5 w-5 bg-zinc-200 dark:bg-zinc-800 rounded"></div>
+                          </div>
+                          <div className="mt-3 h-8 bg-zinc-200 dark:bg-zinc-800 rounded w-1/3"></div>
+                        </div>
+                      ))}
+                    </div>
+                    {/* Columns Skeleton */}
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                      <div className="rounded-xl border border-zinc-200 bg-white p-4 shadow-sm animate-pulse dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
+                        <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-1/3"></div>
+                        <div className="space-y-3">
+                          {Array.from({ length: 5 }).map((_, i) => (
+                            <div key={i} className="flex justify-between items-center"><div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-2/3"></div><div className="h-3 bg-zinc-200 dark:bg-zinc-800 rounded w-8"></div></div>
+                          ))}
+                        </div>
+                      </div>
+                      <div className="lg:col-span-2 rounded-xl border border-zinc-200 bg-white p-6 shadow-sm animate-pulse dark:border-zinc-800 dark:bg-zinc-900 space-y-4">
+                        <div className="h-4 bg-zinc-200 dark:bg-zinc-800 rounded w-1/4"></div>
+                        <div className="h-28 bg-zinc-150 dark:bg-zinc-800/30 rounded-xl"></div>
+                        <div className="h-32 bg-zinc-150 dark:bg-zinc-800/30 rounded-xl"></div>
+                      </div>
+                    </div>
                   </div>
                 ) : sitemapData ? (
                   <div className="space-y-6">
@@ -4005,6 +4388,102 @@ export default function AdminPage() {
                     Could not fetch sitemap. Click refresh above to retry.
                   </p>
                 )}
+              </div>
+            )}
+
+            {/* Service Application status edit modal */}
+            {editingApplication && (
+              <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-zinc-950/60 backdrop-blur-md animate-in fade-in duration-200">
+                <div 
+                  className="w-full max-w-lg rounded-2xl border border-zinc-200 bg-white p-6 shadow-2xl dark:border-zinc-800 dark:bg-zinc-900 animate-in zoom-in-95 duration-200"
+                  onClick={(e) => e.stopPropagation()}
+                >
+                  <div className="flex items-center justify-between border-b border-zinc-150 dark:border-zinc-850 pb-3 mb-4">
+                    <div>
+                      <h3 className="text-base font-bold text-zinc-900 dark:text-zinc-55">
+                        Update Request Status
+                      </h3>
+                      <p className="text-xs text-zinc-500 mt-0.5 font-semibold">
+                        Tracking ID: {editingApplication.trackingId} | Applicant: {editingApplication.name}
+                      </p>
+                    </div>
+                    <button
+                      type="button"
+                      onClick={() => setEditingApplication(null)}
+                      className="rounded-lg p-1.5 text-zinc-450 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                    >
+                      <X className="w-5 h-5" />
+                    </button>
+                  </div>
+
+                  <form onSubmit={handleUpdateApplicationStatus} className="space-y-4">
+                    {/* Status Select */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-350">
+                        Application Status <span className="text-red-500">*</span>
+                      </label>
+                      <select
+                        value={appForm.status}
+                        onChange={(e) => setAppForm({ ...appForm, status: e.target.value })}
+                        className="w-full rounded-xl border-2 border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-indigo-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100"
+                      >
+                        <option value="pending">Pending (लंबित)</option>
+                        <option value="in_progress">In Progress (प्रक्रिया में)</option>
+                        <option value="completed">Completed (पूर्ण)</option>
+                        <option value="rejected">Rejected (अस्वीकृत)</option>
+                      </select>
+                    </div>
+
+                    {/* Remarks (Public) */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-350 flex items-center justify-between">
+                        <span>Remarks (सार्वजनिक टिप्पणी)</span>
+                        <span className="text-[10px] text-zinc-405 font-semibold">(Visible to applicant)</span>
+                      </label>
+                      <textarea
+                        value={appForm.remarks}
+                        onChange={(e) => setAppForm({ ...appForm, remarks: e.target.value })}
+                        rows={3}
+                        className="w-full rounded-xl border-2 border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-indigo-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 placeholder-zinc-400"
+                        placeholder="जैसे: आपका फॉर्म भर दिया गया है, संपर्क करें। Or: Uploading document..."
+                      />
+                    </div>
+
+                    {/* Admin Notes (Private) */}
+                    <div className="space-y-1.5">
+                      <label className="text-xs font-bold text-zinc-700 dark:text-zinc-355 flex items-center justify-between">
+                        <span>Admin Private Notes (प्राइवेट नोट)</span>
+                        <span className="text-[10px] text-indigo-400 font-semibold">(Only you can see this)</span>
+                      </label>
+                      <textarea
+                        value={appForm.adminNotes}
+                        onChange={(e) => setAppForm({ ...appForm, adminNotes: e.target.value })}
+                        rows={2}
+                        className="w-full rounded-xl border-2 border-zinc-200 bg-white px-3 py-2 text-sm text-zinc-800 focus:border-indigo-500 focus:outline-none dark:border-zinc-800 dark:bg-zinc-950 dark:text-zinc-100 placeholder-zinc-400"
+                        placeholder="Internal notes about the application..."
+                      />
+                    </div>
+
+                    {/* Buttons Row */}
+                    <div className="flex justify-end gap-3 pt-3 border-t border-zinc-150 dark:border-zinc-850 mt-4">
+                      <button
+                        type="button"
+                        onClick={() => setEditingApplication(null)}
+                        className="rounded-xl border border-zinc-200 bg-white px-4 py-2.5 text-xs font-semibold text-zinc-700 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-750 dark:bg-zinc-800 dark:text-zinc-200"
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        type="submit"
+                        disabled={appUpdateLoading}
+                        className="rounded-xl bg-indigo-600 px-4 py-2.5 text-xs font-bold text-white shadow-md transition hover:bg-indigo-700 disabled:opacity-50 flex items-center gap-1.5"
+                      >
+                        {appUpdateLoading ? <Loader2 className="h-3.5 w-3.5 animate-spin" /> : null}
+                        Save Status
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
             )}
               </main>
