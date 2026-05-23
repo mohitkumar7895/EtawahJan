@@ -204,7 +204,7 @@ export default function QuickLeadWidget() {
           className={`h-12 sm:h-14 px-4 sm:px-5 rounded-full flex items-center gap-2 text-white font-bold text-xs sm:text-sm shadow-2xl transition duration-300 transform hover:scale-105 active:scale-95 ${
             isOpen 
               ? 'bg-zinc-800 hover:bg-zinc-950' 
-              : 'bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-700 hover:to-indigo-700 animate-pulse'
+              : 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 animate-pulse'
           }`}
         >
           {isOpen ? (

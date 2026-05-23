@@ -78,11 +78,14 @@ export default function Hero() {
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
               <Link
-                href="/photo-resizer"
-                className="bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-lg font-bold text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl active:scale-95 transition transform hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto animate-pulse"
+                href="/payment"
+                className="bg-gradient-to-r from-green-500 to-emerald-600 hover:from-green-600 hover:to-emerald-700 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-lg font-bold text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl active:scale-95 transition transform hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto animate-pulse"
               >
+                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
                 <span className="flex items-center gap-1">
-                  ⚡ फ्री फोटो रीसाइज़र (Resizer)
+                  Make Payment
                 </span>
               </Link>
               <Link
@@ -90,15 +93,6 @@ export default function Hero() {
                 className="bg-white/10 hover:bg-white/20 active:bg-white/30 border-2 border-white/30 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-lg font-semibold text-sm sm:text-base md:text-lg transition transform hover:scale-105 active:scale-95 text-center w-full sm:w-auto"
               >
                 View All Services
-              </Link>
-              <Link
-                href="/payment"
-                className="bg-green-500 hover:bg-green-600 active:bg-green-700 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-lg font-semibold text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl active:scale-95 transition transform hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto"
-              >
-                <svg className="w-4 h-4 sm:w-5 sm:h-5" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
-                </svg>
-                <span>Make Payment</span>
               </Link>
             </div>
           </div>
