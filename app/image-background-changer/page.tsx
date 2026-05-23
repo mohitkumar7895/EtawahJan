@@ -1,6 +1,7 @@
 'use client';
 
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
+import NextImage from 'next/image';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { 
@@ -28,6 +29,12 @@ import {
   Undo
 } from 'lucide-react';
 import Link from 'next/link';
+import {
+  detectBackgroundColorFromCanvas,
+  applyAlphaChannelAsMask,
+  loadImageFromBlobUrl,
+} from '@/lib/backgroundRemoval';
+import { removeBackgroundViaRemoveBg } from '@/lib/removeBgClient';
 
 interface ColorPreset {
   name: string;
@@ -66,15 +73,18 @@ export default function ImageBackgroundChangerPage() {
   const [originalWidth, setOriginalWidth] = useState<number>(0);
   const [originalHeight, setOriginalHeight] = useState<number>(0);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
+  const [isAutoRemoving, setIsAutoRemoving] = useState<boolean>(false);
+  const [autoRemoveProgress, setAutoRemoveProgress] = useState<string>('');
+  const [removalMode, setRemovalMode] = useState<'auto-chroma' | 'removebg' | 'none'>('none');
   const [errorMsg, setErrorMsg] = useState<string>('');
   const [showSuccessToast, setShowSuccessToast] = useState<boolean>(false);
   
   // Tabs
-  const [activeTab, setActiveTab] = useState<'auto-remove' | 'manual-refine' | 'background' | 'adjustments' | 'download'>('auto-remove');
+  const [activeTab, setActiveTab] = useState<'auto-remove' | 'manual-refine' | 'background' | 'adjustments' | 'download'>('background');
 
   // Chroma Key Settings
   const [keyColor, setKeyColor] = useState<[number, number, number] | null>(null);
-  const [tolerance, setTolerance] = useState<number>(30);
+  const [tolerance, setTolerance] = useState<number>(45);
   const [feather, setFeather] = useState<number>(5);
   const [isEyeDropperActive, setIsEyeDropperActive] = useState<boolean>(false);
   const [smartShield, setSmartShield] = useState<boolean>(true);
@@ -134,6 +144,7 @@ export default function ImageBackgroundChangerPage() {
   // Drawing state
   const [isDrawing, setIsDrawing] = useState<boolean>(false);
   const lastPointRef = useRef<{ x: number; y: number } | null>(null);
+  const uploadedUrlRef = useRef<string | null>(null);
 
   // Setup dimensions based on preset
   useEffect(() => {
@@ -152,104 +163,139 @@ export default function ImageBackgroundChangerPage() {
     }
   }, [outputPreset, originalWidth, originalHeight]);
 
-  // Load BG Image if uploaded
-  useEffect(() => {
-    if (bgImageFile) {
-      const url = URL.createObjectURL(bgImageFile);
-      setBgImageUrl(url);
-      const img = new Image();
-      img.onload = () => {
-        bgImageElementRef.current = img;
-        triggerRedraw();
-      };
-      img.src = url;
-      return () => URL.revokeObjectURL(url);
+  // 3. Render Combined Composite Workspace Canvas
+  const renderCompositeCanvas = useCallback(() => {
+    const workspace = workspaceCanvasRef.current;
+    if (!workspace || !originalImageRef.current || !srcCanvasRef.current || !maskCanvasRef.current || !eraseCanvasRef.current || !restoreCanvasRef.current) return;
+
+    const ctx = workspace.getContext('2d');
+    if (!ctx) return;
+
+    const imgWidth = originalImageRef.current.width;
+    const imgHeight = originalImageRef.current.height;
+
+    workspace.width = customWidth;
+    workspace.height = customHeight;
+
+    ctx.clearRect(0, 0, customWidth, customHeight);
+
+    if (bgColorType === 'color') {
+      ctx.fillStyle = selectedBgColor;
+      ctx.fillRect(0, 0, customWidth, customHeight);
+    } else if (bgColorType === 'gradient') {
+      const grad = ctx.createLinearGradient(0, 0, customWidth, customHeight);
+      if (selectedGradient.includes('#FF512F')) {
+        grad.addColorStop(0, '#FF512F');
+        grad.addColorStop(1, '#DD2476');
+      } else if (selectedGradient.includes('#2193b0')) {
+        grad.addColorStop(0, '#2193b0');
+        grad.addColorStop(1, '#6dd5ed');
+      } else if (selectedGradient.includes('#1f1c2c')) {
+        grad.addColorStop(0, '#1f1c2c');
+        grad.addColorStop(1, '#928dab');
+      } else if (selectedGradient.includes('#11998e')) {
+        grad.addColorStop(0, '#11998e');
+        grad.addColorStop(1, '#38ef7d');
+      } else {
+        grad.addColorStop(0, '#da22ff');
+        grad.addColorStop(1, '#9733ee');
+      }
+      ctx.fillStyle = grad;
+      ctx.fillRect(0, 0, customWidth, customHeight);
+    } else if (bgColorType === 'image' && bgImageElementRef.current) {
+      const bgImg = bgImageElementRef.current;
+      const scale = Math.max(customWidth / bgImg.width, customHeight / bgImg.height);
+      const x = (customWidth - bgImg.width * scale) / 2;
+      const y = (customHeight - bgImg.height * scale) / 2;
+      ctx.drawImage(bgImg, x, y, bgImg.width * scale, bgImg.height * scale);
     }
-  }, [bgImageFile]);
 
-  // Re-run chroma key algorithm when key color parameters change
-  useEffect(() => {
-    if (!originalUrl || !srcCanvasRef.current || !maskCanvasRef.current) return;
-    updateChromaKeyMask();
-  }, [keyColor, tolerance, feather, originalUrl, smartShield, clickSeed]);
+    const tempMaskCanvas = document.createElement('canvas');
+    tempMaskCanvas.width = imgWidth;
+    tempMaskCanvas.height = imgHeight;
+    const tempMaskCtx = tempMaskCanvas.getContext('2d');
+    if (tempMaskCtx) {
+      tempMaskCtx.drawImage(maskCanvasRef.current, 0, 0);
+      tempMaskCtx.globalCompositeOperation = 'destination-out';
+      tempMaskCtx.drawImage(eraseCanvasRef.current, 0, 0);
+      tempMaskCtx.globalCompositeOperation = 'source-over';
+      tempMaskCtx.drawImage(restoreCanvasRef.current, 0, 0);
+    }
 
-  // Redraw main workspace when anything visual changes
-  useEffect(() => {
-    triggerRedraw();
+    const tempSubjectCanvas = document.createElement('canvas');
+    tempSubjectCanvas.width = imgWidth;
+    tempSubjectCanvas.height = imgHeight;
+    const tempSubCtx = tempSubjectCanvas.getContext('2d');
+    if (tempSubCtx) {
+      tempSubCtx.filter = `brightness(${subjectBrightness}%) contrast(${subjectContrast}%) saturate(${subjectSaturation}%)`;
+      tempSubCtx.drawImage(srcCanvasRef.current, 0, 0);
+      tempSubCtx.filter = 'none';
+      tempSubCtx.globalCompositeOperation = 'destination-in';
+      tempSubCtx.drawImage(tempMaskCanvas, 0, 0);
+      tempSubCtx.globalCompositeOperation = 'source-over';
+
+      if (edgeBlur > 0) {
+        tempSubCtx.filter = `blur(${edgeBlur}px)`;
+        const tempBlurCanvas = document.createElement('canvas');
+        tempBlurCanvas.width = imgWidth;
+        tempBlurCanvas.height = imgHeight;
+        const tempBlurCtx = tempBlurCanvas.getContext('2d');
+        if (tempBlurCtx) {
+          tempBlurCtx.drawImage(tempSubjectCanvas, 0, 0);
+        }
+        tempSubCtx.clearRect(0, 0, imgWidth, imgHeight);
+        tempSubCtx.drawImage(tempBlurCanvas, 0, 0);
+        tempSubCtx.filter = 'none';
+      }
+    }
+
+    ctx.save();
+    ctx.shadowColor = 'rgba(0,0,0,0.15)';
+    ctx.shadowBlur = 10;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 4;
+    ctx.translate(customWidth / 2 + subjectX, customHeight / 2 + subjectY);
+    ctx.rotate((subjectRotate * Math.PI) / 180);
+    ctx.scale(subjectScale, subjectScale);
+    ctx.drawImage(tempSubjectCanvas, -imgWidth / 2, -imgHeight / 2);
+    ctx.restore();
+
+    if (frameBorderSize > 0) {
+      ctx.strokeStyle = frameBorderColor;
+      ctx.lineWidth = frameBorderSize;
+      ctx.strokeRect(
+        frameBorderSize / 2,
+        frameBorderSize / 2,
+        customWidth - frameBorderSize,
+        customHeight - frameBorderSize
+      );
+    }
   }, [
-    originalUrl,
     bgColorType,
+    customWidth,
+    customHeight,
+    edgeBlur,
+    frameBorderColor,
+    frameBorderSize,
     selectedBgColor,
     selectedGradient,
-    bgImageUrl,
+    subjectBrightness,
+    subjectContrast,
+    subjectRotate,
+    subjectSaturation,
     subjectScale,
     subjectX,
     subjectY,
-    subjectRotate,
-    subjectBrightness,
-    subjectContrast,
-    subjectSaturation,
-    edgeBlur,
-    frameBorderSize,
-    frameBorderColor,
-    customWidth,
-    customHeight
   ]);
 
-  // Trigger main canvas redraw
-  const triggerRedraw = () => {
-    if (!originalUrl || !workspaceCanvasRef.current) return;
-    renderCompositeCanvas();
-  };
-
-  // 1. Initialize Canvases when image is loaded
-  const handleImageLoad = (img: HTMLImageElement) => {
-    originalImageRef.current = img;
-    setOriginalWidth(img.width);
-    setOriginalHeight(img.height);
-
-    // Offscreen Src Canvas
-    const srcCanvas = document.createElement('canvas');
-    srcCanvas.width = img.width;
-    srcCanvas.height = img.height;
-    const srcCtx = srcCanvas.getContext('2d');
-    if (srcCtx) {
-      srcCtx.drawImage(img, 0, 0);
-    }
-    srcCanvasRef.current = srcCanvas;
-
-    // Offscreen base Chroma Key Mask Canvas
-    const maskCanvas = document.createElement('canvas');
-    maskCanvas.width = img.width;
-    maskCanvas.height = img.height;
-    maskCanvasRef.current = maskCanvas;
-
-    // Offscreen Manual Erase Canvas (Transparent, erases drawn in black)
-    const eraseCanvas = document.createElement('canvas');
-    eraseCanvas.width = img.width;
-    eraseCanvas.height = img.height;
-    const eraseCtx = eraseCanvas.getContext('2d');
-    if (eraseCtx) {
-      eraseCtx.clearRect(0, 0, img.width, img.height);
-    }
-    eraseCanvasRef.current = eraseCanvas;
-
-    // Offscreen Manual Restore Canvas (Transparent, restores drawn in white)
-    const restoreCanvas = document.createElement('canvas');
-    restoreCanvas.width = img.width;
-    restoreCanvas.height = img.height;
-    const restoreCtx = restoreCanvas.getContext('2d');
-    if (restoreCtx) {
-      restoreCtx.clearRect(0, 0, img.width, img.height);
-    }
-    restoreCanvasRef.current = restoreCanvas;
-
-    // Run base mask calculations
-    updateChromaKeyMask();
-  };
-
   // 2. Perform Chroma Keying Pixel Loop
-  const updateChromaKeyMask = () => {
+  const updateChromaKeyMask = useCallback((options?: {
+    mode?: 'auto-chroma' | 'removebg' | 'none';
+    keyColorOverride?: [number, number, number] | null;
+  }) => {
+    const effectiveMode = options?.mode ?? removalMode;
+    const effectiveKeyColor = options?.keyColorOverride !== undefined ? options.keyColorOverride : keyColor;
+
     const srcCanvas = srcCanvasRef.current;
     const maskCanvas = maskCanvasRef.current;
     if (!srcCanvas || !maskCanvas) return;
@@ -266,16 +312,20 @@ export default function ImageBackgroundChangerPage() {
     const srcData = srcImgData.data;
     const maskData = maskImgData.data;
 
-    if (!keyColor) {
-      // No background key selected - solid opaque mask
-      for (let i = 0; i < srcData.length; i += 4) {
-        maskData[i] = 255;     // R
-        maskData[i + 1] = 255; // G
-        maskData[i + 2] = 255; // B
-        maskData[i + 3] = 255; // A (Fully opaque)
+    if (!effectiveKeyColor) {
+      if (effectiveMode === 'removebg') {
+        applyAlphaChannelAsMask(srcData, maskData);
+      } else {
+        // No background key selected - solid opaque mask
+        for (let i = 0; i < srcData.length; i += 4) {
+          maskData[i] = 255;
+          maskData[i + 1] = 255;
+          maskData[i + 2] = 255;
+          maskData[i + 3] = 255;
+        }
       }
     } else {
-      const [keyR, keyG, keyB] = keyColor;
+      const [keyR, keyG, keyB] = effectiveKeyColor;
       const maxDist = tolerance * 2.5; // Map tolerance 0-100 to standard range
       const featherWidth = feather * 1.5;
 
@@ -474,138 +524,181 @@ export default function ImageBackgroundChangerPage() {
 
     maskCtx.putImageData(maskImgData, 0, 0);
     renderCompositeCanvas();
+  }, [clickSeed, feather, keyColor, removalMode, renderCompositeCanvas, smartShield, tolerance]);
+
+  const triggerRedraw = useCallback(() => {
+    if (!originalUrl || !workspaceCanvasRef.current) return;
+    renderCompositeCanvas();
+  }, [originalUrl, renderCompositeCanvas]);
+
+  useEffect(() => {
+    if (bgImageFile) {
+      const url = URL.createObjectURL(bgImageFile);
+      setBgImageUrl(url);
+      const img = new window.Image();
+      img.onload = () => {
+        bgImageElementRef.current = img;
+        triggerRedraw();
+      };
+      img.src = url;
+      return () => URL.revokeObjectURL(url);
+    }
+  }, [bgImageFile, triggerRedraw]);
+
+  useEffect(() => {
+    if (!originalUrl || !srcCanvasRef.current || !maskCanvasRef.current) return;
+    updateChromaKeyMask();
+  }, [keyColor, tolerance, feather, originalUrl, smartShield, clickSeed, removalMode, updateChromaKeyMask]);
+
+  useEffect(() => {
+    triggerRedraw();
+  }, [
+    originalUrl,
+    bgColorType,
+    selectedBgColor,
+    selectedGradient,
+    bgImageUrl,
+    subjectScale,
+    subjectX,
+    subjectY,
+    subjectRotate,
+    subjectBrightness,
+    subjectContrast,
+    subjectSaturation,
+    edgeBlur,
+    frameBorderSize,
+    frameBorderColor,
+    customWidth,
+    customHeight,
+    triggerRedraw,
+  ]);
+
+  const setupImageCanvases = (img: HTMLImageElement): HTMLCanvasElement => {
+    originalImageRef.current = img;
+    setOriginalWidth(img.width);
+    setOriginalHeight(img.height);
+
+    const srcCanvas = document.createElement('canvas');
+    srcCanvas.width = img.width;
+    srcCanvas.height = img.height;
+    const srcCtx = srcCanvas.getContext('2d');
+    if (srcCtx) {
+      srcCtx.drawImage(img, 0, 0);
+    }
+    srcCanvasRef.current = srcCanvas;
+
+    const maskCanvas = document.createElement('canvas');
+    maskCanvas.width = img.width;
+    maskCanvas.height = img.height;
+    maskCanvasRef.current = maskCanvas;
+
+    const eraseCanvas = document.createElement('canvas');
+    eraseCanvas.width = img.width;
+    eraseCanvas.height = img.height;
+    const eraseCtx = eraseCanvas.getContext('2d');
+    if (eraseCtx) {
+      eraseCtx.clearRect(0, 0, img.width, img.height);
+    }
+    eraseCanvasRef.current = eraseCanvas;
+
+    const restoreCanvas = document.createElement('canvas');
+    restoreCanvas.width = img.width;
+    restoreCanvas.height = img.height;
+    const restoreCtx = restoreCanvas.getContext('2d');
+    if (restoreCtx) {
+      restoreCtx.clearRect(0, 0, img.width, img.height);
+    }
+    restoreCanvasRef.current = restoreCanvas;
+
+    return srcCanvas;
   };
 
-  // 3. Render Combined Composite Workspace Canvas
-  const renderCompositeCanvas = () => {
-    const workspace = workspaceCanvasRef.current;
-    if (!workspace || !originalImageRef.current || !srcCanvasRef.current || !maskCanvasRef.current || !eraseCanvasRef.current || !restoreCanvasRef.current) return;
+  const applyInstantBackgroundRemoval = (mode: 'auto-chroma' | 'removebg') => {
+    setSmartShield(true);
+    setSelectedBgColor('#FFFFFF');
+    setBgColorType('color');
+    setActiveTab('background');
 
-    const ctx = workspace.getContext('2d');
-    if (!ctx) return;
-
-    const imgWidth = originalImageRef.current.width;
-    const imgHeight = originalImageRef.current.height;
-
-    // Set canvas resolution size
-    workspace.width = customWidth;
-    workspace.height = customHeight;
-
-    // STEP A: Draw Background
-    ctx.clearRect(0, 0, customWidth, customHeight);
-
-    if (bgColorType === 'color') {
-      ctx.fillStyle = selectedBgColor;
-      ctx.fillRect(0, 0, customWidth, customHeight);
-    } else if (bgColorType === 'gradient') {
-      // Parse gradient values
-      const grad = ctx.createLinearGradient(0, 0, customWidth, customHeight);
-      if (selectedGradient.includes('#FF512F')) {
-        grad.addColorStop(0, '#FF512F');
-        grad.addColorStop(1, '#DD2476');
-      } else if (selectedGradient.includes('#2193b0')) {
-        grad.addColorStop(0, '#2193b0');
-        grad.addColorStop(1, '#6dd5ed');
-      } else if (selectedGradient.includes('#1f1c2c')) {
-        grad.addColorStop(0, '#1f1c2c');
-        grad.addColorStop(1, '#928dab');
-      } else if (selectedGradient.includes('#11998e')) {
-        grad.addColorStop(0, '#11998e');
-        grad.addColorStop(1, '#38ef7d');
-      } else {
-        grad.addColorStop(0, '#da22ff');
-        grad.addColorStop(1, '#9733ee');
-      }
-      ctx.fillStyle = grad;
-      ctx.fillRect(0, 0, customWidth, customHeight);
-    } else if (bgColorType === 'image' && bgImageElementRef.current) {
-      // Cover fit background image
-      const bgImg = bgImageElementRef.current;
-      const scale = Math.max(customWidth / bgImg.width, customHeight / bgImg.height);
-      const x = (customWidth - bgImg.width * scale) / 2;
-      const y = (customHeight - bgImg.height * scale) / 2;
-      ctx.drawImage(bgImg, x, y, bgImg.width * scale, bgImg.height * scale);
+    if (mode === 'removebg') {
+      setRemovalMode('removebg');
+      setKeyColor(null);
+      return;
     }
 
-    // STEP B: Generate Combined Mask Offscreen
-    const tempMaskCanvas = document.createElement('canvas');
-    tempMaskCanvas.width = imgWidth;
-    tempMaskCanvas.height = imgHeight;
-    const tempMaskCtx = tempMaskCanvas.getContext('2d');
-    if (tempMaskCtx) {
-      // 1. Draw base chroma mask
-      tempMaskCtx.drawImage(maskCanvasRef.current, 0, 0);
-      // 2. Erase manual drawings (destination-out cuts out transparent pixels)
-      tempMaskCtx.globalCompositeOperation = 'destination-out';
-      tempMaskCtx.drawImage(eraseCanvasRef.current, 0, 0);
-      // 3. Restore manual drawings (source-over paints solid opaque pixels)
-      tempMaskCtx.globalCompositeOperation = 'source-over';
-      tempMaskCtx.drawImage(restoreCanvasRef.current, 0, 0);
-    }
+    const srcCanvas = srcCanvasRef.current;
+    if (!srcCanvas) return;
 
-    // STEP C: Apply Combined Mask to Source Image with Filters
-    const tempSubjectCanvas = document.createElement('canvas');
-    tempSubjectCanvas.width = imgWidth;
-    tempSubjectCanvas.height = imgHeight;
-    const tempSubCtx = tempSubjectCanvas.getContext('2d');
-    if (tempSubCtx) {
-      // 1. Apply image adjustments
-      tempSubCtx.filter = `brightness(${subjectBrightness}%) contrast(${subjectContrast}%) saturate(${subjectSaturation}%)`;
-      tempSubCtx.drawImage(srcCanvasRef.current, 0, 0);
-      tempSubCtx.filter = 'none';
+    const detected = detectBackgroundColorFromCanvas(srcCanvas);
+    setRemovalMode('auto-chroma');
+    setKeyColor(detected);
+  };
 
-      // 2. Crop/Mask image (Destination-in retains only masked opaque sections)
-      tempSubCtx.globalCompositeOperation = 'destination-in';
-      tempSubCtx.drawImage(tempMaskCanvas, 0, 0);
-      tempSubCtx.globalCompositeOperation = 'source-over';
-      
-      // 3. Optional edge blur effect
-      if (edgeBlur > 0) {
-        tempSubCtx.filter = `blur(${edgeBlur}px)`;
-        // Simple trick to apply soft blur to edges of subject cutout
-        const tempBlurCanvas = document.createElement('canvas');
-        tempBlurCanvas.width = imgWidth;
-        tempBlurCanvas.height = imgHeight;
-        const tempBlurCtx = tempBlurCanvas.getContext('2d');
-        if (tempBlurCtx) {
-          tempBlurCtx.drawImage(tempSubjectCanvas, 0, 0);
-        }
-        tempSubCtx.clearRect(0, 0, imgWidth, imgHeight);
-        tempSubCtx.drawImage(tempBlurCanvas, 0, 0);
-        tempSubCtx.filter = 'none';
-      }
-    }
-
-    // STEP D: Draw Subject Cutout onto Main Canvas with transforms (Scale, Move, Rotate)
-    ctx.save();
-    
-    // Add soft shadow around the cutout subject
-    ctx.shadowColor = 'rgba(0,0,0,0.15)';
-    ctx.shadowBlur = 10;
-    ctx.shadowOffsetX = 0;
-    ctx.shadowOffsetY = 4;
-
-    // Apply affine translations
-    ctx.translate(customWidth / 2 + subjectX, customHeight / 2 + subjectY);
-    ctx.rotate((subjectRotate * Math.PI) / 180);
-    ctx.scale(subjectScale, subjectScale);
-
-    // Draw centered subject
-    ctx.drawImage(tempSubjectCanvas, -imgWidth / 2, -imgHeight / 2);
-    ctx.restore();
-
-    // STEP E: Apply Rectangular Frame Photo Border (Standard Passport requirement)
-    if (frameBorderSize > 0) {
-      ctx.strokeStyle = frameBorderColor;
-      ctx.lineWidth = frameBorderSize;
-      ctx.strokeRect(
-        frameBorderSize / 2, 
-        frameBorderSize / 2, 
-        customWidth - frameBorderSize, 
-        customHeight - frameBorderSize
+  const processUploadedImage = useCallback(async (file: File) => {
+    if (!file.type.startsWith('image/')) {
+      setErrorMsg(
+        'कृपया केवल वैध इमेज फाइल (JPG, JPEG, PNG) अपलोड करें। / Please select a valid image.'
       );
+      return;
     }
-  };
+
+    setIsAutoRemoving(true);
+    setAutoRemoveProgress('remove.bg se background remove ho raha hai...');
+    setErrorMsg('');
+    setResizedUrl('');
+    setImageFile(file);
+    setOriginalUrl('');
+
+    if (uploadedUrlRef.current) {
+      URL.revokeObjectURL(uploadedUrlRef.current);
+      uploadedUrlRef.current = null;
+    }
+
+    const runChromaFallback = async () => {
+      setAutoRemoveProgress('Smart detect se background remove ho raha hai...');
+      const objectUrl = URL.createObjectURL(file);
+      const img = await loadImageFromBlobUrl(objectUrl);
+      setupImageCanvases(img);
+      applyInstantBackgroundRemoval('auto-chroma');
+      uploadedUrlRef.current = objectUrl;
+      setOriginalUrl(objectUrl);
+    };
+
+    try {
+      const blob = await removeBackgroundViaRemoveBg(file, { format: 'png' });
+      const processedUrl = URL.createObjectURL(blob);
+      const img = await loadImageFromBlobUrl(processedUrl);
+      setupImageCanvases(img);
+      applyInstantBackgroundRemoval('removebg');
+      uploadedUrlRef.current = processedUrl;
+      setOriginalUrl(processedUrl);
+    } catch (removeBgError) {
+      console.warn('remove.bg failed, using local fallback:', removeBgError);
+      try {
+        await runChromaFallback();
+      } catch {
+        setErrorMsg(
+          removeBgError instanceof Error
+            ? removeBgError.message
+            : 'Image processing failed. Please try another photo.'
+        );
+        setImageFile(null);
+      }
+    } finally {
+      setIsAutoRemoving(false);
+      setAutoRemoveProgress('');
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!originalUrl || !srcCanvasRef.current || !maskCanvasRef.current) {
+      return;
+    }
+    const frameId = requestAnimationFrame(() => {
+      if (!workspaceCanvasRef.current) return;
+      updateChromaKeyMask();
+    });
+    return () => cancelAnimationFrame(frameId);
+  }, [originalUrl, updateChromaKeyMask]);
 
   // Convert Click Coordinates on Canvas to Original Image Coordinates for precise Brush Drawing
   const getTransformedCoordinates = (clientX: number, clientY: number) => {
@@ -847,30 +940,9 @@ export default function ImageBackgroundChangerPage() {
 
   // Upload Photo File Handler
   const handleImageChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setErrorMsg('');
-    setResizedUrl('');
-
     if (e.target.files && e.target.files[0]) {
-      const file = e.target.files[0];
-      if (!file.type.startsWith('image/')) {
-        setErrorMsg('कृपया केवल वैध इमेज फाइल (JPG, JPEG, PNG) अपलोड करें। / Please select a valid image.');
-        return;
-      }
-
-      setImageFile(file);
-      
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const url = event.target.result as string;
-          setOriginalUrl(url);
-          
-          const img = new Image();
-          img.onload = () => handleImageLoad(img);
-          img.src = url;
-        }
-      };
-      reader.readAsDataURL(file);
+      void processUploadedImage(e.target.files[0]);
+      e.target.value = '';
     }
   };
 
@@ -890,27 +962,8 @@ export default function ImageBackgroundChangerPage() {
 
   const handleDrop = (e: React.DragEvent) => {
     e.preventDefault();
-    setErrorMsg('');
-
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
-      const file = e.dataTransfer.files[0];
-      if (!file.type.startsWith('image/')) {
-        setErrorMsg('केवल इमेज फाइल ही मान्य है। / Image file only.');
-        return;
-      }
-      setImageFile(file);
-      
-      const reader = new FileReader();
-      reader.onload = (event) => {
-        if (event.target?.result) {
-          const url = event.target.result as string;
-          setOriginalUrl(url);
-          const img = new Image();
-          img.onload = () => handleImageLoad(img);
-          img.src = url;
-        }
-      };
-      reader.readAsDataURL(file);
+      void processUploadedImage(e.dataTransfer.files[0]);
     }
   };
 
@@ -970,11 +1023,18 @@ export default function ImageBackgroundChangerPage() {
   const resetAll = () => {
     setImageFile(null);
     setOriginalUrl('');
+    if (uploadedUrlRef.current) {
+      URL.revokeObjectURL(uploadedUrlRef.current);
+      uploadedUrlRef.current = null;
+    }
     setResizedUrl('');
     setResizedSize(0);
     setKeyColor(null);
     setClickSeed(null);
-    setTolerance(30);
+    setRemovalMode('none');
+    setIsAutoRemoving(false);
+    setAutoRemoveProgress('');
+    setTolerance(45);
     setFeather(5);
     setSubjectX(0);
     setSubjectY(0);
@@ -1018,10 +1078,10 @@ export default function ImageBackgroundChangerPage() {
               Jan Seva Kendra Premium Photo Editor
             </span>
             <h1 className="text-3xl sm:text-4xl md:text-5xl font-black mb-3">
-              Sarkari Photo Background Changer
+              Change Image Background Online Free
             </h1>
             <p className="text-sm sm:text-base md:text-lg text-blue-100 max-w-3xl mx-auto leading-relaxed">
-              SSC, UP Police, NEET or Board exams ke liye photo ka background instantly 1-click me change karein rules ke according!
+              Powered by remove.bg API — upload karte hi professional background remove
             </p>
           </div>
         </section>
@@ -1037,27 +1097,55 @@ export default function ImageBackgroundChangerPage() {
               </div>
             )}
 
-            {!imageFile ? (
+            {!originalUrl ? (
               /* UPLOAD SCREEN */
               <div className="max-w-3xl mx-auto">
                 <div
                   onDragOver={handleDragOver}
                   onDrop={handleDrop}
-                  onClick={() => fileInputRef.current?.click()}
-                  className="bg-white border-3 border-dashed border-slate-300 hover:border-blue-500 rounded-3xl py-16 px-6 text-center cursor-pointer transition-all duration-300 group flex flex-col items-center justify-center space-y-6 shadow-md hover:shadow-xl"
+                  onClick={() => !isAutoRemoving && fileInputRef.current?.click()}
+                  className={`bg-white border-3 border-dashed border-slate-300 hover:border-blue-500 rounded-3xl py-16 px-6 text-center transition-all duration-300 group flex flex-col items-center justify-center space-y-6 shadow-md hover:shadow-xl ${
+                    isAutoRemoving ? 'opacity-80 pointer-events-none' : 'cursor-pointer'
+                  }`}
                 >
-                  <div className="bg-blue-50 p-6 rounded-full text-blue-600 group-hover:scale-110 transition duration-300 shadow-inner">
-                    <Upload className="w-10 h-10" />
-                  </div>
-                  <div className="space-y-2">
-                    <h2 className="font-extrabold text-slate-800 text-xl sm:text-2xl">
-                      Drag & Drop Photo here or Click to Upload
-                    </h2>
-                    <p className="text-slate-500 text-sm max-w-md mx-auto leading-relaxed">
-                      Apni photo ko upload karein aur 1-click me background remove/replace karein exam specs ke according.
-                    </p>
-                  </div>
+                  {isAutoRemoving ? (
+                    <>
+                      <div className="bg-blue-50 p-6 rounded-full text-blue-600 shadow-inner">
+                        <RefreshCw className="w-10 h-10 animate-spin" />
+                      </div>
+                      <div className="space-y-2">
+                        <h2 className="font-extrabold text-slate-800 text-xl sm:text-2xl">
+                          Background Remove ho raha hai...
+                        </h2>
+                        <p className="text-slate-500 text-sm max-w-md mx-auto leading-relaxed">
+                          {autoRemoveProgress || 'Please wait, your photo is being processed.'}
+                        </p>
+                      </div>
+                    </>
+                  ) : (
+                    <>
+                      <div className="bg-blue-50 p-6 rounded-full text-blue-600 group-hover:scale-110 transition duration-300 shadow-inner">
+                        <Upload className="w-10 h-10" />
+                      </div>
+                      <div className="space-y-2">
+                        <h2 className="font-extrabold text-slate-800 text-xl sm:text-2xl">
+                          Upload Photo — Background Auto Change
+                        </h2>
+                        <p className="text-slate-500 text-sm max-w-md mx-auto leading-relaxed">
+                          Drag & drop ya click karein. remove.bg API se background turant remove hoga, phir White/Grey/Blue color choose karein.
+                        </p>
+                      </div>
+                    </>
+                  )}
                 </div>
+
+                <input
+                  type="file"
+                  ref={fileInputRef}
+                  onChange={handleImageChange}
+                  accept="image/jpeg,image/jpg,image/png,image/webp"
+                  className="hidden"
+                />
 
                 {/* Info Guide */}
                 <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mt-10">
@@ -1094,7 +1182,15 @@ export default function ImageBackgroundChangerPage() {
               </div>
             ) : (
               /* EDITOR SCREEN */
-              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start relative">
+                {isAutoRemoving && (
+                  <div className="absolute inset-0 z-20 bg-white/80 backdrop-blur-sm rounded-3xl flex flex-col items-center justify-center gap-3">
+                    <RefreshCw className="w-10 h-10 text-blue-600 animate-spin" />
+                    <p className="text-sm font-bold text-slate-700">
+                      {autoRemoveProgress || 'Background remove ho raha hai...'}
+                    </p>
+                  </div>
+                )}
                 
                 {/* LEFT WORKSPACE PANEL: CONTROLS (5 Cols) */}
                 <div className="lg:col-span-5 bg-white rounded-3xl border border-slate-200 shadow-xl overflow-hidden">
@@ -1216,11 +1312,15 @@ export default function ImageBackgroundChangerPage() {
                             Or Click directly on the photo below:
                           </h4>
                           <div className="flex justify-center">
-                            <img
+                            <NextImage
                               src={originalUrl}
                               alt="Source preview"
+                              width={160}
+                              height={160}
+                              unoptimized
                               onClick={handleSourcePreviewClick}
-                              className="max-h-40 max-w-full rounded-xl object-contain border border-slate-200 cursor-crosshair hover:shadow-md transition"
+                              className="max-h-40 max-w-full rounded-xl object-contain border border-slate-200 cursor-crosshair hover:shadow-md transition w-auto h-auto"
+                              style={{ width: 'auto', height: 'auto' }}
                               title="Click directly on background color"
                             />
                           </div>
@@ -1497,7 +1597,7 @@ export default function ImageBackgroundChangerPage() {
 
                             {bgImageUrl && (
                               <div className="flex items-center gap-3 p-3 bg-slate-50 border border-slate-200 rounded-xl">
-                                <img src={bgImageUrl} alt="bg" className="w-12 h-12 rounded object-cover border border-slate-300" />
+                                <NextImage src={bgImageUrl} alt="Custom background preview" width={48} height={48} unoptimized className="w-12 h-12 rounded object-cover border border-slate-300" />
                                 <div className="min-w-0 flex-1">
                                   <p className="text-xs font-bold text-slate-800 truncate">{bgImageFile?.name}</p>
                                   <p className="text-[10px] text-slate-400 font-bold uppercase">Background Custom Loaded</p>
@@ -1829,6 +1929,33 @@ export default function ImageBackgroundChangerPage() {
                       />
                     </div>
 
+                    {/* Quick Background Swatches (remove.bg style) */}
+                    <div className="w-full space-y-2 pt-2">
+                      <p className="text-[10px] font-black uppercase tracking-wider text-slate-400 text-center">
+                        Quick Background Change
+                      </p>
+                      <div className="flex flex-wrap justify-center gap-2">
+                        {OFFICIAL_COLORS.map((preset) => (
+                          <button
+                            key={preset.name}
+                            type="button"
+                            onClick={() => {
+                              setBgColorType('color');
+                              setSelectedBgColor(preset.value);
+                              setActiveTab('background');
+                            }}
+                            title={preset.name}
+                            className={`w-9 h-9 rounded-full border-2 transition hover:scale-110 ${
+                              selectedBgColor.toLowerCase() === preset.value.toLowerCase() && bgColorType === 'color'
+                                ? 'border-blue-600 ring-2 ring-blue-300'
+                                : 'border-slate-300'
+                            }`}
+                            style={{ backgroundColor: preset.value }}
+                          />
+                        ))}
+                      </div>
+                    </div>
+
                     {/* Bottom Status Details */}
                     <div className="flex flex-wrap justify-between items-center gap-4 w-full text-xs text-slate-500 font-bold border-t border-slate-100 pt-3">
                       <div className="flex items-center gap-1.5">
@@ -1836,7 +1963,12 @@ export default function ImageBackgroundChangerPage() {
                         <span>Canvas Specs: {customWidth} x {customHeight} px</span>
                       </div>
                       <div className="flex items-center gap-1 bg-slate-50 px-3 py-1 rounded border">
-                        <span className="text-[10px] text-slate-400">Chroma Background selected:</span>
+                        <span className="text-[10px] text-slate-400">Engine:</span>
+                        <span className="font-mono text-[10px] text-slate-700">
+                          {removalMode === 'removebg' ? 'remove.bg API' : removalMode === 'auto-chroma' ? 'Smart Detect' : 'None'}
+                        </span>
+                      </div>
+                      <div className="flex items-center gap-1 bg-slate-50 px-3 py-1 rounded border">
                         <span 
                           className="w-3.5 h-3.5 rounded-full border inline-block"
                           style={{ backgroundColor: keyColor ? `rgb(${keyColor.join(',')})` : '#CCCCCC' }}
@@ -1864,10 +1996,14 @@ export default function ImageBackgroundChangerPage() {
                         {/* Output visual */}
                         <div className="flex flex-col items-center justify-center space-y-2">
                           <div className="bg-white rounded-xl p-3 border-2 border-slate-200 shadow-inner overflow-hidden flex items-center justify-center bg-checkered-pattern max-h-[300px] max-w-full">
-                            <img 
-                              src={resizedUrl} 
-                              alt="Resized output" 
-                              className="max-h-[240px] object-contain shadow border border-slate-100 rounded"
+                            <NextImage
+                              src={resizedUrl}
+                              alt="Resized output"
+                              width={240}
+                              height={300}
+                              unoptimized
+                              className="max-h-[240px] w-auto h-auto object-contain shadow border border-slate-100 rounded"
+                              style={{ width: 'auto', height: 'auto' }}
                             />
                           </div>
                           <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Final Output JPEG Preview</span>
