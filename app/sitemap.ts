@@ -61,7 +61,49 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.75,
     },
+    {
+      url: `${baseUrl}/sitemap`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
+    {
+      url: `${baseUrl}/state-sitemap`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.7,
+    },
   ]
+
+  const UP_DISTRICTS = [
+    'Agra', 'Aligarh', 'Ambedkar Nagar', 'Amethi', 'Amroha', 'Auraiya', 'Azamgarh',
+    'Baghpat', 'Bahraich', 'Ballia', 'Balrampur', 'Banda', 'Barabanki', 'Bareilly', 
+    'Basti', 'Bhadohi', 'Bijnor', 'Budaun', 'Bulandshahr',
+    'Chandauli', 'Chitrakoot',
+    'Deoria',
+    'Etah', 'Etawah',
+    'Farrukhabad', 'Fatehpur', 'Firozabad',
+    'Gautam Buddha Nagar', 'Ghaziabad', 'Ghazipur', 'Gonda', 'Gorakhpur',
+    'Hamirpur', 'Hapur', 'Hardoi', 'Hathras',
+    'Jalaun', 'Jaunpur', 'Jhansi',
+    'Kannauj', 'Kanpur Dehat', 'Kanpur Nagar', 'Kasganj', 'Kaushambi', 'Kheri', 'Kushinagar',
+    'Lalitpur', 'Lucknow',
+    'Maharajganj', 'Mahoba', 'Mainpuri', 'Mathura', 'Mau', 'Meerut', 'Mirzapur', 
+    'Moradabad', 'Muzaffarnagar',
+    'Pilibhit', 'Pratapgarh', 'Prayagraj',
+    'Raebareli', 'Rampur',
+    'Saharanpur', 'Sambhal', 'Sant Kabir Nagar', 'Shahjahanpur', 'Shamli', 'Shrawasti', 
+    'Siddharthnagar', 'Sitapur', 'Sonbhadra', 'Sultanpur',
+    'Unnao',
+    'Varanasi'
+  ]
+
+  const districtPages: MetadataRoute.Sitemap = UP_DISTRICTS.map(d => ({
+    url: `${baseUrl}/district/${d.toLowerCase()}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly',
+    priority: 0.6,
+  }))
 
   // Add blog posts dynamically
   try {
@@ -106,13 +148,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.error('Error fetching custom sitemap links:', customErr)
       }
 
-      return [...staticPages, ...blogPages, ...customPages]
+      return [...staticPages, ...blogPages, ...customPages, ...districtPages]
     }
   } catch (error) {
     console.error('Error fetching blogs for sitemap:', error)
   }
 
-  return staticPages
+  return [...staticPages, ...districtPages]
 }
 
 

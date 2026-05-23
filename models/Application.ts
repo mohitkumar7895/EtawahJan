@@ -40,6 +40,10 @@ const applicationSchema = new mongoose.Schema({
     required: true,
     // Index defined separately below
   },
+  applicationId: {
+    type: String,
+    // Kept to satisfy legacy unique indexes in MongoDB environments
+  },
   remarks: {
     type: String,
     default: '',
@@ -76,6 +80,10 @@ applicationSchema.pre('save', async function(next) {
     const timestamp = Date.now().toString().slice(-8);
     const random = Math.floor(1000 + Math.random() * 9000);
     this.trackingId = `JSK${timestamp}${random}`;
+  }
+  // Safeguard: satisfy any legacy unique database index constraints on applicationId
+  if (this.isNew || !this.applicationId) {
+    this.applicationId = this.trackingId;
   }
   this.updatedAt = new Date();
   next();

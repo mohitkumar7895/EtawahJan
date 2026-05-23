@@ -248,6 +248,7 @@ export default function ServicesPageComponent() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [submitSuccess, setSubmitSuccess] = useState(false);
   const [error, setError] = useState('');
+  const [selectedServiceForDocs, setSelectedServiceForDocs] = useState<string>('');
 
   const loadVacancies = async () => {
     try {
@@ -478,6 +479,77 @@ export default function ServicesPageComponent() {
                 Found {filteredServices.length} service{filteredServices.length !== 1 ? 's' : ''} matching &quot;{searchQuery}&quot;
               </p>
             )}
+          </div>
+
+          {/* Check Required Documents Tool */}
+          <div className="mb-8 max-w-2xl mx-auto bg-gradient-to-br from-blue-50/60 via-indigo-50/40 to-white rounded-2xl p-6 border border-blue-100/80 shadow-lg">
+            <h2 className="text-lg sm:text-xl font-bold text-blue-900 mb-3 flex items-center gap-2">
+              <ClipboardList className="w-5.5 h-5.5 text-blue-600 animate-pulse" />
+              Check Required Documents / आवश्यक दस्तावेज जांचें
+            </h2>
+            <p className="text-xs sm:text-sm text-gray-600 mb-4">
+              दुकान पर आने से पहले किसी भी सेवा के लिए आवश्यक दस्तावेज घर बैठे ही जांच लें ताकि आपका चक्कर बेकार न जाए।
+            </p>
+            <div className="space-y-4">
+              <div>
+                <label className="block text-xs font-bold text-gray-500 uppercase tracking-wide mb-1.5">सर्विस चुनें / Select Service:</label>
+                <select
+                  value={selectedServiceForDocs}
+                  onChange={(e) => setSelectedServiceForDocs(e.target.value)}
+                  className="w-full px-4 py-2.5 border-2 border-blue-100 rounded-xl focus:ring-2 focus:ring-blue-500 focus:border-blue-500 text-sm sm:text-base bg-white transition"
+                >
+                  <option value="">-- चुनें / Select a Service --</option>
+                  {Object.keys(serviceDocuments).sort().map((srv, idx) => (
+                    <option key={idx} value={srv}>{srv}</option>
+                  ))}
+                </select>
+              </div>
+
+              {selectedServiceForDocs && (
+                <div className="bg-white rounded-xl p-4 border border-blue-100/60 animate-fade-in space-y-3">
+                  <div className="flex justify-between items-center pb-2 border-b border-gray-100">
+                    <span className="font-extrabold text-gray-900 text-sm sm:text-base">{selectedServiceForDocs}</span>
+                    <span className="text-[10px] sm:text-xs font-bold text-blue-600 bg-blue-50 px-2.5 py-1 rounded-full">
+                      ⏳ Processing: {selectedServiceForDocs.includes('PAN') || selectedServiceForDocs.includes('Shram') ? 'Fast Track (24-48 Hrs)' : '3 - 7 Working Days'}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="block text-[11px] font-bold text-gray-400 uppercase tracking-wider mb-2">Required Papers / जरूरी कागजात:</span>
+                    <ul className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm text-gray-700">
+                      {getDocumentsForService(selectedServiceForDocs).map((doc, idx) => (
+                        <li key={idx} className="flex items-center gap-2">
+                          <span className="text-green-500 font-bold flex-shrink-0 text-base">✓</span>
+                          <span>{doc}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  </div>
+                  <div className="pt-2 flex flex-col sm:flex-row gap-2 justify-between items-center border-t border-gray-100/50">
+                    <span className="text-[10px] sm:text-xs text-emerald-600 font-bold flex items-center gap-1">
+                      🎁 Online Special: 20% discount on Service Charge!
+                    </span>
+                    <button
+                      onClick={() => {
+                        const target = services.find(s => s.name === selectedServiceForDocs);
+                        if (target) {
+                          handleServiceClick(target);
+                        } else {
+                          handleServiceClick({
+                            name: selectedServiceForDocs,
+                            category: 'Documents',
+                            description: `Online application services for ${selectedServiceForDocs}`,
+                            icon: ClipboardList
+                          });
+                        }
+                      }}
+                      className="bg-blue-600 hover:bg-blue-700 text-white font-bold px-4 py-2 rounded-xl text-xs flex items-center gap-1.5 transition active:scale-95 w-full sm:w-auto justify-center"
+                    >
+                      Apply Online Now →
+                    </button>
+                  </div>
+                </div>
+              )}
+            </div>
           </div>
 
           {/* Category Filter */}

@@ -18,23 +18,6 @@ function validateFields(obj: any, requiredFields: string[]) {
 
 export async function POST(request: NextRequest) {
   try {
-    // Check if any email service is configured
-    if (!isEmailConfigured()) {
-      console.error('❌ No email service configured');
-      return NextResponse.json(
-        { 
-          error: "Email service not configured",
-          message: "No email service available. Please configure one of the following:",
-          options: [
-            "Option 1: Set RESEND_API_KEY in .env.local (Get from https://resend.com/api-keys)",
-            "Option 2: Set GMAIL_USER and GMAIL_APP_PASSWORD in .env.local (Use Gmail App Password)"
-          ],
-          hint: "See env.example for configuration details"
-        },
-        { status: 500 }
-      );
-    }
-
     const body = await request.json();
     const {
       name,
@@ -56,20 +39,8 @@ export async function POST(request: NextRequest) {
 
     console.log("\n🔥 NEW SERVICE APPLICATION 🔥");
     console.log({ name, email, phone, service, address });
-    console.log(`📧 Recipients: ${RECIPIENTS.join(', ')}`);
 
-    // Remove emojis and spam trigger words from subject for better deliverability
-    const cleanService = service.replace(/[🔔]/g, '').trim();
-    const subject = `नया सेवा आवेदन - ${cleanService} | New Service Application - ${cleanService}`;
-    const html = serviceApplicationTemplate({
-      name,
-      email,
-      phone,
-      service,
-      address,
-    });
-
-    // Save application to database and user as subscriber
+    // Save application to database and user as subscriber FIRST (non-blocking)
     let trackingId = '';
     try {
       if (!isDBConnected()) {
@@ -125,90 +96,78 @@ export async function POST(request: NextRequest) {
       }
     } catch (dbError: any) {
       console.error('❌ Error saving application/subscriber:', dbError);
-      // Don't fail the request if database save fails
+      return NextResponse.json(
+        { error: "Database save failed", details: dbError.message },
+        { status: 500 }
+      );
     }
 
-    // Send emails sequentially to admin recipients
+    // Now handle emails if configured (non-blocking to submission status)
+    let emailSentSuccessfully = false;
     const results = [];
-    for (const to of RECIPIENTS) {
-      const result = await sendEmail({ to, subject, html });
-      results.push({ to, ...result });
-      await new Promise((r) => setTimeout(r, 1000)); // wait 1s between sends
-    }
-
-    // Send confirmation email to user if email is provided
     let userEmailSent = false;
-    if (email && email.trim()) {
-      try {
-        const userSubject = `✅ आवेदन प्राप्त - ${cleanService} | Application Received - ${cleanService}`;
-        const userHtml = userConfirmationTemplate({
-          name,
-          phone,
-          service,
-          email,
-          trackingId: trackingId || 'N/A',
-        });
-        const userResult = await sendEmail({ to: email.trim(), subject: userSubject, html: userHtml });
-        userEmailSent = userResult.success;
-        if (userEmailSent) {
-          console.log(`✅ Confirmation email sent to user: ${email}`);
-        } else {
-          console.warn(`⚠️ Failed to send confirmation email to user: ${email}`);
+
+    if (isEmailConfigured()) {
+      console.log(`📧 Recipients: ${RECIPIENTS.join(', ')}`);
+      // Remove emojis and spam trigger words from subject for better deliverability
+      const cleanService = service.replace(/[🔔]/g, '').trim();
+      const subject = `नया सेवा आवेदन - ${cleanService} | New Service Application - ${cleanService}`;
+      const html = serviceApplicationTemplate({
+        name,
+        email,
+        phone,
+        service,
+        address,
+      });
+
+      // Send emails sequentially to admin recipients
+      for (const to of RECIPIENTS) {
+        const result = await sendEmail({ to, subject, html });
+        results.push({ to, ...result });
+        await new Promise((r) => setTimeout(r, 1000)); // wait 1s between sends
+      }
+
+      // Send confirmation email to user if email is provided
+      if (email && email.trim()) {
+        try {
+          const userSubject = `✅ आवेदन प्राप्त - ${cleanService} | Application Received - ${cleanService}`;
+          const userHtml = userConfirmationTemplate({
+            name,
+            phone,
+            service,
+            email,
+            trackingId: trackingId || 'N/A',
+          });
+          const userResult = await sendEmail({ to: email.trim(), subject: userSubject, html: userHtml });
+          userEmailSent = userResult.success;
+          if (userEmailSent) {
+            console.log(`✅ Confirmation email sent to user: ${email}`);
+          }
+        } catch (userEmailError: any) {
+          console.error('❌ Error sending user confirmation email:', userEmailError);
         }
-      } catch (userEmailError: any) {
-        console.error('❌ Error sending user confirmation email:', userEmailError);
-        // Don't fail the request if user email fails
       }
-    }
-
-    const successCount = results.filter((r) => r.success).length;
-
-    console.log(`\n📊 Email sending results: ${successCount}/${RECIPIENTS.length} successful`);
-    results.forEach((r, i) => {
-      if (r.success) {
-        console.log(`  ✅ ${i + 1}. ${r.to} - Success (${r.method}, ID: ${r.id})`);
-      } else {
-        console.log(`  ❌ ${i + 1}. ${r.to} - Failed: ${r.error}`);
-      }
-    });
-
-    // Always show detailed results in response
-    const responseData = {
-      success: successCount > 0,
-      message: successCount > 0 
-        ? "✅ Application submitted and emails sent successfully" 
-        : "⚠️ Application submitted but emails failed",
-      trackingId: trackingId || null,
-      emailStatus: `${successCount}/${RECIPIENTS.length} admin emails sent${userEmailSent ? ' + user confirmation sent' : ''}`,
-      userNotificationSent: userEmailSent,
-      results: results.map(r => ({
-        to: r.to,
-        success: r.success,
-        method: r.method,
-        messageId: r.id,
-        error: r.error,
-        errorDetails: r.details
-      })),
-    };
-
-    if (successCount > 0) {
-      return NextResponse.json(responseData, { status: 200 });
+      const successCount = results.filter((r) => r.success).length;
+      emailSentSuccessfully = successCount > 0;
     } else {
-      // Return 200 but with warning
-      return NextResponse.json({
-        ...responseData,
-        warning: "⚠️ All emails failed. Check server logs for details.",
-        hint: "Common issues: Invalid API key, unverified domain, or rate limiting"
-      }, { status: 200 });
+      console.warn('⚠️ No email service configured. Skipping email notifications, but data was saved safely in MongoDB.');
     }
+
+    return NextResponse.json({
+      success: true,
+      message: emailSentSuccessfully 
+        ? "✅ Application submitted and emails sent successfully" 
+        : "✅ Application saved successfully (Email skipped/not configured)",
+      trackingId: trackingId,
+      emailStatus: isEmailConfigured() ? "Sent" : "Skipped"
+    }, { status: 200 });
+
   } catch (err: any) {
     console.error("💥 SERVER ERROR (apply-service):", err);
-    console.error("💥 Error stack:", err?.stack);
     return NextResponse.json(
       { 
         error: "Internal server error", 
         details: err.message,
-        stack: process.env.NODE_ENV === 'development' ? err?.stack : undefined
       },
       { status: 500 }
     );

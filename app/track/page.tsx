@@ -215,6 +215,103 @@ function TrackPageContent() {
                     </div>
                   </div>
 
+                  {/* Visual Stepper Tracker */}
+                  <div className="my-6 bg-gray-50 rounded-2xl p-5 sm:p-6 border border-gray-100 relative overflow-hidden">
+                    <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider mb-5 text-center md:text-left">
+                      Application Progress / आवेदन प्रगति
+                    </h3>
+                    
+                    {application.status === 'rejected' ? (
+                      <div className="bg-red-50 border-l-4 border-red-500 p-4 rounded-xl">
+                        <div className="flex items-center gap-3">
+                          <XCircle className="w-6 h-6 text-red-600 flex-shrink-0" />
+                          <div>
+                            <p className="font-extrabold text-red-950 text-sm sm:text-base">आवेदन अस्वीकृत / Application Rejected</p>
+                            <p className="text-xs sm:text-sm text-red-700 mt-0.5">
+                              {application.remarks || 'आपके दस्तावेजों में कुछ कमी या विसंगति के कारण आवेदन अस्वीकृत कर दिया गया है। विवरण के लिए हमसे संपर्क करें।'}
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="relative flex flex-col md:flex-row justify-between items-start md:items-center gap-6 md:gap-0">
+                        {/* Connecting Line (Desktop) */}
+                        <div className="absolute top-[18px] left-[10%] right-[10%] h-1 bg-gray-200 hidden md:block -z-0">
+                          <div 
+                            className="h-full bg-gradient-to-r from-blue-500 to-green-500 transition-all duration-500" 
+                            style={{ 
+                              width: application.status === 'completed' 
+                                ? '100%' 
+                                : application.status === 'in_progress' 
+                                ? '66%' 
+                                : '33%' 
+                            }}
+                          />
+                        </div>
+
+                        {/* Step 1: Submitted */}
+                        <div className="flex md:flex-col items-center gap-3 md:gap-2 z-10 w-full md:w-1/4">
+                          <div className="w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow transition duration-300 bg-blue-600 text-white ring-4 ring-blue-100">
+                            ✓
+                          </div>
+                          <div className="text-left md:text-center">
+                            <span className="block font-bold text-gray-900 text-xs sm:text-sm">Submitted</span>
+                            <span className="block text-[10px] text-gray-500 font-semibold">आवेदन प्राप्त</span>
+                          </div>
+                        </div>
+
+                        {/* Step 2: Documents Verified */}
+                        <div className="flex md:flex-col items-center gap-3 md:gap-2 z-10 w-full md:w-1/4">
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow transition duration-300 ${
+                            application.status === 'in_progress' || application.status === 'completed'
+                              ? 'bg-blue-600 text-white ring-4 ring-blue-100'
+                              : application.status === 'pending'
+                              ? 'bg-blue-100 text-blue-600 ring-4 ring-blue-50 animate-pulse'
+                              : 'bg-gray-200 text-gray-400'
+                          }`}>
+                            {application.status === 'in_progress' || application.status === 'completed' ? '✓' : '2'}
+                          </div>
+                          <div className="text-left md:text-center">
+                            <span className="block font-bold text-gray-900 text-xs sm:text-sm">Verified</span>
+                            <span className="block text-[10px] text-gray-500 font-semibold">दस्तावेज सत्यापित</span>
+                          </div>
+                        </div>
+
+                        {/* Step 3: In Process */}
+                        <div className="flex md:flex-col items-center gap-3 md:gap-2 z-10 w-full md:w-1/4">
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow transition duration-300 ${
+                            application.status === 'completed'
+                              ? 'bg-blue-600 text-white ring-4 ring-blue-100'
+                              : application.status === 'in_progress'
+                              ? 'bg-amber-500 text-white ring-4 ring-amber-100 animate-pulse'
+                              : 'bg-gray-200 text-gray-400'
+                          }`}>
+                            {application.status === 'completed' ? '✓' : '3'}
+                          </div>
+                          <div className="text-left md:text-center">
+                            <span className="block font-bold text-gray-900 text-xs sm:text-sm">In Process</span>
+                            <span className="block text-[10px] text-gray-500 font-semibold">प्रगति में है</span>
+                          </div>
+                        </div>
+
+                        {/* Step 4: Completed */}
+                        <div className="flex md:flex-col items-center gap-3 md:gap-2 z-10 w-full md:w-1/4">
+                          <div className={`w-9 h-9 rounded-full flex items-center justify-center font-bold text-sm shadow transition duration-300 ${
+                            application.status === 'completed'
+                              ? 'bg-green-600 text-white ring-4 ring-green-100'
+                              : 'bg-gray-200 text-gray-400'
+                          }`}>
+                            {application.status === 'completed' ? '✓' : '4'}
+                          </div>
+                          <div className="text-left md:text-center">
+                            <span className="block font-bold text-gray-900 text-xs sm:text-sm">Completed</span>
+                            <span className="block text-[10px] text-gray-500 font-semibold">पूर्ण हो गया</span>
+                          </div>
+                        </div>
+                      </div>
+                    )}
+                  </div>
+
                   {/* Application Details */}
                   <div className="bg-gray-50 rounded-lg p-4 sm:p-6 space-y-3">
                     <div className="flex items-start gap-3">

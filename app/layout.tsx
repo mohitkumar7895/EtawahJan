@@ -2,6 +2,8 @@ import type { Metadata, Viewport } from 'next'
 import './globals.css'
 import ChatSupport from '@/components/ChatSupport'
 import VisitorTracker from '@/components/VisitorTracker'
+import SarkariTicker from '@/components/SarkariTicker'
+import QuickLeadWidget from '@/components/QuickLeadWidget'
 
 // ============================================================
 // ALL 75 UP DISTRICTS COVERED — MAX SEO POWER
@@ -829,9 +831,11 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-white text-zinc-900 antialiased">
+        <SarkariTicker />
         {children}
         <ChatSupport />
         <VisitorTracker />
+        <QuickLeadWidget />
       </body>
     </html>
   )

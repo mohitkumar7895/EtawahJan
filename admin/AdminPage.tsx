@@ -242,6 +242,7 @@ export default function AdminPage() {
   const [applicationsLoading, setApplicationsLoading] = useState(false);
   const [applicationsFilter, setApplicationsFilter] = useState<'all' | 'weekly' | 'monthly' | 'yearly'>('all');
   const [applicationsStatusFilter, setApplicationsStatusFilter] = useState<string>('all');
+  const [applicationsTypeFilter, setApplicationsTypeFilter] = useState<'all' | 'callbacks' | 'services'>('all');
   const [editingApplication, setEditingApplication] = useState<ServiceApplication | null>(null);
   const [appUpdateLoading, setAppUpdateLoading] = useState(false);
   const [appForm, setAppForm] = useState({ status: 'pending', remarks: '', adminNotes: '' });
@@ -3592,6 +3593,52 @@ export default function AdminPage() {
                   </div>
                 </div>
 
+                {/* Segmented Application Type Tabs */}
+                <div className="flex border-b border-zinc-200 dark:border-zinc-800 scrollbar-none overflow-x-auto">
+                  <button
+                    type="button"
+                    onClick={() => setApplicationsTypeFilter('all')}
+                    className={`px-4 py-2.5 font-bold text-sm border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
+                      applicationsTypeFilter === 'all'
+                        ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                        : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
+                    }`}
+                  >
+                    <FileText className="w-4 h-4" />
+                    All Submissions (सभी फॉर्म)
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setApplicationsTypeFilter('callbacks')}
+                    className={`px-4 py-2.5 font-bold text-sm border-b-2 transition-all flex items-center gap-2 relative whitespace-nowrap ${
+                      applicationsTypeFilter === 'callbacks'
+                        ? 'border-amber-500 text-amber-500 dark:border-amber-450 dark:text-amber-450'
+                        : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
+                    }`}
+                  >
+                    <Phone className="w-4 h-4 text-amber-500" />
+                    📞 Callback Requests (कॉल-बैक अनुरोध)
+                    {applications.some((a) => (a.service_type.includes('Callback') || a.name.startsWith('Callback Client:')) && a.status === 'pending') && (
+                      <span className="absolute top-1.5 right-1.5 flex h-2.5 w-2.5">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-500"></span>
+                      </span>
+                    )}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setApplicationsTypeFilter('services')}
+                    className={`px-4 py-2.5 font-bold text-sm border-b-2 transition-all flex items-center gap-2 whitespace-nowrap ${
+                      applicationsTypeFilter === 'services'
+                        ? 'border-indigo-600 text-indigo-600 dark:border-indigo-400 dark:text-indigo-400'
+                        : 'border-transparent text-zinc-500 hover:text-zinc-700 dark:text-zinc-400 dark:hover:text-zinc-300'
+                    }`}
+                  >
+                    <Briefcase className="w-4 h-4" />
+                    📋 Service Forms (सेवा फॉर्म)
+                  </button>
+                </div>
+
                 {/* Filters Widget Panel */}
                 <div className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm dark:border-zinc-800 dark:bg-zinc-900 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex flex-wrap items-center gap-4">
@@ -3657,120 +3704,153 @@ export default function AdminPage() {
                       </div>
                     ))}
                   </div>
-                ) : applications.length === 0 ? (
+                ) : applications.filter((app) => {
+                  const isCallback = app.service_type.includes('Callback') || app.name.startsWith('Callback Client:');
+                  if (applicationsTypeFilter === 'callbacks') return isCallback;
+                  if (applicationsTypeFilter === 'services') return !isCallback;
+                  return true;
+                }).length === 0 ? (
                   <div className="rounded-2xl border border-dashed border-zinc-250 bg-zinc-50/50 py-16 text-center dark:border-zinc-800 dark:bg-zinc-900/20">
                     <FileText className="mx-auto h-12 w-12 text-zinc-350 dark:text-zinc-700" />
-                    <h3 className="mt-4 text-sm font-bold text-zinc-900 dark:text-zinc-200">No applications found</h3>
+                    <h3 className="mt-4 text-sm font-bold text-zinc-900 dark:text-zinc-200">No records found</h3>
                     <p className="mt-1 text-xs text-zinc-500">
-                      No service request submissions were found for the selected time filter.
+                      No request submissions matched the current filters.
                     </p>
                   </div>
                 ) : (
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                    {applications.map((app) => (
-                      <div 
-                        key={app.id} 
-                        className="rounded-2xl border border-zinc-200 bg-white p-5 shadow-sm hover:shadow-md dark:border-zinc-800 dark:bg-zinc-900 transition-all flex flex-col justify-between"
-                      >
-                        <div>
-                          {/* Card Header */}
-                          <div className="flex items-start justify-between gap-2 border-b border-zinc-100 dark:border-zinc-800 pb-3 mb-3">
-                            <div>
-                              <h4 className="font-bold text-sm text-zinc-900 dark:text-zinc-50 mt-0.5">{app.name}</h4>
-                              <span className="text-[10px] font-mono font-bold text-zinc-450 dark:text-zinc-500 uppercase tracking-wider block">ID: {app.trackingId}</span>
-                            </div>
-                            <span 
-                              className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
-                                app.status === 'completed'
-                                  ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-450 dark:border-emerald-900/50'
-                                  : app.status === 'in_progress'
-                                  ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-450 dark:border-indigo-900/50'
-                                  : app.status === 'rejected'
-                                  ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-450 dark:border-rose-900/50'
-                                  : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-450 dark:border-amber-900/50'
-                              }`}
-                            >
-                              <span className={`w-1.5 h-1.5 rounded-full ${
-                                app.status === 'completed' ? 'bg-emerald-500' : app.status === 'in_progress' ? 'bg-indigo-500' : app.status === 'rejected' ? 'bg-rose-500' : 'bg-amber-500'
-                              }`} />
-                              {app.status.replace('_', ' ').toUpperCase()}
-                            </span>
-                          </div>
-
-                          {/* Details List */}
-                          <div className="space-y-2 text-xs">
-                            <div className="flex items-center justify-between">
-                              <span className="text-zinc-450 font-semibold">Service Requested:</span>
-                              <span className="font-bold text-zinc-805 dark:text-zinc-200">{app.service_type}</span>
-                            </div>
-                            <div className="flex items-center justify-between">
-                              <span className="text-zinc-455 font-semibold">Mobile Number:</span>
-                              <div className="flex items-center gap-2">
-                                <a href={`tel:${app.mobile}`} className="font-bold font-mono text-indigo-600 dark:text-indigo-400 hover:underline">
-                                  {app.mobile}
-                                </a>
-                                <a 
-                                  href={`https://wa.me/91${app.mobile}?text=Hello%20${app.name},%20we%20received%20your%20application%2520for%2520${app.service_type}%2520at%2520Jan%2520Seva%2520Kendra.`}
-                                  target="_blank" 
-                                  rel="noopener noreferrer" 
-                                  className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-450 font-semibold"
-                                >
-                                  (WhatsApp)
-                                </a>
-                              </div>
-                            </div>
-                            {app.email && (
-                              <div className="flex items-center justify-between">
-                                <span className="text-zinc-450 font-semibold">Email Address:</span>
-                                <span className="font-mono text-zinc-700 dark:text-zinc-300">{app.email}</span>
-                              </div>
-                            )}
-                            <div className="flex items-start justify-between gap-4">
-                              <span className="text-zinc-450 font-semibold shrink-0">Address:</span>
-                              <span className="text-zinc-700 dark:text-zinc-300 text-right leading-relaxed">{app.address}</span>
-                            </div>
-                            <div className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/60 pt-2 mt-2">
-                              <span className="text-zinc-450 font-semibold">Submitted On:</span>
-                              <span className="text-zinc-600 dark:text-zinc-400 font-semibold">
-                                {new Date(app.submittedAt).toLocaleString('en-IN', {
-                                  day: '2-digit',
-                                  month: 'short',
-                                  year: 'numeric',
-                                  hour: '2-digit',
-                                  minute: '2-digit'
-                                })}
-                              </span>
-                            </div>
-                            
-                            {/* Remarks & Private Notes */}
-                            {app.remarks && (
-                              <div className="rounded-lg bg-zinc-50 p-2.5 border border-zinc-100 dark:bg-zinc-800/40 dark:border-zinc-800 mt-2">
-                                <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-wider block">Remarks (Public)</span>
-                                <p className="text-zinc-700 dark:text-zinc-300 mt-0.5 leading-relaxed">{app.remarks}</p>
-                              </div>
-                            )}
-                            {app.adminNotes && (
-                              <div className="rounded-lg bg-indigo-50/40 p-2.5 border border-indigo-100/50 dark:bg-indigo-950/20 dark:border-indigo-900/30 mt-2">
-                                <span className="text-[10px] font-bold text-indigo-400 dark:text-indigo-500 uppercase tracking-wider block">Admin Notes (Private)</span>
-                                <p className="text-indigo-950 dark:text-indigo-200 mt-0.5 leading-relaxed">{app.adminNotes}</p>
-                              </div>
-                            )}
-                          </div>
-                        </div>
-
-                        {/* Card Action */}
-                        <div className="mt-5 pt-3 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-end">
-                          <button
-                            type="button"
-                            onClick={() => handleEditApplicationClick(app)}
-                            className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-750"
+                    {applications
+                      .filter((app) => {
+                        const isCallback = app.service_type.includes('Callback') || app.name.startsWith('Callback Client:');
+                        if (applicationsTypeFilter === 'callbacks') return isCallback;
+                        if (applicationsTypeFilter === 'services') return !isCallback;
+                        return true;
+                      })
+                      .map((app) => {
+                        const isCallback = app.service_type.includes('Callback') || app.name.startsWith('Callback Client:');
+                        return (
+                          <div 
+                            key={app.id} 
+                            className={`rounded-2xl border p-5 shadow-sm hover:shadow-md transition-all flex flex-col justify-between ${
+                              isCallback && app.status === 'pending'
+                                ? 'border-amber-300 bg-amber-50/20 dark:border-amber-900/40 dark:bg-amber-950/5'
+                                : 'border-zinc-200 bg-white dark:border-zinc-800 dark:bg-zinc-900'
+                            }`}
                           >
-                            <Edit className="w-3.5 h-3.5" />
-                            Edit Status & Remarks
-                          </button>
-                        </div>
-                      </div>
-                    ))}
+                            <div>
+                              {/* Card Header */}
+                              <div className="flex items-start justify-between gap-2 border-b border-zinc-100 dark:border-zinc-800 pb-3 mb-3">
+                                <div>
+                                  <h4 className="font-bold text-sm text-zinc-900 dark:text-zinc-50 mt-0.5">{app.name}</h4>
+                                  <span className="text-[10px] font-mono font-bold text-zinc-450 dark:text-zinc-500 uppercase tracking-wider block">ID: {app.trackingId}</span>
+                                  {isCallback && app.status === 'pending' && (
+                                    <span className="inline-flex items-center gap-1.5 px-2 py-0.5 mt-1.5 rounded bg-red-100 text-red-700 dark:bg-red-950/30 dark:text-red-400 font-extrabold text-[10px] uppercase tracking-wide animate-pulse">
+                                      ⚡ URGENT CALLBACK / तुरंत कॉल करें!
+                                    </span>
+                                  )}
+                                </div>
+                                <span 
+                                  className={`inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[10px] font-bold border ${
+                                    app.status === 'completed'
+                                      ? 'bg-emerald-50 text-emerald-700 border-emerald-200 dark:bg-emerald-950/30 dark:text-emerald-450 dark:border-emerald-900/50'
+                                      : app.status === 'in_progress'
+                                      ? 'bg-indigo-50 text-indigo-700 border-indigo-200 dark:bg-indigo-950/30 dark:text-indigo-450 dark:border-indigo-900/50'
+                                      : app.status === 'rejected'
+                                      ? 'bg-rose-50 text-rose-700 border-rose-200 dark:bg-rose-950/30 dark:text-rose-450 dark:border-rose-900/50'
+                                      : 'bg-amber-50 text-amber-700 border-amber-200 dark:bg-amber-950/30 dark:text-amber-450 dark:border-amber-900/50'
+                                  }`}
+                                >
+                                  <span className={`w-1.5 h-1.5 rounded-full ${
+                                    app.status === 'completed' ? 'bg-emerald-500' : app.status === 'in_progress' ? 'bg-indigo-500' : app.status === 'rejected' ? 'bg-rose-500' : 'bg-amber-500'
+                                  }`} />
+                                  {app.status.replace('_', ' ').toUpperCase()}
+                                </span>
+                              </div>
+
+                              {/* Details List */}
+                              <div className="space-y-2 text-xs">
+                                <div className="flex items-center justify-between">
+                                  <span className="text-zinc-455 font-semibold">Service Requested:</span>
+                                  <span className="font-bold text-zinc-805 dark:text-zinc-200">{app.service_type}</span>
+                                </div>
+                                <div className="flex items-center justify-between">
+                                  <span className="text-zinc-455 font-semibold">Mobile Number:</span>
+                                  <div className="flex items-center gap-2">
+                                    <a href={`tel:${app.mobile}`} className="font-bold font-mono text-indigo-600 dark:text-indigo-400 hover:underline">
+                                      {app.mobile}
+                                    </a>
+                                    <a 
+                                      href={`https://wa.me/91${app.mobile}?text=Hello%20${app.name},%20we%20received%20your%252520callback%252520request%25252520at%25252520Jan%25252520Seva%25252520Kendra.`}
+                                      target="_blank" 
+                                      rel="noopener noreferrer" 
+                                      className="text-emerald-600 hover:text-emerald-700 dark:text-emerald-450 font-semibold"
+                                    >
+                                      (WhatsApp)
+                                    </a>
+                                  </div>
+                                </div>
+                                {app.email && (
+                                  <div className="flex items-center justify-between">
+                                    <span className="text-zinc-455 font-semibold">Email Address:</span>
+                                    <span className="font-mono text-zinc-700 dark:text-zinc-300">{app.email}</span>
+                                  </div>
+                                )}
+                                <div className="flex items-start justify-between gap-4">
+                                  <span className="text-zinc-455 font-semibold shrink-0">Address:</span>
+                                  <span className="text-zinc-700 dark:text-zinc-300 text-right leading-relaxed">{app.address}</span>
+                                </div>
+                                <div className="flex items-center justify-between border-t border-zinc-100 dark:border-zinc-800/60 pt-2 mt-2">
+                                  <span className="text-zinc-455 font-semibold">Submitted On:</span>
+                                  <span className="text-zinc-600 dark:text-zinc-400 font-semibold">
+                                    {new Date(app.submittedAt).toLocaleString('en-IN', {
+                                      day: '2-digit',
+                                      month: 'short',
+                                      year: 'numeric',
+                                      hour: '2-digit',
+                                      minute: '2-digit'
+                                    })}
+                                  </span>
+                                </div>
+                                
+                                {/* Remarks & Private Notes */}
+                                {app.remarks && (
+                                  <div className="rounded-lg bg-zinc-50 p-2.5 border border-zinc-100 dark:bg-zinc-800/40 dark:border-zinc-800 mt-2">
+                                    <span className="text-[10px] font-bold text-zinc-450 dark:text-zinc-500 uppercase tracking-wider block">Remarks (Public)</span>
+                                    <p className="text-zinc-700 dark:text-zinc-300 mt-0.5 leading-relaxed">{app.remarks}</p>
+                                  </div>
+                                )}
+                                {app.adminNotes && (
+                                  <div className="rounded-lg bg-indigo-50/40 p-2.5 border border-indigo-100/50 dark:bg-indigo-950/20 dark:border-indigo-900/30 mt-2">
+                                    <span className="text-[10px] font-bold text-indigo-400 dark:text-indigo-500 uppercase tracking-wider block">Admin Notes (Private)</span>
+                                    <p className="text-indigo-950 dark:text-indigo-200 mt-0.5 leading-relaxed">{app.adminNotes}</p>
+                                  </div>
+                                )}
+                              </div>
+                            </div>
+
+                            {/* Card Action */}
+                            <div className="mt-5 pt-3 border-t border-zinc-100 dark:border-zinc-800/60 flex items-center justify-between gap-2">
+                              {isCallback && app.status === 'pending' ? (
+                                <a
+                                  href={`tel:${app.mobile}`}
+                                  className="inline-flex items-center justify-center gap-1.5 rounded-lg bg-green-600 px-3.5 py-1.5 text-xs font-bold text-white shadow-sm transition hover:bg-green-755 active:scale-95"
+                                >
+                                  <Phone className="w-3.5 h-3.5 fill-current" />
+                                  Call Now (अभी कॉल करें)
+                                </a>
+                              ) : <div />}
+                              <button
+                                type="button"
+                                onClick={() => handleEditApplicationClick(app)}
+                                className="inline-flex items-center justify-center gap-1.5 rounded-lg border border-zinc-200 bg-white px-3 py-1.5 text-xs font-bold text-zinc-700 shadow-sm transition hover:bg-zinc-50 dark:border-zinc-700 dark:bg-zinc-800 dark:text-zinc-200 dark:hover:bg-zinc-750"
+                              >
+                                <Edit className="w-3.5 h-3.5" />
+                                Edit Status & Remarks
+                              </button>
+                            </div>
+                          </div>
+                        );
+                      })}
                   </div>
                 )}
               </div>

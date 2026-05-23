@@ -9,9 +9,9 @@ export default function Footer() {
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8 lg:py-10">
         {/* Main Footer Content */}
-        <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-5 lg:gap-6 mb-4 sm:mb-6">
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-5 lg:gap-6 mb-4 sm:mb-6">
           {/* About Section */}
-          <div className="col-span-2 sm:col-span-2 lg:col-span-1">
+          <div className="col-span-2 sm:col-span-3 lg:col-span-1">
             <div className="flex items-center space-x-2 mb-2 sm:mb-3">
               <Image 
                 src="/jan-seva-logo-1.png" 
@@ -96,6 +96,34 @@ export default function Footer() {
             </ul>
           </div>
 
+          {/* Sitemaps (New Section) */}
+          <div className="col-span-1">
+            <h3 className="text-sm sm:text-base lg:text-lg font-bold mb-2 sm:mb-3 flex items-center">
+              <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-blue-400 flex-shrink-0" />
+              Sitemaps
+            </h3>
+            <ul className="space-y-1 sm:space-y-1.5">
+              <li>
+                <Link href="/sitemap" className="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>HTML Sitemap</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/state-sitemap" className="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>State Sitemap</span>
+                </Link>
+              </li>
+              <li>
+                <a href="/sitemap.xml" target="_blank" rel="noopener noreferrer" className="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>XML Sitemap</span>
+                </a>
+              </li>
+            </ul>
+          </div>
+
           {/* Contact Information */}
           <div className="col-span-1">
             <h3 className="text-sm sm:text-base lg:text-lg font-bold mb-2 sm:mb-3 flex items-center">
@@ -135,7 +163,7 @@ export default function Footer() {
           </div>
 
           {/* Services Highlights */}
-          <div>
+          <div className="col-span-1">
             <h3 className="text-sm sm:text-base lg:text-lg font-bold mb-2 sm:mb-3 flex items-center">
               <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-blue-400 flex-shrink-0" />
               Services
