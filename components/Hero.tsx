@@ -69,7 +69,7 @@ export default function Hero() {
             </p>
 
             {/* CTA Buttons */}
-            <div className="flex flex-col sm:flex-row gap-2 sm:gap-3 md:gap-4 justify-center mb-6 sm:mb-8 md:mb-10 px-2">
+            <div className="flex flex-wrap gap-2.5 sm:gap-3 md:gap-4 justify-center mb-6 sm:mb-8 md:mb-10 px-2">
               <button
                 onClick={() => setShowModal(true)}
                 className="bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-gray-900 px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-lg font-semibold text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl active:scale-95 transition transform hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto"
@@ -77,6 +77,14 @@ export default function Hero() {
                 <span>Apply for Services</span>
                 <ArrowRight className="w-4 h-4 sm:w-5 sm:h-5" />
               </button>
+              <Link
+                href="/photo-resizer"
+                className="bg-gradient-to-r from-orange-400 to-amber-500 hover:from-orange-500 hover:to-amber-600 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-lg font-bold text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl active:scale-95 transition transform hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto animate-pulse"
+              >
+                <span className="flex items-center gap-1">
+                  ⚡ फ्री फोटो रीसाइज़र (Resizer)
+                </span>
+              </Link>
               <Link
                 href="/services"
                 className="bg-white/10 hover:bg-white/20 active:bg-white/30 border-2 border-white/30 text-white px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-lg font-semibold text-sm sm:text-base md:text-lg transition transform hover:scale-105 active:scale-95 text-center w-full sm:w-auto"
