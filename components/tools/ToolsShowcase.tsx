@@ -38,7 +38,7 @@ export default function ToolsShowcase() {
             {DIGITAL_TOOLS.map((tool) => {
               const Icon = tool.icon;
               return (
-                <ToolCard key={tool.id} tool={tool}>
+                <ToolCard key={tool.id} link={tool.link} accent={tool.accent}>
                   <div className="flex justify-between items-start gap-2 mb-4">
                     <div className={`p-3 rounded-xl ${tool.iconBg}`}>
                       <Icon className="w-6 h-6" />
