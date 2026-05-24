@@ -9,7 +9,7 @@ import {
   Loader2,
   MessageCircle,
   Send,
-  Image,
+  Image as ImageIcon,
   Video,
   Phone,
   Clock,
@@ -366,31 +366,6 @@ export default function AdminPage() {
       }
     }
   }, [isAuthed, activeTab]);
-
-  // Load applications when tab or filters change
-  useEffect(() => {
-    if (isAuthed && activeTab === 'applications') {
-      loadApplicationsFromAPI();
-    }
-  }, [isAuthed, activeTab, applicationsFilter, applicationsStatusFilter]);
-  
-  // Poll for new chats when on chats tab
-  useEffect(() => {
-    if (isAuthed && activeTab === 'chats') {
-      loadChatsFromAPI();
-      const interval = setInterval(() => {
-        loadChatsFromAPI();
-        if (selectedChat?.userPhone) {
-          loadSelectedChat();
-        }
-      }, 2000);
-      setChatPollingInterval(interval);
-      return () => {
-        clearInterval(interval);
-        setChatPollingInterval(null);
-      };
-    }
-  }, [isAuthed, activeTab, selectedChat?.userPhone]);
 
   // Poll for visitors when on visitors tab - Real-time updates
   useEffect(() => {
@@ -811,7 +786,7 @@ export default function AdminPage() {
     }
   };
 
-  const loadSelectedChat = async () => {
+  const loadSelectedChat = useCallback(async () => {
     if (!selectedChat?.userPhone) return;
     try {
       const chatData = await getChat(selectedChat.userPhone);
@@ -819,7 +794,25 @@ export default function AdminPage() {
     } catch (err) {
       console.error('Error loading selected chat:', err);
     }
-  };
+  }, [selectedChat?.userPhone]);
+
+  // Poll for new chats when on chats tab
+  useEffect(() => {
+    if (isAuthed && activeTab === 'chats') {
+      loadChatsFromAPI();
+      const interval = setInterval(() => {
+        loadChatsFromAPI();
+        if (selectedChat?.userPhone) {
+          loadSelectedChat();
+        }
+      }, 2000);
+      setChatPollingInterval(interval);
+      return () => {
+        clearInterval(interval);
+        setChatPollingInterval(null);
+      };
+    }
+  }, [isAuthed, activeTab, selectedChat?.userPhone, loadSelectedChat]);
 
   const handleSelectChat = async (chat: Chat) => {
     try {
@@ -1224,19 +1217,29 @@ export default function AdminPage() {
   };
 
   // Service Applications operations
-  const loadApplicationsFromAPI = async (dateFilter = applicationsFilter, statusFilter = applicationsStatusFilter) => {
-    setApplicationsLoading(true);
-    setError(null);
-    try {
-      const data = await getAdminApplications(dateFilter, statusFilter);
-      setApplications(data);
-    } catch (err: any) {
-      setError(err.message || 'Failed to load applications');
-      setApplications([]);
-    } finally {
-      setApplicationsLoading(false);
+  const loadApplicationsFromAPI = useCallback(
+    async (dateFilter = applicationsFilter, statusFilter = applicationsStatusFilter) => {
+      setApplicationsLoading(true);
+      setError(null);
+      try {
+        const data = await getAdminApplications(dateFilter, statusFilter);
+        setApplications(data);
+      } catch (err: any) {
+        setError(err.message || 'Failed to load applications');
+        setApplications([]);
+      } finally {
+        setApplicationsLoading(false);
+      }
+    },
+    [applicationsFilter, applicationsStatusFilter]
+  );
+
+  // Load applications when tab or filters change
+  useEffect(() => {
+    if (isAuthed && activeTab === 'applications') {
+      loadApplicationsFromAPI();
     }
-  };
+  }, [isAuthed, activeTab, applicationsFilter, applicationsStatusFilter, loadApplicationsFromAPI]);
 
   const handleUpdateApplicationStatus = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -2244,7 +2247,7 @@ export default function AdminPage() {
                         </p>
                         <div className="flex flex-wrap gap-2">
                           <label className="inline-flex items-center gap-1.5 px-3 py-2 bg-white dark:bg-zinc-800 border border-gray-300 dark:border-zinc-600 rounded-lg text-xs sm:text-sm cursor-pointer hover:bg-gray-50 dark:hover:bg-zinc-700 text-gray-800 dark:text-zinc-200 transition-colors duration-200">
-                            <Image className="w-4 h-4 text-gray-600 dark:text-zinc-400" />
+                            <ImageIcon className="w-4 h-4 text-gray-600 dark:text-zinc-400" aria-hidden />
                             <span>Upload image</span>
                             <input
                               type="file"
@@ -3018,7 +3021,7 @@ export default function AdminPage() {
                                         <span className="truncate">{lastMessage.content}</span>
                                       ) : lastMessage.type === 'image' ? (
                                         <span className="flex items-center gap-1 text-blue-600">
-                                          <Image className="w-3 h-3" />
+                                          <ImageIcon className="w-3 h-3" aria-hidden />
                                           <span>Image</span>
                                         </span>
                                       ) : (
