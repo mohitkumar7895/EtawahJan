@@ -12,7 +12,8 @@ import {
   HelpCircle,
   Phone,
   FileText,
-  Image as ImageIcon
+  Image as ImageIcon,
+  FileStack,
 } from 'lucide-react';
 import type { Metadata } from 'next';
 
@@ -80,6 +81,20 @@ const toolList = [
     link: '/pdf-editor',
     ctaText: 'Open PDF Editor →',
     primaryColor: 'border-t-purple-500 hover:shadow-purple-100',
+  },
+  {
+    id: 'file-converter',
+    title: 'All-in-One File Converter',
+    hindiTitle: 'PDF, Word, Image Converter',
+    description:
+      'PDF to JPG, Merge/Split PDF, Word/Excel to PDF, OCR, compress images — 30+ tools, batch convert & ZIP download. Professional & free.',
+    badge: '🚀 New Suite',
+    badgeColor: 'bg-rose-100 text-rose-900 border-rose-200/50',
+    icon: FileStack,
+    iconBg: 'bg-rose-50 text-rose-600',
+    link: '/file-converter',
+    ctaText: 'Open Converter →',
+    primaryColor: 'border-t-rose-500 hover:shadow-rose-100',
   },
   {
     id: 'eligibility-wizard',

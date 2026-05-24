@@ -38,6 +38,9 @@ next-env.d.ts
 # uploads
 /public/uploads/
 
+# file converter temp
+/tmp/
+
 
 
 

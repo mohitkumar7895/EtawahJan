@@ -7,7 +7,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "pdf-server": "node server/pdf-editor-server.js"
+    "pdf-server": "node server/pdf-editor-server.js",
+    "converter-server": "tsx server/converter/index.ts",
+    "dev:converter": "concurrently \"npm run dev\" \"npm run converter-server\""
   },
   "dependencies": {
     "@headlessui/react": "^2.2.9",
@@ -15,7 +17,13 @@
     "@supabase/supabase-js": "^2.57.4",
     "@tanstack/react-query": "^5.100.14",
     "@types/node-cron": "^3.0.11",
+    "archiver": "^7.0.1",
     "axios": "^1.13.6",
+    "bullmq": "^5.34.10",
+    "canvas": "^3.1.0",
+    "express-rate-limit": "^7.5.0",
+    "helmet": "^8.0.0",
+    "ioredis": "^5.4.2",
     "cheerio": "^1.2.0",
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
@@ -33,12 +41,16 @@
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "resend": "^2.0.0",
+    "sharp": "^0.33.5",
     "sonner": "^2.0.7",
     "tesseract.js": "^5.1.1",
     "uuid": "^11.1.1",
     "zustand": "^5.0.13"
   },
   "devDependencies": {
+    "@types/archiver": "^6.0.3",
+    "concurrently": "^9.1.2",
+    "tsx": "^4.19.3",
     "@types/multer": "^2.1.0",
     "@types/node": "^20.14.0",
     "@types/nodemailer": "^7.0.4",
