@@ -30,6 +30,15 @@ export interface PersonalInfo {
   location: string;
   website: string;
   photoUrl?: string;
+  /** Indian biodata / CSC resume fields */
+  fatherName?: string;
+  dateOfBirth?: string;
+  gender?: string;
+  religion?: string;
+  nationality?: string;
+  maritalStatus?: string;
+  declarationDate?: string;
+  declarationPlace?: string;
 }
 
 export interface ExperienceItem {
@@ -143,7 +152,7 @@ export interface ResumeTemplateMeta {
   description: string;
   category: 'modern' | 'corporate' | 'creative' | 'ats' | 'sidebar';
   previewGradient: string;
-  layout: 'single' | 'sidebar' | 'timeline' | 'compact';
+  layout: 'single' | 'sidebar' | 'timeline' | 'compact' | 'indian';
   isPremium: boolean;
 }
 

@@ -3,6 +3,8 @@
 import { memo } from 'react';
 import type { ResumeContent, ResumeDocument, ResumeSectionConfig } from '@/lib/resume-builder/types';
 import { getTemplateById } from '@/lib/resume-builder/templates';
+import { isIndianTemplate } from '@/lib/resume-builder/janseva-templates';
+import IndianResumeDocument from './IndianResumeDocument';
 
 interface Props {
   document: ResumeDocument;
@@ -15,6 +17,10 @@ function visibleSections(sections: ResumeSectionConfig[]) {
 }
 
 function ResumeDocumentView({ document: doc, className = '', dark = false }: Props) {
+  if (isIndianTemplate(doc.templateId)) {
+    return <IndianResumeDocument document={doc} className={className} />;
+  }
+
   const c = doc.content;
   const t = doc.theme;
   const meta = getTemplateById(doc.templateId);

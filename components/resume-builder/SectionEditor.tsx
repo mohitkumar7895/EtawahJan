@@ -3,16 +3,27 @@
 import { useResumeStore } from '@/store/resume-store';
 import { RbButton, RbInput, RbLabel, RbTextarea } from './ui';
 import { uid } from '@/lib/resume-builder/types';
+import { isIndianTemplate } from '@/lib/resume-builder/janseva-templates';
+import ResumePhotoUpload from './ResumePhotoUpload';
 
 export default function SectionEditor({ activeSection }: { activeSection: string }) {
   const { document, updateContent } = useResumeStore();
   const c = document.content;
+  const indianTpl = isIndianTemplate(document.templateId);
 
   const blurHistory = { onBlur: () => updateContent({}, { saveHistory: true }) };
 
   if (activeSection === 'personal') {
     return (
       <div className="space-y-3">
+        {indianTpl && (
+          <ResumePhotoUpload
+            photoUrl={c.personal.photoUrl}
+            onPhoto={(photoUrl) =>
+              updateContent({ personal: { ...c.personal, photoUrl } }, { saveHistory: true })
+            }
+          />
+        )}
         <RbLabel>Full name</RbLabel>
         <RbInput
           className="!bg-slate-900/50 !border-white/20 !text-white"
@@ -55,6 +66,86 @@ export default function SectionEditor({ activeSection }: { activeSection: string
           onChange={(e) => updateContent({ personal: { ...c.personal, website: e.target.value } })}
           {...blurHistory}
         />
+        {indianTpl && (
+          <>
+            <p className="text-[11px] text-slate-500 pt-1 border-t border-white/10">CSC / biodata details</p>
+            <RbLabel>Father&apos;s name</RbLabel>
+            <RbInput
+              className="!bg-slate-900/50 !border-white/20 !text-white"
+              value={c.personal.fatherName || ''}
+              onChange={(e) => updateContent({ personal: { ...c.personal, fatherName: e.target.value } })}
+              {...blurHistory}
+            />
+            <RbLabel>Date of birth</RbLabel>
+            <RbInput
+              className="!bg-slate-900/50 !border-white/20 !text-white"
+              placeholder="e.g. 15/08/2000"
+              value={c.personal.dateOfBirth || ''}
+              onChange={(e) => updateContent({ personal: { ...c.personal, dateOfBirth: e.target.value } })}
+              {...blurHistory}
+            />
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <RbLabel>Gender</RbLabel>
+                <RbInput
+                  className="!bg-slate-900/50 !border-white/20 !text-white"
+                  value={c.personal.gender || ''}
+                  onChange={(e) => updateContent({ personal: { ...c.personal, gender: e.target.value } })}
+                  {...blurHistory}
+                />
+              </div>
+              <div>
+                <RbLabel>Religion</RbLabel>
+                <RbInput
+                  className="!bg-slate-900/50 !border-white/20 !text-white"
+                  value={c.personal.religion || ''}
+                  onChange={(e) => updateContent({ personal: { ...c.personal, religion: e.target.value } })}
+                  {...blurHistory}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <RbLabel>Nationality</RbLabel>
+                <RbInput
+                  className="!bg-slate-900/50 !border-white/20 !text-white"
+                  value={c.personal.nationality || ''}
+                  onChange={(e) => updateContent({ personal: { ...c.personal, nationality: e.target.value } })}
+                  {...blurHistory}
+                />
+              </div>
+              <div>
+                <RbLabel>Marital status</RbLabel>
+                <RbInput
+                  className="!bg-slate-900/50 !border-white/20 !text-white"
+                  value={c.personal.maritalStatus || ''}
+                  onChange={(e) => updateContent({ personal: { ...c.personal, maritalStatus: e.target.value } })}
+                  {...blurHistory}
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <RbLabel>Declaration date</RbLabel>
+                <RbInput
+                  className="!bg-slate-900/50 !border-white/20 !text-white"
+                  value={c.personal.declarationDate || ''}
+                  onChange={(e) => updateContent({ personal: { ...c.personal, declarationDate: e.target.value } })}
+                  {...blurHistory}
+                />
+              </div>
+              <div>
+                <RbLabel>Declaration place</RbLabel>
+                <RbInput
+                  className="!bg-slate-900/50 !border-white/20 !text-white"
+                  value={c.personal.declarationPlace || ''}
+                  onChange={(e) => updateContent({ personal: { ...c.personal, declarationPlace: e.target.value } })}
+                  {...blurHistory}
+                />
+              </div>
+            </div>
+          </>
+        )}
       </div>
     );
   }
@@ -62,7 +153,7 @@ export default function SectionEditor({ activeSection }: { activeSection: string
   if (activeSection === 'summary') {
     return (
       <div>
-        <RbLabel>Professional summary</RbLabel>
+        <RbLabel>Career objective / summary</RbLabel>
         <RbTextarea
           rows={7}
           className="!bg-slate-900/50 !border-white/20 !text-white"
@@ -373,10 +464,59 @@ export default function SectionEditor({ activeSection }: { activeSection: string
     );
   }
 
+  if (activeSection === 'languages') {
+    return (
+      <div className="space-y-3">
+        {c.languages.map((lang, idx) => (
+          <div key={lang.id} className="grid grid-cols-2 gap-2">
+            <RbInput
+              className="!bg-slate-900/50 !border-white/20 !text-white"
+              placeholder="Language"
+              value={lang.name}
+              onChange={(e) => {
+                const languages = [...c.languages];
+                languages[idx] = { ...lang, name: e.target.value };
+                updateContent({ languages });
+              }}
+              {...blurHistory}
+            />
+            <RbInput
+              className="!bg-slate-900/50 !border-white/20 !text-white"
+              placeholder="Level"
+              value={lang.level}
+              onChange={(e) => {
+                const languages = [...c.languages];
+                languages[idx] = { ...lang, level: e.target.value };
+                updateContent({ languages });
+              }}
+              {...blurHistory}
+            />
+          </div>
+        ))}
+        <RbButton
+          variant="secondary"
+          onClick={() =>
+            updateContent({ languages: [...c.languages, { id: uid(), name: '', level: '' }] }, { saveHistory: true })
+          }
+        >
+          + Add language
+        </RbButton>
+      </div>
+    );
+  }
+
+  if (activeSection === 'certifications' || activeSection === 'references') {
+    return (
+      <p className="text-sm text-slate-400">
+        Use Personal, Career Objective, Education &amp; Languages for Jan Seva CSC format. Other sections work on modern
+        templates.
+      </p>
+    );
+  }
+
   return (
     <p className="text-sm text-slate-400">
-      Toggle section ON and fill basic fields. More fields for this section coming soon — use Experience, Education,
-      Projects for now.
+      Toggle section ON and fill fields. Education &amp; Experience sections are in the sidebar list.
     </p>
   );
 }

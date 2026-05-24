@@ -44,6 +44,8 @@ export default function ToolsShowcase() {
                 <Link
                   key={tool.id}
                   href={tool.link}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className={`group bg-white rounded-2xl border border-slate-200/80 border-t-4 ${tool.accent} p-6 shadow-md hover:shadow-xl hover:-translate-y-1 transition-all duration-300 flex flex-col`}
                 >
                   <div className="flex justify-between items-start gap-2 mb-4">

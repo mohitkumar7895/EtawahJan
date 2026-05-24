@@ -21,6 +21,33 @@ export const RESUME_TEMPLATES: ResumeTemplateMeta[] = [
   { id: 'white-pro', name: 'White Professional', description: 'Crisp white corporate', category: 'corporate', previewGradient: 'from-slate-100 to-slate-300', layout: 'single', isPremium: false },
   { id: 'designer', name: 'Designer Resume', description: 'Portfolio style layout', category: 'creative', previewGradient: 'from-teal-400 to-indigo-600', layout: 'sidebar', isPremium: true },
   { id: 'one-page', name: 'One Page Resume', description: 'Single page optimized', category: 'ats', previewGradient: 'from-blue-500 to-cyan-600', layout: 'compact', isPremium: false },
+  {
+    id: 'janseva-classic',
+    name: 'Jan Seva Classic',
+    description: 'Jan Seva Kendra — traditional bordered CSC resume',
+    category: 'corporate',
+    previewGradient: 'from-slate-400 to-slate-600',
+    layout: 'indian',
+    isPremium: false,
+  },
+  {
+    id: 'janseva-formal',
+    name: 'Jan Seva Formal',
+    description: 'Jan Seva Kendra — blue formal biodata with photo',
+    category: 'corporate',
+    previewGradient: 'from-blue-600 to-indigo-800',
+    layout: 'indian',
+    isPremium: false,
+  },
+  {
+    id: 'janseva-biodata',
+    name: 'Jan Seva Biodata',
+    description: 'Jan Seva Kendra — green academic biodata layout',
+    category: 'corporate',
+    previewGradient: 'from-emerald-600 to-teal-800',
+    layout: 'indian',
+    isPremium: false,
+  },
 ];
 
 export function getTemplateById(id: string) {

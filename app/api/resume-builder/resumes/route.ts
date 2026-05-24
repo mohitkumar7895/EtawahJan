@@ -5,6 +5,8 @@ import Resume from '@/models/Resume';
 import ResumeBuilderUser from '@/models/ResumeBuilderUser';
 import { getSession } from '@/lib/resume-builder/session';
 import { createDefaultResumeDocument } from '@/lib/resume-builder/types';
+import { createJanSevaResumeDocument, isIndianTemplate } from '@/lib/resume-builder/janseva-templates';
+import { applyTemplatePreset } from '@/lib/resume-builder/template-presets';
 import { calculateCompletion, estimateAtsScore } from '@/lib/resume-builder/completion';
 import { trackResumeEvent } from '@/lib/resume-builder/analytics';
 
@@ -45,8 +47,14 @@ export async function POST(request: Request) {
   if (!session) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const body = await request.json().catch(() => ({}));
-  const doc = createDefaultResumeDocument(body.title || 'My Resume');
-  if (body.templateId) doc.templateId = body.templateId;
+  const templateId = typeof body.templateId === 'string' ? body.templateId : 'janseva-classic';
+  const doc = isIndianTemplate(templateId)
+    ? createJanSevaResumeDocument(body.title || 'My Resume', templateId)
+    : createDefaultResumeDocument(body.title || 'My Resume');
+  if (!isIndianTemplate(templateId) && body.templateId) {
+    doc.templateId = body.templateId;
+    doc.theme = applyTemplatePreset(body.templateId, doc.theme);
+  }
 
   doc.completionPercent = calculateCompletion(doc);
   doc.atsScore = estimateAtsScore(doc);

@@ -22,6 +22,7 @@ import ExportPdfButton from './ExportPdfButton';
 import SectionEditor from './SectionEditor';
 import { RbButton, RbCard, RbInput, RbLabel, cn } from './ui';
 import { getTemplateById, RESUME_TEMPLATES } from '@/lib/resume-builder/templates';
+import { INDIAN_TEMPLATE_IDS } from '@/lib/resume-builder/janseva-templates';
 
 export default function ResumeEditor({ resumeId }: { resumeId: string }) {
   const {
@@ -307,7 +308,13 @@ export default function ResumeEditor({ resumeId }: { resumeId: string }) {
               <div>
                 <p className="text-xs text-slate-400 mb-3 px-1">Tap a template — colors & layout update instantly.</p>
                 <div className="grid grid-cols-2 gap-2 max-h-[58vh] overflow-y-auto pr-1">
-                  {RESUME_TEMPLATES.map((t) => {
+                  {[...RESUME_TEMPLATES].sort((a, b) => {
+                    const aJan = INDIAN_TEMPLATE_IDS.includes(a.id as (typeof INDIAN_TEMPLATE_IDS)[number]);
+                    const bJan = INDIAN_TEMPLATE_IDS.includes(b.id as (typeof INDIAN_TEMPLATE_IDS)[number]);
+                    if (aJan && !bJan) return -1;
+                    if (!aJan && bJan) return 1;
+                    return 0;
+                  }).map((t) => {
                     const active = document.templateId === t.id;
                     const justApplied = templateApplied === t.id;
                     return (

@@ -17,6 +17,13 @@ import {
 } from 'lucide-react';
 import { RbButton, RbInput, cn } from './ui';
 import { getTemplateById } from '@/lib/resume-builder/templates';
+import {
+  JANSEVA_FEATURED_TEMPLATES,
+  JANSEVA_LOGO_SRC,
+  JANSEVA_BRAND_LINE,
+  JANSEVA_OWNER_LINE,
+  type IndianTemplateId,
+} from '@/lib/resume-builder/janseva-templates';
 
 interface ResumeRow {
   id: string;
@@ -55,13 +62,13 @@ export default function ResumeDashboard() {
     void load();
   }, [load]);
 
-  const createResume = async () => {
+  const createResume = async (templateId: IndianTemplateId = 'janseva-classic') => {
     setCreating(true);
     try {
       const res = await fetch('/api/resume-builder/resumes', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ title: 'My Resume', templateId: 'modern' }),
+        body: JSON.stringify({ title: 'My Resume', templateId }),
       });
       const data = await res.json();
       if (data.resume?.id) router.push(`/resume-builder/editor/${data.resume.id}`);
@@ -100,14 +107,21 @@ export default function ResumeDashboard() {
       <div className="relative mx-auto max-w-6xl px-4 py-8 sm:py-12">
         <header className="flex flex-wrap items-start justify-between gap-4 border-b border-white/10 pb-8">
           <div>
-            <p className="text-xs font-bold uppercase tracking-widest text-blue-400">Jan Seva · Resume Studio</p>
-            <h1 className="mt-2 text-3xl sm:text-4xl font-extrabold tracking-tight">
+            <div className="flex items-center gap-3 mb-2">
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img src={JANSEVA_LOGO_SRC} alt="" className="w-11 h-11 object-contain" />
+              <div>
+                <p className="text-xs font-bold uppercase tracking-widest text-blue-400">{JANSEVA_BRAND_LINE}</p>
+                <p className="text-sm font-semibold text-slate-300">{JANSEVA_OWNER_LINE}</p>
+              </div>
+            </div>
+            <h1 className="mt-1 text-3xl sm:text-4xl font-extrabold tracking-tight">
               Hello, {user?.name?.split(' ')[0] || 'there'} 👋
             </h1>
             <p className="mt-2 text-slate-400 text-sm sm:text-base">{user?.email}</p>
           </div>
           <div className="flex flex-wrap gap-2">
-            <RbButton onClick={createResume} disabled={creating}>
+            <RbButton onClick={() => createResume('janseva-classic')} disabled={creating}>
               <Plus className="w-4 h-4" />
               {creating ? 'Creating...' : 'New Resume'}
             </RbButton>
@@ -116,6 +130,30 @@ export default function ResumeDashboard() {
             </RbButton>
           </div>
         </header>
+
+        <section className="mt-8 rounded-2xl border border-blue-500/30 bg-gradient-to-br from-blue-950/40 to-slate-900/60 p-5 sm:p-6">
+          <h2 className="text-lg font-bold text-white">Jan Seva CSC Resume Templates</h2>
+          <p className="text-sm text-slate-400 mt-1">
+            Aapke diye gaye format jaisa — logo, border, Career Objective, Education, Personal Details &amp; Declaration.
+            Fully editable.
+          </p>
+          <div className="mt-4 grid gap-3 sm:grid-cols-3">
+            {JANSEVA_FEATURED_TEMPLATES.map((tpl) => (
+              <button
+                key={tpl.id}
+                type="button"
+                disabled={creating}
+                onClick={() => createResume(tpl.id)}
+                className="rounded-xl border border-white/15 bg-white/5 p-4 text-left hover:border-blue-400/50 hover:bg-white/10 transition-all"
+              >
+                <div className={cn('h-14 rounded-lg bg-gradient-to-br mb-3', tpl.previewGradient)} />
+                <p className="font-bold text-white text-sm">{tpl.name}</p>
+                <p className="text-[11px] text-slate-400 mt-1 line-clamp-2">{tpl.description}</p>
+                <span className="inline-block mt-3 text-xs font-semibold text-blue-300">+ Create &amp; Edit</span>
+              </button>
+            ))}
+          </div>
+        </section>
 
         <div className="mt-8 grid gap-4 sm:grid-cols-3">
           {[
@@ -162,7 +200,7 @@ export default function ResumeDashboard() {
               <FileText className="mx-auto h-12 w-12 text-slate-500 mb-4" />
               <h2 className="text-xl font-bold">No resumes yet</h2>
               <p className="text-slate-400 mt-2 text-sm">Create your first professional CV in under 2 minutes.</p>
-              <RbButton className="mt-6" onClick={createResume}>
+              <RbButton className="mt-6" onClick={() => createResume('janseva-classic')}>
                 <Plus className="w-4 h-4" /> Start building
               </RbButton>
             </div>

@@ -22,6 +22,9 @@ const PRESETS: Record<string, Partial<ResumeThemeSettings>> = {
   'white-pro': { primaryColor: '#0f172a', accentColor: '#64748b', textColor: '#334155', backgroundColor: '#ffffff', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 14, spacing: 18 },
   designer: { primaryColor: '#14b8a6', accentColor: '#6366f1', textColor: '#134e4a', backgroundColor: '#f0fdfa', fontFamily: 'Inter, system-ui, sans-serif', fontSize: 14, spacing: 16 },
   'one-page': { primaryColor: '#2563eb', accentColor: '#0891b2', textColor: '#0f172a', backgroundColor: '#ffffff', fontFamily: 'Arial, sans-serif', fontSize: 11, spacing: 12 },
+  'janseva-classic': { primaryColor: '#1f2937', accentColor: '#6b7280', textColor: '#111827', backgroundColor: '#ffffff', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: 13, spacing: 14 },
+  'janseva-formal': { primaryColor: '#1e40af', accentColor: '#3b82f6', textColor: '#0f172a', backgroundColor: '#ffffff', fontFamily: 'Arial, Helvetica, sans-serif', fontSize: 13, spacing: 14 },
+  'janseva-biodata': { primaryColor: '#166534', accentColor: '#22c55e', textColor: '#14532d', backgroundColor: '#ffffff', fontFamily: 'Georgia, Times New Roman, serif', fontSize: 13, spacing: 14 },
 };
 
 export function getTemplateThemePreset(templateId: string): Partial<ResumeThemeSettings> {
