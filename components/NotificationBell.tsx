@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState, useRef } from 'react';
+import { useEffect, useState, useRef, useCallback } from 'react';
 import { Bell, X, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import CallbackRequestForm from '@/components/CallbackRequestForm';
@@ -48,7 +48,7 @@ export default function NotificationBell() {
     setUserId(storedUserId);
   }, []);
 
-  const fetchNotifications = async () => {
+  const fetchNotifications = useCallback(async () => {
     if (!userId || userId === 'anonymous') return;
 
     try {
@@ -64,7 +64,7 @@ export default function NotificationBell() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [userId]);
 
   const markAsSeen = async (notificationId: string) => {
     try {
@@ -134,7 +134,7 @@ export default function NotificationBell() {
         }
       };
     }
-  }, [userId]);
+  }, [userId, fetchNotifications]);
 
   useEffect(() => {
     const handleNotificationUpdate = () => {
@@ -147,7 +147,7 @@ export default function NotificationBell() {
     return () => {
       window.removeEventListener('janseva:notifications:updated', handleNotificationUpdate);
     };
-  }, [userId]);
+  }, [userId, fetchNotifications]);
 
   const unreadCount = notifications.length;
 

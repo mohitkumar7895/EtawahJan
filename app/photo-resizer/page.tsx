@@ -443,6 +443,8 @@ export default function PhotoResizerPage() {
                       <div className="flex items-center justify-between p-3.5 bg-slate-50 border border-slate-200 rounded-xl">
                         <div className="flex items-center gap-3 min-w-0">
                           <div className="w-12 h-12 bg-white rounded-lg border border-slate-200 overflow-hidden flex-shrink-0 flex items-center justify-center">
+                            {/* Blob preview — next/image does not support object URLs */}
+                            {/* eslint-disable-next-line @next/next/no-img-element */}
                             <img src={originalUrl} alt="Thumbnail" className="w-full h-full object-cover" />
                           </div>
                           <div className="min-w-0">
@@ -493,10 +495,11 @@ export default function PhotoResizerPage() {
                           className="bg-white rounded-xl p-3 border-2 border-slate-200 shadow-inner overflow-hidden flex items-center justify-center bg-checkered-pattern"
                           style={{ maxWidth: '100%', maxHeight: '280px' }}
                         >
-                          <img 
-                            src={resizedUrl} 
-                            alt="Resized preview" 
-                            className="max-h-[220px] object-contain shadow border border-slate-100 rounded" 
+                          {/* eslint-disable-next-line @next/next/no-img-element */}
+                          <img
+                            src={resizedUrl}
+                            alt="Resized preview"
+                            className="max-h-[220px] object-contain shadow border border-slate-100 rounded"
                           />
                         </div>
                         <span className="text-[10px] text-slate-400 font-bold uppercase tracking-wide">Output Preview</span>

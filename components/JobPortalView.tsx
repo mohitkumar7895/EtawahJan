@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 
 interface Vacancy {
@@ -34,7 +34,7 @@ export default function JobPortalView({
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  const fetchJobs = async () => {
+  const fetchJobs = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -69,7 +69,7 @@ export default function JobPortalView({
     } finally {
       setLoading(false);
     }
-  };
+  }, [category, search]);
 
   useEffect(() => {
     // Debounce search slightly to avoid excessive API requests
@@ -78,7 +78,7 @@ export default function JobPortalView({
     }, 300);
 
     return () => clearTimeout(delayDebounceFn);
-  }, [category, search]);
+  }, [category, search, fetchJobs]);
 
   // Map category to CSS colors for tags
   const getCategoryStyles = (cat: string) => {
@@ -224,7 +224,7 @@ export default function JobPortalView({
             <span className="text-slate-300 text-6xl block mb-4">🔍</span>
             <h3 className="font-bold text-slate-800 text-xl">No Updates Found</h3>
             <p className="text-slate-500 mt-2 text-sm max-w-md mx-auto">
-              We couldn't find any job posts matching your criteria. Try adjusting your category or check your search spelling.
+              We could not find any job posts matching your criteria. Try adjusting your category or check your search spelling.
             </p>
             {(search || category !== initialCategory) && (
               <button

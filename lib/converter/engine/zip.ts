@@ -2,10 +2,9 @@ import fs from 'fs';
 import path from 'path';
 
 export async function zipDirectory(sourceDir: string, zipPath: string): Promise<void> {
-  let archiver: typeof import('archiver');
-  try {
-    archiver = (await import(/* webpackIgnore: true */ 'archiver')).default;
-  } catch {
+  const archiverModule = await import(/* webpackIgnore: true */ 'archiver').catch(() => null);
+  const archiver = archiverModule?.default;
+  if (!archiver) {
     throw new Error('ZIP download requires: npm install archiver');
   }
 

@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { Calendar, Clock, Tag, User, ArrowLeft, Share2, Eye } from 'lucide-react';
@@ -44,11 +44,7 @@ export default function BlogPostComponent({ slug }: BlogPostProps) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
-  useEffect(() => {
-    fetchBlog();
-  }, [slug]);
-
-  const fetchBlog = async () => {
+  const fetchBlog = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/blogs/${slug}`);
@@ -66,7 +62,11 @@ export default function BlogPostComponent({ slug }: BlogPostProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [slug]);
+
+  useEffect(() => {
+    fetchBlog();
+  }, [fetchBlog]);
 
   const handleShare = async () => {
     if (navigator.share && blog) {

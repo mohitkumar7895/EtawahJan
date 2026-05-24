@@ -2,13 +2,15 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB, isDBConnected } from '@/lib/db';
 import Application from '@/models/Application';
 
+export const dynamic = 'force-dynamic';
+
 export async function GET(request: NextRequest) {
   try {
     if (!isDBConnected()) {
       await connectDB();
     }
 
-    const { searchParams } = new URL(request.url);
+    const searchParams = request.nextUrl.searchParams;
     const filter = searchParams.get('filter') || 'all'; // 'weekly', 'monthly', 'yearly', 'all'
     const status = searchParams.get('status');
 

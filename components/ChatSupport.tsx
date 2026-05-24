@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useState, useRef, useCallback } from 'react';
-import { MessageCircle, X, Send, Image, Video, Download } from 'lucide-react';
+import { MessageCircle, X, Send, Image as ImageIcon, Video, Download } from 'lucide-react';
 import { getChat, sendMessage, uploadChatFile, saveUser, updateUser, type Chat, type ChatMessage } from '@/lib/api';
 
 export default function ChatSupport() {
@@ -23,38 +23,6 @@ export default function ChatSupport() {
   const [notificationPermission, setNotificationPermission] = useState<NotificationPermission>('default');
   const notificationRef = useRef<Notification | null>(null);
   const serviceWorkerRegistrationRef = useRef<ServiceWorkerRegistration | null>(null);
-
-  // Register Service Worker for background notifications
-  useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
-      navigator.serviceWorker
-        .register('/sw.js')
-        .then((registration) => {
-          console.log('Service Worker registered:', registration);
-          serviceWorkerRegistrationRef.current = registration;
-          
-          // Check for updates
-          registration.update();
-        })
-        .catch((error) => {
-          console.error('Service Worker registration failed:', error);
-        });
-
-      // Listen for messages from Service Worker
-      navigator.serviceWorker.addEventListener('message', (event) => {
-        if (event.data && event.data.type === 'NEW_MESSAGE') {
-          // New message received from background
-          if (phoneNumber) {
-            loadChat(true);
-          }
-        } else if (event.data && event.data.type === 'OPEN_CHAT') {
-          // Open chat from notification click
-          setIsOpen(true);
-          setShowNotification(false);
-        }
-      });
-    }
-  }, []);
 
   // Start/Stop Service Worker monitoring when phone number changes
   useEffect(() => {
@@ -365,6 +333,38 @@ export default function ChatSupport() {
       }
     }
   }, [phoneNumber, isOpen, lastAdminMessageTime]);
+
+  // Register Service Worker for background notifications
+  useEffect(() => {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+      navigator.serviceWorker
+        .register('/sw.js')
+        .then((registration) => {
+          console.log('Service Worker registered:', registration);
+          serviceWorkerRegistrationRef.current = registration;
+          registration.update();
+        })
+        .catch((error) => {
+          console.error('Service Worker registration failed:', error);
+        });
+
+      const onSwMessage = (event: MessageEvent) => {
+        if (event.data?.type === 'NEW_MESSAGE') {
+          if (phoneNumber) {
+            loadChat(true);
+          }
+        } else if (event.data?.type === 'OPEN_CHAT') {
+          setIsOpen(true);
+          setShowNotification(false);
+        }
+      };
+
+      navigator.serviceWorker.addEventListener('message', onSwMessage);
+      return () => {
+        navigator.serviceWorker.removeEventListener('message', onSwMessage);
+      };
+    }
+  }, [loadChat, phoneNumber]);
 
   // Clear notification when chat opens
   useEffect(() => {
@@ -911,7 +911,7 @@ export default function ChatSupport() {
                         aria-label="Upload image, video, or PDF"
                         disabled={loading}
                       >
-                        <Image className="w-4 h-4 sm:w-5 sm:h-5" />
+                        <ImageIcon className="w-4 h-4 sm:w-5 sm:h-5" aria-hidden />
                       </button>
                       <input
                         type="text"

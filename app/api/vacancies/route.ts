@@ -79,7 +79,10 @@ export async function GET(request: NextRequest) {
           vacancies,
           admitCards,
           results,
-          lastSyncAt: lastSync?.updatedAt ?? null,
+          lastSyncAt:
+            lastSync && !Array.isArray(lastSync)
+              ? (lastSync as { updatedAt?: Date }).updatedAt ?? null
+              : null,
           refreshHours: 6,
         });
       }

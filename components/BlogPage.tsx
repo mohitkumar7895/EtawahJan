@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { Calendar, Clock, Tag, Search, Filter, BookOpen, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
@@ -39,11 +39,7 @@ export default function BlogPageComponent() {
   const [currentPage, setCurrentPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
 
-  useEffect(() => {
-    fetchBlogs();
-  }, [selectedCategory, searchQuery, currentPage]);
-
-  const fetchBlogs = async () => {
+  const fetchBlogs = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -72,7 +68,11 @@ export default function BlogPageComponent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [currentPage, selectedCategory, searchQuery]);
+
+  useEffect(() => {
+    fetchBlogs();
+  }, [fetchBlogs]);
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-50 dark:from-zinc-950 dark:to-zinc-900 transition-colors duration-200">
