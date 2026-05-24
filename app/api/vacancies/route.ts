@@ -5,176 +5,189 @@ import Subscriber from '@/models/Subscriber';
 import Notification from '@/models/Notification';
 import { sendEmail, isEmailConfigured } from '@/lib/emailService';
 import { websiteUpdateTemplate } from '@/lib/emailTemplates';
+import { slugify } from '@/lib/scraper';
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
-    // Check database connection - only try once if not connected
     if (!isDBConnected()) {
-      // Check if MONGODB_URI is configured
-      const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URL || process.env.MONGODB_URL;
-      if (!mongoUri || mongoUri.trim() === '') {
-        // Return empty array if DB not configured (graceful degradation)
-        console.warn("⚠️ MONGODB_URI not configured - returning empty vacancies array");
-        return NextResponse.json([]);
-      }
-      
-      // Try to connect only if URI is configured
       try {
         await connectDB();
       } catch (connError: any) {
         console.error("❌ Connection failed:", connError.message);
-        // Return empty array instead of error (graceful degradation)
         return NextResponse.json([]);
       }
+    }
 
-      if (!isDBConnected()) {
-        // Return empty array if still not connected
-        return NextResponse.json([]);
-      }
+    // Parse query params for search & filter
+    const { searchParams } = new URL(request.url);
+    const category = searchParams.get('category');
+    const search = searchParams.get('search');
+    const limitParam = searchParams.get('limit');
+    const limit = limitParam ? parseInt(limitParam, 10) : undefined;
+
+    const filter: any = {};
+    if (category) {
+      filter.category = category;
+    }
+    if (search) {
+      filter.$or = [
+        { title: { $regex: search, $options: 'i' } },
+        { shortDescription: { $regex: search, $options: 'i' } },
+        { fullDescription: { $regex: search, $options: 'i' } },
+        { qualification: { $regex: search, $options: 'i' } }
+      ];
     }
 
     try {
-      const vacancies = await Vacancy.find().sort({ createdAt: -1 });
-      console.log(`✅ Fetched ${vacancies.length} vacancies`);
+      let query = Vacancy.find(filter).sort({ createdAt: -1 });
+      if (limit) {
+        query = query.limit(limit);
+      }
+      
+      const vacancies = await query;
       return NextResponse.json(vacancies || []);
     } catch (queryError: any) {
       console.error("❌ Error querying vacancies:", queryError);
-
-      if (queryError.name === 'MongoServerError' ||
-          queryError.name === 'MongoError' ||
-          queryError.message.includes('connection') ||
-          queryError.message.includes('timeout')) {
-        return NextResponse.json(
-          {
-            error: "Database connection error",
-            message: "Failed to query database. Please check MongoDB connection.",
-            hint: "Verify MONGODB_URI is correct in your .env file"
-          },
-          { status: 503 }
-        );
-      }
-
-      throw queryError;
+      return NextResponse.json([]);
     }
   } catch (error: any) {
     console.error("❌ Error fetching vacancies:", error);
-
-    // Always return empty array instead of error - graceful degradation
-    // This ensures the frontend doesn't break even if database is unavailable
-    console.warn("⚠️ Returning empty vacancies array due to error");
     return NextResponse.json([]);
   }
 }
 
 export async function POST(request: NextRequest) {
-  // Set timeout for Vercel (8 seconds max - Vercel has 10s limit)
   const timeoutPromise = new Promise<NextResponse>((_, reject) => {
     setTimeout(() => reject(new Error('Request timeout')), 8000);
   });
 
   try {
-    // Race between actual work and timeout
     const result = await Promise.race([
       (async () => {
-        // Check database connection with timeout
         if (!isDBConnected()) {
-          const mongoUri = process.env.MONGODB_URI || process.env.MONGO_URL || process.env.MONGODB_URL;
-          if (!mongoUri || mongoUri.trim() === '') {
-            return NextResponse.json(
-              {
-                error: "Database not configured",
-                message: "MONGODB_URI is not set.",
-                hint: "Set MONGODB_URI environment variable"
-              },
-              { status: 503 }
-            );
-          }
-          
           try {
-            // Ultra-fast connection with timeout (2.5 seconds for Vercel)
-            await Promise.race([
-              connectDB(),
-              new Promise((_, reject) => setTimeout(() => reject(new Error('Connection timeout')), 2500))
-            ]);
+            await connectDB();
           } catch (connError: any) {
             console.error("❌ Connection failed:", connError.message);
-            return NextResponse.json(
-              {
-                error: "Database connection timeout",
-                message: "MongoDB connection is taking too long. Please try again.",
-                hint: "This may be a temporary issue. Please try again in a moment."
-              },
-              { status: 503 }
-            );
-          }
-
-          if (!isDBConnected()) {
-            return NextResponse.json(
-              {
-                error: "Database not available",
-                message: "MongoDB connection could not be established.",
-                hint: "Please try again in a moment"
-              },
-              { status: 503 }
-            );
+            return NextResponse.json({ error: "Database connection error" }, { status: 503 });
           }
         }
 
         const body = await request.json();
-        const { title, tag, info, date, lastDate, vacancies, link } = body;
+        const { 
+          title, 
+          tag, 
+          info, 
+          date, 
+          lastDate, 
+          vacancies, 
+          link,
+          // New fields
+          category,
+          shortDescription,
+          fullDescription,
+          startDate,
+          ageLimit,
+          totalPosts,
+          qualification,
+          requiredDocuments,
+          officialLink,
+          thumbnail,
+          sourceType
+        } = body;
 
         if (!title || !title.trim()) {
           return NextResponse.json({ error: "Title is required" }, { status: 400 });
         }
-        if (!tag || !tag.trim()) {
-          return NextResponse.json({ error: "Tag is required" }, { status: 400 });
+
+        // Determine category (fallback if only tag is sent from old UI)
+        let finalCategory = category;
+        if (!finalCategory && tag) {
+          if (tag.toLowerCase().includes('result')) {
+            finalCategory = 'Results';
+          } else if (tag.toLowerCase().includes('admit')) {
+            finalCategory = 'Admit Cards';
+          } else {
+            finalCategory = 'Vacancies';
+          }
+        }
+        if (!finalCategory) {
+          finalCategory = 'Vacancies'; // Default category
         }
 
-        console.log("📝 Creating vacancy:", { title, tag });
+        // Generate base unique slug
+        let baseSlug = slugify(title);
+        let uniqueSlug = baseSlug;
+        let counter = 1;
+        
+        // Loop to resolve any slug collision
+        while (await Vacancy.findOne({ slug: uniqueSlug })) {
+          uniqueSlug = `${baseSlug}-${counter}`;
+          counter++;
+        }
 
+        console.log("📝 Creating vacancy:", { title, category: finalCategory, slug: uniqueSlug });
+
+        // Map values with fallbacks to keep both old and new formats in sync
         const vacancy = new Vacancy({
           title: title.trim(),
-          tag: tag.trim(),
-          info: info ? info.trim() : '',
-          date: date ? date.trim() : '',
-          lastDate: lastDate ? lastDate.trim() : '',
+          slug: uniqueSlug,
+          category: finalCategory,
+          shortDescription: shortDescription || info || '',
+          fullDescription: fullDescription || shortDescription || info || 'Full details available in official link.',
+          startDate: startDate || date || '',
+          lastDate: lastDate || '',
+          ageLimit: ageLimit || 'As per Rules',
+          totalPosts: totalPosts || (vacancies ? String(vacancies) : 'Various'),
+          qualification: qualification || 'Check Details',
+          requiredDocuments: requiredDocuments || 'ID Proof, Photos, Certificates',
+          officialLink: officialLink || link || '',
+          thumbnail: thumbnail || '',
+          sourceType: sourceType || 'admin',
+          isNew: true,
+          
+          // Old fields (will be auto-mapped by pre-save hooks, but defined here explicitly too)
+          tag: tag || (finalCategory === 'Results' ? 'Result' : finalCategory === 'Admit Cards' ? 'Admit Card' : 'Vacancy'),
+          info: info || shortDescription || '',
+          date: date || startDate || '',
           vacancies: vacancies ? (Number(vacancies) || null) : null,
-          link: link ? link.trim() : '',
+          link: link || `/${finalCategory === 'Results' ? 'result' : finalCategory === 'Admit Cards' ? 'admit-card' : 'vacancy'}/${uniqueSlug}`
         });
 
+        // Validate
         const validationError = vacancy.validateSync();
         if (validationError) {
           const errors = Object.values(validationError.errors).map((e: any) => e.message);
-          return NextResponse.json(
-            {
-              error: "Validation error",
-              details: errors.join(', ')
-            },
-            { status: 400 }
-          );
+          return NextResponse.json({ error: "Validation error", details: errors.join(', ') }, { status: 400 });
         }
 
-        // Fast save with timeout (2 seconds)
-        const savedVacancy = await Promise.race([
-          vacancy.save(),
-          new Promise((_, reject) => setTimeout(() => reject(new Error('Save timeout')), 2000))
-        ]) as any;
-        
+        const savedVacancy = await vacancy.save() as any;
         console.log("✅ Vacancy created successfully:", savedVacancy._id);
+
+        // Limit Pruning: Keep only top 15 posts for this category
+        try {
+          const categoryPosts = await Vacancy.find({ category: finalCategory }).sort({ createdAt: -1 });
+          if (categoryPosts.length > 15) {
+            const postsToDelete = categoryPosts.slice(15);
+            const idsToDelete = postsToDelete.map(p => p._id);
+            await Vacancy.deleteMany({ _id: { $in: idsToDelete } });
+            console.log(`🧼 Pruned ${idsToDelete.length} older posts in category: ${finalCategory}`);
+          }
+        } catch (pruneErr: any) {
+          console.error("❌ Error cleaning older posts:", pruneErr);
+        }
 
         // Create in-app notification
         try {
-          const notificationMessage = savedVacancy.info 
-            ? `${savedVacancy.title} - ${savedVacancy.info.substring(0, 100)}${savedVacancy.info.length > 100 ? '...' : ''}`
+          const notificationMessage = savedVacancy.shortDescription 
+            ? `${savedVacancy.title} - ${savedVacancy.shortDescription.substring(0, 100)}...`
             : savedVacancy.title;
           
-          const notificationLink = savedVacancy.link || '';
-          
           const notification = new Notification({
-            title: `New ${savedVacancy.tag}: ${savedVacancy.title}`,
+            title: `New ${savedVacancy.category}: ${savedVacancy.title}`,
             message: notificationMessage,
             type: 'vacancy',
-            link: notificationLink,
+            link: savedVacancy.link || '',
             relatedId: savedVacancy._id.toString(),
             isActive: true,
           });
@@ -183,18 +196,16 @@ export async function POST(request: NextRequest) {
           console.log("✅ In-app notification created:", notification._id);
         } catch (notifError: any) {
           console.error('❌ Error creating in-app notification:', notifError);
-          // Don't fail the vacancy creation if notification fails
         }
 
-        // Send notifications to all subscribers if email service is configured
+        // Send email notifications to subscribers
         if (isEmailConfigured()) {
-          // Run notification sending in background (don't wait for it)
           (async () => {
             try {
               const subscribers = await Subscriber.find({ 
                 isActive: true,
                 email: { $exists: true, $ne: '' }
-              }).limit(200); // Limit to prevent too many emails
+              }).limit(200);
 
               console.log(`📧 Sending vacancy notifications to ${subscribers.length} subscribers...`);
 
@@ -203,7 +214,7 @@ export async function POST(request: NextRequest) {
                 if (subscriber.email && subscriber.email.trim()) {
                   try {
                     const subject = `🔔 नई नौकरी: ${savedVacancy.title} | New Job: ${savedVacancy.title} - Jan Seva Kendra`;
-                    const message = `नई नौकरी की जानकारी:\n\n${savedVacancy.title}\n${savedVacancy.tag ? `Tag: ${savedVacancy.tag}\n` : ''}${savedVacancy.info ? `Details: ${savedVacancy.info}\n` : ''}${savedVacancy.lastDate ? `Last Date: ${savedVacancy.lastDate}\n` : ''}${savedVacancy.link ? `Apply: ${savedVacancy.link}` : ''}`;
+                    const message = `नई नौकरी की जानकारी:\n\n${savedVacancy.title}\nCategory: ${savedVacancy.category}\nLast Date: ${savedVacancy.lastDate}\nApply Link: ${savedVacancy.officialLink}`;
                     
                     const html = websiteUpdateTemplate({
                       title: `नई नौकरी: ${savedVacancy.title}`,
@@ -224,15 +235,12 @@ export async function POST(request: NextRequest) {
                         $inc: { notificationCount: 1 },
                       });
                     }
-                    
-                    // Small delay to avoid rate limiting
                     await new Promise((r) => setTimeout(r, 500));
                   } catch (emailError: any) {
                     console.error(`❌ Failed to send notification to ${subscriber.email}:`, emailError);
                   }
                 }
               }
-
               console.log(`✅ Vacancy notifications sent to ${notificationCount}/${subscribers.length} subscribers`);
             } catch (notificationError: any) {
               console.error('❌ Error sending vacancy notifications:', notificationError);
@@ -251,80 +259,6 @@ export async function POST(request: NextRequest) {
     return result;
   } catch (error: any) {
     console.error("❌ Error creating vacancy:", error);
-
-    // Handle timeout errors
-    if (error.message === 'Request timeout' || error.message.includes('timeout')) {
-      return NextResponse.json(
-        {
-          error: "Request timeout",
-          message: "The request took too long to complete. Please try again.",
-          hint: "This may be due to database connection delay. Try again in a moment."
-        },
-        { status: 504 }
-      );
-    }
-
-    if (error.name === 'ValidationError') {
-      const errors = Object.values(error.errors).map((e: any) => e.message);
-      return NextResponse.json(
-        {
-          error: "Validation error",
-          details: errors.join(', ')
-        },
-        { status: 400 }
-      );
-    }
-
-    if (error.name === 'MongoServerError' || error.name === 'MongoError') {
-      if (error.message.includes('connection') || error.message.includes('timeout') || error.message.includes('ECONNREFUSED')) {
-        return NextResponse.json(
-          {
-            error: "Database connection error",
-            message: "Failed to connect to MongoDB. Please try again.",
-            hint: "Database connection is taking too long. This may be a temporary issue."
-          },
-          { status: 503 }
-        );
-      }
-      return NextResponse.json(
-        {
-          error: "Database error",
-          message: "Failed to save vacancy to database",
-          details: process.env.NODE_ENV === 'development' ? error.message : undefined
-        },
-        { status: 500 }
-      );
-    }
-
-    if (error.message && (error.message.includes('connection') || error.message.includes('ECONNREFUSED') || error.message.includes('timeout'))) {
-      return NextResponse.json(
-        {
-          error: "Database connection error",
-          message: "Database connection timeout. Please try again.",
-          hint: "This may be a temporary issue. Please try again in a moment."
-        },
-        { status: 503 }
-      );
-    }
-
-    if (error.name === 'CastError') {
-      return NextResponse.json(
-        {
-          error: "Invalid data type",
-          details: error.message
-        },
-        { status: 400 }
-      );
-    }
-
-    return NextResponse.json(
-      {
-        error: "Failed to create vacancy",
-        message: error.message || "An unexpected error occurred",
-        details: process.env.NODE_ENV === 'development' ? error.message : undefined
-      },
-      { status: 500 }
-    );
+    return NextResponse.json({ error: "Failed to create vacancy", message: error.message }, { status: 500 });
   }
 }
-

@@ -1,0 +1,15 @@
+﻿node.exe : npm info using npm@10.8.2
+At line:1 char:1
++ & "C:\Program Files\nodejs/node.exe" "C:\Users\mohit\AppData\Roaming\ ...
++ ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+    + CategoryInfo          : NotSpecified: (npm info using npm@10.8.2:String) [], RemoteException
+    + FullyQualifiedErrorId : NativeCommandError
+ 
+npm info using node@v24.11.1
+(node:22720) Warning: Setting the NODE_TLS_REJECT_UNAUTHORIZED environment variable to '0' makes TLS connections and 
+HTTPS requests insecure by disabling certificate verification.
+(Use `node --trace-warnings ...` to show where the warning was created)
+npm http fetch GET https://registry.npmjs.org/@tanstack%2freact-query attempt 1 failed with 
+UNABLE_TO_VERIFY_LEAF_SIGNATURE
+npm http fetch GET https://registry.npmjs.org/@tanstack%2freact-query attempt 2 failed with 
+UNABLE_TO_VERIFY_LEAF_SIGNATURE

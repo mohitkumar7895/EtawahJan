@@ -147,7 +147,26 @@ export default function AdminPage() {
   const [error, setError] = useState<string | null>(null);
 
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
-  const [form, setForm] = useState({ title: '', tag: '', info: '', date: '', lastDate: '', vacancies: '', link: '' });
+  const [form, setForm] = useState({
+    title: '',
+    tag: '',
+    info: '',
+    date: '',
+    lastDate: '',
+    vacancies: '',
+    link: '',
+    // New rich fields
+    category: 'Vacancies',
+    shortDescription: '',
+    fullDescription: '',
+    startDate: '',
+    ageLimit: '',
+    totalPosts: '',
+    qualification: '',
+    requiredDocuments: '',
+    officialLink: '',
+    thumbnail: '',
+  });
   const [editingId, setEditingId] = useState<string | null>(null);
 
   // Announcements state
@@ -542,47 +561,79 @@ export default function AdminPage() {
     }
   };
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>) => {
     setForm({ ...form, [e.target.name]: e.target.value });
   };
 
   const handleAdd = async () => {
-    if (!form.title.trim() || !form.tag.trim()) {
-      alert('Title and Tag are required');
+    if (!form.title.trim()) {
+      alert('Title is required');
       return;
     }
 
     setLoading(true);
     setError(null);
 
+    // Map to tags and links for backward compatibility
+    const finalTag = form.tag.trim() || (form.category === 'Results' ? 'Result' : form.category === 'Admit Cards' ? 'Admit Card' : 'Vacancy');
+    const finalLink = form.officialLink.trim() || form.link.trim() || '';
+
     try {
       const vacancyData = {
         title: form.title.trim(),
-        tag: form.tag.trim(),
-        info: form.info.trim() || undefined,
-        date: form.date || undefined,
-        lastDate: form.lastDate || undefined,
+        tag: finalTag,
+        info: form.shortDescription.trim() || form.info.trim() || '',
+        date: form.startDate || form.date || '',
+        lastDate: form.lastDate || '',
         vacancies: form.vacancies ? Number(form.vacancies) : undefined,
-        link: form.link || undefined,
+        link: finalLink,
+        
+        // Rich government portal fields
+        category: form.category,
+        shortDescription: form.shortDescription.trim() || form.info.trim() || '',
+        fullDescription: form.fullDescription.trim() || form.shortDescription.trim() || form.info.trim() || '',
+        startDate: form.startDate || form.date || '',
+        ageLimit: form.ageLimit || 'As per Rules',
+        totalPosts: form.totalPosts || form.vacancies || 'Various',
+        qualification: form.qualification || 'See Details',
+        requiredDocuments: form.requiredDocuments || 'Photograph, Signature, ID Proof, Marksheets',
+        officialLink: finalLink,
+        thumbnail: form.thumbnail || '',
+        sourceType: 'admin'
       };
 
       if (editingId) {
         await updateVacancy(editingId, vacancyData);
       } else {
         await createVacancy(vacancyData);
-        // Notification will be created automatically in the API route
-        // Dispatch event to update notifications
         window.dispatchEvent(new CustomEvent('janseva:notifications:updated'));
       }
 
       await loadVacanciesFromAPI();
-      setForm({ title: '', tag: '', info: '', date: '', lastDate: '', vacancies: '', link: '' });
+      setForm({
+        title: '',
+        tag: '',
+        info: '',
+        date: '',
+        lastDate: '',
+        vacancies: '',
+        link: '',
+        category: 'Vacancies',
+        shortDescription: '',
+        fullDescription: '',
+        startDate: '',
+        ageLimit: '',
+        totalPosts: '',
+        qualification: '',
+        requiredDocuments: '',
+        officialLink: '',
+        thumbnail: '',
+      });
       setEditingId(null);
       
       window.dispatchEvent(new CustomEvent('janseva:vacancies:updated'));
     } catch (err: any) {
       const errorMsg = err?.message || (editingId ? 'Failed to update vacancy' : 'Failed to create vacancy');
-      
       if (errorMsg.includes('Database') || errorMsg.includes('MongoDB') || errorMsg.includes('connection')) {
         setError(`Database Error: ${errorMsg}. Please check MONGODB_URI in your .env file.`);
       } else {
@@ -595,10 +646,32 @@ export default function AdminPage() {
   };
 
   const handleEdit = (id: string) => {
-    const v = vacancies.find((x) => (x.id || x._id) === id);
+    const v = vacancies.find((x) => (x.id || x._id) === id) as any;
     if (!v) return;
     setEditingId(id);
-    setForm({ title: v.title || '', tag: v.tag || '', info: v.info || '', date: v.date || '', lastDate: v.lastDate || '', vacancies: v.vacancies ? String(v.vacancies) : '', link: v.link || '' });
+    
+    // Auto map dynamic fields on edit
+    const mappedCategory = v.category || (v.tag?.toLowerCase().includes('result') ? 'Results' : v.tag?.toLowerCase().includes('admit') ? 'Admit Cards' : 'Vacancies');
+
+    setForm({
+      title: v.title || '',
+      tag: v.tag || '',
+      info: v.info || v.shortDescription || '',
+      date: v.date || v.startDate || '',
+      lastDate: v.lastDate || '',
+      vacancies: v.vacancies ? String(v.vacancies) : '',
+      link: v.link || v.officialLink || '',
+      category: mappedCategory,
+      shortDescription: v.shortDescription || v.info || '',
+      fullDescription: v.fullDescription || v.info || '',
+      startDate: v.startDate || v.date || '',
+      ageLimit: v.ageLimit || 'As per Rules',
+      totalPosts: v.totalPosts || (v.vacancies ? String(v.vacancies) : 'Various'),
+      qualification: v.qualification || 'See Details',
+      requiredDocuments: v.requiredDocuments || 'Photograph, Signature, ID Proof, Marksheets',
+      officialLink: v.officialLink || v.link || '',
+      thumbnail: v.thumbnail || '',
+    });
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
@@ -1935,19 +2008,97 @@ export default function AdminPage() {
 
             {/* Vacancies Tab */}
             {activeTab === 'vacancies' && (
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-            <div className="lg:col-span-1 order-2 lg:order-1">
-              <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md dark:shadow-black/20 p-4 sm:p-5 md:p-6 border border-transparent dark:border-zinc-800 transition-colors duration-200">
-                <h3 className="font-semibold mb-4 text-base sm:text-lg md:text-xl text-gray-900 dark:text-zinc-100">Add / Edit Vacancy</h3>
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+                <div className="lg:col-span-1 order-2 lg:order-1">
+                  <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md dark:shadow-black/20 p-4 sm:p-5 md:p-6 border border-transparent dark:border-zinc-800 transition-colors duration-200">
+                <h3 className="font-semibold mb-4 text-base sm:text-lg md:text-xl text-gray-900 dark:text-zinc-100">Add / Edit Post</h3>
                 <div className="space-y-3 sm:space-y-4">
-                  <input name="title" value={form.title} onChange={handleChange} placeholder="Title" className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
-                  <input name="tag" value={form.tag} onChange={handleChange} placeholder="Tag (Result/Notification)" className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
-                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                    <input name="vacancies" value={form.vacancies} onChange={handleChange} placeholder="Vacancies" className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
-                    <input name="date" value={form.date} onChange={handleChange} placeholder="Date" className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+                  
+                  {/* Category Selection */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Portal Category</label>
+                    <select
+                      name="category"
+                      value={form.category}
+                      onChange={handleChange}
+                      className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200"
+                    >
+                      <option value="Vacancies">Vacancies (Latest Jobs)</option>
+                      <option value="Results">Results (Exams Decycled)</option>
+                      <option value="Admit Cards">Admit Cards (Hall Tickets)</option>
+                    </select>
                   </div>
-                  <input name="link" value={form.link} onChange={handleChange} placeholder="Link (optional)" className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
-                  <textarea name="info" value={form.info} onChange={handleChange} placeholder="Short info" rows={4} className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 resize-none focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+
+                  {/* Title */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Title / Designation</label>
+                    <input name="title" value={form.title} onChange={handleChange} placeholder="e.g. SSC CGL Online Form 2026" className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+                  </div>
+
+                  {/* Date Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Start Date</label>
+                      <input name="startDate" value={form.startDate} onChange={handleChange} placeholder="e.g. 24-05-2026" className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Last Date</label>
+                      <input name="lastDate" value={form.lastDate} onChange={handleChange} placeholder="e.g. 24-06-2026" className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+                    </div>
+                  </div>
+
+                  {/* Vacancy / Age limit Grid */}
+                  <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Total Posts</label>
+                      <input name="totalPosts" value={form.totalPosts} onChange={handleChange} placeholder="e.g. 12236 Posts" className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+                    </div>
+                    <div>
+                      <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Age Limit</label>
+                      <input name="ageLimit" value={form.ageLimit} onChange={handleChange} placeholder="e.g. 18-30 Years" className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+                    </div>
+                  </div>
+
+                  {/* Official link & Thumbnail */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Official Apply Link</label>
+                    <input name="officialLink" value={form.officialLink} onChange={handleChange} placeholder="https://ssc.gov.in/" className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+                  </div>
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Thumbnail Image URL</label>
+                    <input name="thumbnail" value={form.thumbnail} onChange={handleChange} placeholder="e.g. https://... or leave blank" className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+                  </div>
+
+                  {/* Short description */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Short Summary / Description</label>
+                    <textarea name="shortDescription" value={form.shortDescription} onChange={handleChange} placeholder="Brief one-line summary..." rows={2} className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 resize-none focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+                  </div>
+
+                  {/* Qualification */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Qualification & Eligibility</label>
+                    <textarea name="qualification" value={form.qualification} onChange={handleChange} placeholder="Post-wise required educational qualifications..." rows={2} className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 resize-none focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+                  </div>
+
+                  {/* Required Documents */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Required Documents</label>
+                    <textarea name="requiredDocuments" value={form.requiredDocuments} onChange={handleChange} placeholder="e.g. Passport Size Photo, Signature scan copy, Identity Proof..." rows={2} className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 resize-none focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+                  </div>
+
+                  {/* Full Description */}
+                  <div>
+                    <label className="block text-xs font-semibold text-gray-500 uppercase tracking-wider mb-1.5">Full Detailed Notification Details</label>
+                    <textarea name="fullDescription" value={form.fullDescription} onChange={handleChange} placeholder="Full details containing tables, posts, dates, how to apply..." rows={5} className="w-full px-4 py-3 border-2 border-gray-300 dark:border-zinc-600 rounded-lg text-sm sm:text-base text-gray-900 dark:text-zinc-100 bg-white dark:bg-zinc-950 placeholder-gray-500 dark:placeholder-zinc-500 resize-none focus:outline-none focus:border-blue-500 dark:focus:border-blue-400 focus:ring-2 focus:ring-blue-200 dark:focus:ring-blue-900/40 transition-colors duration-200" />
+                  </div>
+
+                  {/* Hidden inputs for backward-compatibility bindings */}
+                  <input type="hidden" name="tag" value={form.tag} />
+                  <input type="hidden" name="vacancies" value={form.vacancies} />
+                  <input type="hidden" name="date" value={form.date} />
+                  <input type="hidden" name="link" value={form.link} />
+                  <input type="hidden" name="info" value={form.info} />
 
                   <div className="flex flex-col sm:flex-row items-stretch sm:items-center gap-3 pt-2">
                     <button 
@@ -1967,7 +2118,25 @@ export default function AdminPage() {
                       <button 
                         onClick={() => { 
                           setEditingId(null); 
-                          setForm({ title: '', tag: '', info: '', date: '', lastDate: '', vacancies: '', link: '' }); 
+                          setForm({
+                            title: '',
+                            tag: '',
+                            info: '',
+                            date: '',
+                            lastDate: '',
+                            vacancies: '',
+                            link: '',
+                            category: 'Vacancies',
+                            shortDescription: '',
+                            fullDescription: '',
+                            startDate: '',
+                            ageLimit: '',
+                            totalPosts: '',
+                            qualification: '',
+                            requiredDocuments: '',
+                            officialLink: '',
+                            thumbnail: '',
+                          }); 
                         }} 
                         disabled={loading}
                         className="w-full sm:w-auto px-4 sm:px-6 py-3 border-2 border-gray-300 hover:border-gray-400 rounded-lg disabled:opacity-50 text-sm sm:text-base font-medium transition-colors"
@@ -1977,8 +2146,7 @@ export default function AdminPage() {
                     )}
                   </div>
                 </div>
-              </div>
-            </div>
+              </div>            </div>
 
             <div className="lg:col-span-2 order-1 lg:order-2">
               <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md dark:shadow-black/20 p-4 sm:p-5 md:p-6 border border-transparent dark:border-zinc-800 transition-colors duration-200">

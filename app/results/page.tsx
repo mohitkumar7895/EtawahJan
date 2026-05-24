@@ -2,11 +2,11 @@ import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import JobPortalView from '@/components/JobPortalView';
 
-export default function Vacancies() {
+export default function Results() {
   return (
     <>
       <Header />
-      <JobPortalView initialCategory="Vacancies" showHero={true} />
+      <JobPortalView initialCategory="Results" showHero={true} />
       <Footer />
     </>
   );

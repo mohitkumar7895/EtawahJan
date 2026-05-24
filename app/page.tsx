@@ -5,6 +5,7 @@ import ITServicesBanner from '@/components/ITServicesBanner'
 import Services from '@/components/Services'
 import Announcements from '@/components/Announcements'
 import Reviews from '@/components/Reviews'
+import HomeJobsFeed from '@/components/HomeJobsFeed'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -64,6 +65,7 @@ export default function Home() {
       <ITServicesBanner />
       <Announcements />
       <Services />
+      <HomeJobsFeed />
       <Reviews />
       <Footer />
     </>
