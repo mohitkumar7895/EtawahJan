@@ -9,24 +9,23 @@ export default function ToolsPrefetch() {
   const router = useRouter();
 
   useEffect(() => {
-    const links = DIGITAL_TOOLS.map((t) => t.link);
-
     const prefetchAll = () => {
-      for (const href of links) {
+      for (const tool of DIGITAL_TOOLS) {
         try {
-          router.prefetch(href);
+          router.prefetch(tool.link);
         } catch {
           /* ignore */
         }
       }
     };
 
-    if ('requestIdleCallback' in window) {
-      const id = window.requestIdleCallback(prefetchAll, { timeout: 2500 });
-      return () => window.cancelIdleCallback(id);
+    if (typeof requestIdleCallback === 'function') {
+      const idleId = requestIdleCallback(prefetchAll, { timeout: 2500 });
+      return () => cancelIdleCallback(idleId);
     }
-    const timer = window.setTimeout(prefetchAll, 500);
-    return () => window.clearTimeout(timer);
+
+    const timerId = setTimeout(prefetchAll, 500);
+    return () => clearTimeout(timerId);
   }, [router]);
 
   return null;

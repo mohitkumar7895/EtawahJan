@@ -811,6 +811,7 @@ export default function RootLayout({
         {/* Preconnect for speed */}
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="dns-prefetch" href="https://www.google-analytics.com" />
+        <link rel="google-site-verification=2rT4H0NwQhMpGMYTHC_rnHNs7Cpatm4pSUhvhtfaRPw" href="https://www.google.com/webmasters/tools/verification?hl=en&siteUrl=https://www.jan-seva.site/" />
 
         {/* === SCHEMA.ORG — STRUCTURED DATA === */}
         <script
