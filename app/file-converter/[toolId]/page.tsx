@@ -1,6 +1,12 @@
 import { notFound } from 'next/navigation';
 import { CONVERTER_TOOLS, getToolById } from '@/lib/converter/tools';
-import ToolWorkspace from '@/components/converter/ToolWorkspace';
+import dynamic from 'next/dynamic';
+import ToolPageLoader from '@/components/tools/ToolPageLoader';
+
+const ToolWorkspace = dynamic(() => import('@/components/converter/ToolWorkspace'), {
+  ssr: false,
+  loading: () => <ToolPageLoader label="Preparing converter…" />,
+});
 import type { Metadata } from 'next';
 
 type Props = { params: { toolId: string } };

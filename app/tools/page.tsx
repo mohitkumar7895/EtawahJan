@@ -1,6 +1,7 @@
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ToolsShowcase from '@/components/tools/ToolsShowcase';
+import ToolsPrefetch from '@/components/tools/ToolsPrefetch';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
@@ -17,6 +18,7 @@ export default function ToolsLandingPage() {
   return (
     <>
       <Header />
+      <ToolsPrefetch />
       <ToolsShowcase />
       <Footer />
     </>

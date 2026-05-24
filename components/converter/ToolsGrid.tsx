@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { useRouter } from 'next/navigation';
 import type { ConverterTool } from '@/lib/converter/types';
 import ToolIcon from './ToolIcon';
 
@@ -11,6 +12,8 @@ export default function ToolsGrid({
   tools: ConverterTool[];
   compact?: boolean;
 }) {
+  const router = useRouter();
+
   return (
     <div
       className={`grid gap-4 ${
@@ -27,7 +30,9 @@ export default function ToolsGrid({
         >
           <Link
             href={`/file-converter/${tool.id}`}
-            className="group block h-full rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm hover:shadow-xl hover:border-rose-200/80 hover:-translate-y-1 transition-all duration-300 dark:bg-slate-900 dark:border-slate-800 dark:hover:border-rose-500/40"
+            prefetch
+            onMouseEnter={() => router.prefetch(`/file-converter/${tool.id}`)}
+            className="group block h-full rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm hover:shadow-lg hover:border-rose-200/80 hover:-translate-y-0.5 active:scale-[0.99] transition-[transform,box-shadow] duration-150 dark:bg-slate-900 dark:border-slate-800 dark:hover:border-rose-500/40"
           >
             <div
               className={`w-12 h-12 rounded-xl bg-gradient-to-br ${tool.color} flex items-center justify-center text-white shadow-lg mb-4 group-hover:scale-110 transition-transform`}

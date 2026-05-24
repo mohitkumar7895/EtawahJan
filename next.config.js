@@ -2,6 +2,7 @@
 const nextConfig = {
   reactStrictMode: true,
   experimental: {
+    optimizePackageImports: ['lucide-react'],
     serverComponentsExternalPackages: [
       'tesseract.js',
       'sharp',
