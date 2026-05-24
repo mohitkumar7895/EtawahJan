@@ -1,7 +1,7 @@
 import fs from 'fs/promises';
 import path from 'path';
 
-async function getSharp() {
+async function getSharp(): Promise<any> {
   try {
     return (await import(/* webpackIgnore: true */ 'sharp')).default;
   } catch {

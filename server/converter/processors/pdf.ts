@@ -78,7 +78,7 @@ export async function protectPdf(
   const saved = await doc.save({
     userPassword: password,
     ownerPassword: password + '_owner',
-  });
+  } as any);
   await fs.writeFile(outputPath, saved);
 }
 
@@ -91,7 +91,7 @@ export async function unlockPdf(
   const doc = await PDFDocument.load(bytes, {
     password: password || undefined,
     ignoreEncryption: true,
-  });
+  } as any);
   const saved = await doc.save();
   await fs.writeFile(outputPath, saved);
 }
@@ -133,9 +133,10 @@ export async function pdfToImages(
   format: 'jpeg' | 'png',
   scale = 2
 ): Promise<string[]> {
-  let createCanvas: typeof import('canvas')['createCanvas'];
+  let createCanvas: any;
   try {
-    createCanvas = (await import(/* webpackIgnore: true */ 'canvas')).createCanvas;
+    const canvasPkg = 'canvas';
+    createCanvas = (await import(/* webpackIgnore: true */ canvasPkg)).createCanvas;
   } catch {
     throw new Error(
       'PDF to image requires the "canvas" package. Run: npm install canvas'
