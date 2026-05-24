@@ -1,13 +1,5 @@
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import JobPortalView from '@/components/JobPortalView';
+import { redirect } from 'next/navigation';
 
-export default function Results() {
-  return (
-    <>
-      <Header />
-      <JobPortalView initialCategory="Results" showHero={true} />
-      <Footer />
-    </>
-  );
+export default function ResultsPage() {
+  redirect('/vacancies?tab=results');
 }

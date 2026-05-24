@@ -2,137 +2,146 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import JobMetaChips from '@/components/JobMetaChips';
+import type { JobMeta } from '@/lib/jobDisplay';
 
-interface Vacancy {
+interface Vacancy extends JobMeta {
   _id?: string;
   id?: string;
   title: string;
   slug: string;
-  category: 'Vacancies' | 'Results' | 'Admit Cards';
   isNew?: boolean;
+  liveOnly?: boolean;
+  officialLink?: string;
+  sourceUrl?: string;
 }
 
-export default function HomeJobsFeed() {
-  const [jobs, setJobs] = useState<Vacancy[]>([]);
-  const [loading, setLoading] = useState(true);
+interface HomeFeed {
+  vacancies: Vacancy[];
+  admitCards: Vacancy[];
+  results: Vacancy[];
+}
 
-  const fetchJobs = async () => {
-    try {
-      setLoading(true);
-      // Fetch latest 25 items to categorize them
-      const response = await fetch('/api/vacancies?limit=30');
-      if (response.ok) {
-        const data = await response.json();
-        setJobs(data || []);
-      }
-    } catch (err) {
-      console.error('Error fetching home jobs feed:', err);
-    } finally {
-      setLoading(false);
-    }
-  };
+const HOME_LIMIT = 5;
+const REFRESH_MS = 6 * 60 * 60 * 1000;
+
+export default function HomeJobsFeed() {
+  const [feed, setFeed] = useState<HomeFeed>({ vacancies: [], admitCards: [], results: [] });
+  const [loading, setLoading] = useState(true);
+  const [lastSyncAt, setLastSyncAt] = useState<string | null>(null);
 
   useEffect(() => {
-    fetchJobs();
+    const load = () => {
+      fetch('/api/vacancies?feed=home')
+        .then((r) => r.json())
+        .then((data) => {
+          setFeed({
+            vacancies: (data.vacancies || []).slice(0, HOME_LIMIT),
+            admitCards: (data.admitCards || []).slice(0, HOME_LIMIT),
+            results: (data.results || []).slice(0, HOME_LIMIT),
+          });
+          if (data.lastSyncAt) setLastSyncAt(data.lastSyncAt);
+        })
+        .catch(console.error)
+        .finally(() => setLoading(false));
+    };
+
+    load();
+    const timer = setInterval(load, REFRESH_MS);
+    return () => clearInterval(timer);
   }, []);
 
-  const vacancies = jobs.filter(j => j.category === 'Vacancies').slice(0, 8);
-  const admitCards = jobs.filter(j => j.category === 'Admit Cards').slice(0, 8);
-  const results = jobs.filter(j => j.category === 'Results').slice(0, 8);
-
-  // Helper to render columns
-  const renderColumn = (title: string, items: Vacancy[], routePrefix: string, href: string, colorClass: string) => {
-    return (
-      <div className="bg-white rounded-3xl border border-slate-200/80 shadow-sm hover:shadow-lg transition-all duration-300 overflow-hidden flex flex-col justify-between">
-        <div>
-          {/* Column Header */}
-          <div className={`p-4 bg-gradient-to-r ${colorClass} text-white font-bold flex justify-between items-center`}>
-            <span className="tracking-wide text-sm sm:text-base">{title}</span>
-            <Link href={href} className="text-xs bg-white/20 hover:bg-white/30 px-3 py-1 rounded-full border border-white/10 transition-colors">
-              View All
-            </Link>
-          </div>
-          
-          {/* List items */}
-          <div className="divide-y divide-slate-100 p-2 min-h-[360px]">
-            {loading ? (
-              // Skeleton loading
-              Array.from({ length: 5 }).map((_, i) => (
-                <div key={i} className="p-3.5 space-y-2 animate-pulse">
-                  <div className="h-4 bg-slate-100 rounded w-11/12"></div>
-                  <div className="h-3 bg-slate-100 rounded w-3/4"></div>
-                </div>
-              ))
-            ) : items.length === 0 ? (
-              <div className="p-8 text-center text-xs text-slate-400 min-h-[300px] flex items-center justify-center">
-                No active updates available
-              </div>
-            ) : (
-              items.map((item) => (
-                <Link
-                  key={item.id || item._id}
-                  href={`/${routePrefix}/${item.slug}`}
-                  className="block p-3 hover:bg-slate-50 transition-colors rounded-xl text-slate-700 hover:text-orange-600 group"
-                >
-                  <div className="flex items-start gap-2">
-                    <span className="text-orange-500 mt-1 shrink-0 text-xs">⚡</span>
-                    <div className="flex-1 min-w-0">
-                      <span className="text-xs sm:text-sm font-semibold leading-snug line-clamp-2">
-                        {item.title}
-                      </span>
-                      {item.isNew && (
-                        <span className="inline-block mt-1 px-1.5 py-0.5 bg-rose-500 text-white rounded text-[8px] font-extrabold uppercase tracking-wider animate-pulse shadow-sm">
-                          NEW
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </Link>
-              ))
-            )}
-          </div>
-        </div>
-        
-        {/* Bottom CTA */}
-        <div className="p-3 bg-slate-50 border-t border-slate-100 text-center">
-          <Link
-            href={href}
-            className="inline-flex items-center text-xs font-bold text-slate-600 hover:text-orange-650 transition-colors"
-          >
-            Explore all {title.toLowerCase()}
-            <svg className="w-3 h-3 ml-1 group-hover:translate-x-0.5 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-            </svg>
-          </Link>
-        </div>
+  const renderColumn = (
+    title: string,
+    items: Vacancy[],
+    routePrefix: string,
+    viewAllTab: string,
+    colorClass: string
+  ) => (
+    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden flex flex-col">
+      <div className={`px-4 py-3 bg-gradient-to-r ${colorClass} text-white flex justify-between items-center`}>
+        <span className="font-bold text-sm">{title}</span>
+        <Link
+          href={`/vacancies?tab=${viewAllTab}`}
+          className="text-[11px] font-bold bg-white/25 hover:bg-white/40 px-2.5 py-1 rounded-full transition-colors"
+        >
+          View All →
+        </Link>
       </div>
-    );
-  };
+
+      <div className="divide-y divide-slate-100 flex-1">
+        {loading ? (
+          Array.from({ length: HOME_LIMIT }).map((_, i) => (
+            <div key={i} className="p-3 animate-pulse h-16 bg-slate-50" />
+          ))
+        ) : items.length === 0 ? (
+          <p className="p-6 text-center text-xs text-slate-400">
+            Abhi naya update nahi. Agla refresh har 6 ghante par.
+          </p>
+        ) : (
+          items.map((item) => {
+            const external = item.liveOnly && (item.officialLink || item.sourceUrl);
+            const href = external || `/${routePrefix}/${item.slug}`;
+            const LinkTag = external ? 'a' : Link;
+            const linkProps = external
+              ? { href, target: '_blank', rel: 'noopener noreferrer' }
+              : { href };
+            return (
+            <LinkTag
+              key={item.id || item._id || item.slug}
+              {...linkProps}
+              className="block px-4 py-3 hover:bg-orange-50/80 transition-colors"
+            >
+              <div className="flex items-start gap-2">
+                {item.isNew && (
+                  <span className="shrink-0 mt-0.5 px-1 py-0.5 bg-rose-500 text-white text-[8px] font-bold rounded uppercase">
+                    New
+                  </span>
+                )}
+                <div className="min-w-0 flex-1">
+                  <p className="text-xs sm:text-sm font-semibold text-slate-800 line-clamp-2 leading-snug">
+                    {item.title}
+                  </p>
+                  <JobMetaChips job={item} compact />
+                </div>
+              </div>
+            </LinkTag>
+          );
+          })
+        )}
+      </div>
+    </div>
+  );
 
   return (
-    <section className="bg-slate-50 py-12 sm:py-16 px-4">
-      <div className="max-w-7xl mx-auto">
-        
-        {/* Section Header */}
-        <div className="text-center mb-10 sm:mb-12">
-          <span className="text-orange-600 text-xs font-bold uppercase tracking-wider px-3 py-1 bg-orange-100 rounded-full">
-            Fast Updates
-          </span>
-          <h2 className="text-2xl sm:text-4xl font-extrabold text-slate-900 mt-3 tracking-tight">
-            Latest Jobs, Admit Cards & Results
-          </h2>
-          <p className="text-slate-500 text-sm sm:text-base mt-2 max-w-2xl mx-auto">
-            Stay ahead with live aggregated government notifications. Fast, verified, and direct.
+    <section className="bg-slate-50 py-10 sm:py-14 px-4">
+      <div className="max-w-6xl mx-auto">
+        <div className="text-center mb-8">
+          <h2 className="text-2xl sm:text-3xl font-extrabold text-slate-900">Sarkari Updates</h2>
+          <p className="text-slate-500 text-sm mt-1">
+            Live SarkariExam updates — har 6 ghante refresh
+            {lastSyncAt ? (
+              <span className="block text-[11px] text-slate-400 mt-0.5">
+                Last sync: {new Date(lastSyncAt).toLocaleString('hi-IN')}
+              </span>
+            ) : null}
           </p>
         </div>
 
-        {/* 3 Column Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 sm:gap-8 max-w-6xl mx-auto">
-          {renderColumn('Latest Vacancies', vacancies, 'vacancy', '/vacancies', 'from-orange-600 to-amber-500',)}
-          {renderColumn('Admit Cards', admitCards, 'admit-card', '/admit-cards', 'from-blue-600 to-indigo-500')}
-          {renderColumn('Exam Results', results, 'result', '/results', 'from-emerald-600 to-teal-500')}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+          {renderColumn('Vacancy', feed.vacancies, 'vacancy', 'vacancies', 'from-orange-600 to-amber-500')}
+          {renderColumn('Admit Card', feed.admitCards, 'admit-card', 'admit', 'from-blue-600 to-indigo-500')}
+          {renderColumn('Result', feed.results, 'result', 'results', 'from-emerald-600 to-teal-500')}
         </div>
 
+        <div className="text-center mt-8">
+          <Link
+            href="/vacancies"
+            className="inline-flex items-center px-6 py-3 bg-slate-900 hover:bg-slate-800 text-white text-sm font-bold rounded-xl shadow-lg transition-colors"
+          >
+            सभी Vacancy, Admit & Result देखें
+          </Link>
+        </div>
       </div>
     </section>
   );

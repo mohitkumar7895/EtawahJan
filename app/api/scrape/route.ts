@@ -12,8 +12,10 @@ if (!(global as any).jobPortalCronRegistered) {
   (global as any).jobPortalCron = cron.schedule('0 */6 * * *', async () => {
     try {
       console.log('⏰ Automated Cron Scraper Triggered...');
-      const added = await scrapeLatestJobs();
-      console.log(`⏰ Cron Scraper execution completed. Added ${added} new posts.`);
+      const result = await scrapeLatestJobs();
+      console.log(
+        `⏰ Cron Scraper execution completed. New: ${result.created}, Updated: ${result.updated}`
+      );
     } catch (err: any) {
       console.error('❌ Error in automated Cron Scraper:', err.message);
     }
@@ -27,14 +29,19 @@ export async function GET() {
     console.log('📡 Manual scraping trigger received at /api/scrape');
     
     // Execute the scraper synchronously for the manual API call
-    const added = await scrapeLatestJobs();
+    const result = await scrapeLatestJobs();
     
     return NextResponse.json({
       success: true,
       message: 'Scraping executed successfully.',
-      addedPostsCount: added,
+      created: result.created,
+      updated: result.updated,
+      syncedAt: result.syncedAt,
+      addedPostsCount: result.created + result.updated,
       cronStatus: 'active',
       schedule: 'every 6 hours (0 */6 * * *)',
+      perCategory: 15,
+      source: 'https://www.sarkariexam.com/',
       timestamp: new Date().toISOString()
     });
   } catch (error: any) {

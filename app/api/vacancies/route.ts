@@ -5,27 +5,51 @@ import Subscriber from '@/models/Subscriber';
 import Notification from '@/models/Notification';
 import { sendEmail, isEmailConfigured } from '@/lib/emailService';
 import { websiteUpdateTemplate } from '@/lib/emailTemplates';
-import { slugify } from '@/lib/scraper';
+import {
+  slugify,
+  fetchLiveHomeFeed,
+  fetchLiveCategoryJobs,
+  fetchAllLiveJobs,
+} from '@/lib/scraper';
 
 export async function GET(request: NextRequest) {
+  const { searchParams } = new URL(request.url);
+  const feed = searchParams.get('feed') === 'home';
+
   try {
-    if (!isDBConnected()) {
+    let dbReady = isDBConnected();
+    if (!dbReady) {
       try {
         await connectDB();
-      } catch (connError: any) {
-        console.error("❌ Connection failed:", connError.message);
-        return NextResponse.json([]);
+        dbReady = true;
+      } catch (connError: unknown) {
+        const message = connError instanceof Error ? connError.message : String(connError);
+        console.error('❌ Connection failed:', message);
+        if (feed) {
+          return NextResponse.json(await fetchLiveHomeFeed());
+        }
+        const category = searchParams.get('category');
+        if (category === 'Vacancies' || category === 'Admit Cards' || category === 'Results') {
+          const limit = searchParams.get('limit');
+          const n = limit ? parseInt(limit, 10) : 15;
+          return NextResponse.json(await fetchLiveCategoryJobs(category, n));
+        }
+        return NextResponse.json(await fetchAllLiveJobs());
       }
     }
 
     // Parse query params for search & filter
-    const { searchParams } = new URL(request.url);
     const category = searchParams.get('category');
     const search = searchParams.get('search');
     const limitParam = searchParams.get('limit');
     const limit = limitParam ? parseInt(limitParam, 10) : undefined;
+    // Default: live SarkariExam feed (scraped, pruned to top 15). ?all=true includes admin/manual too.
+    const liveOnly = searchParams.get('all') !== 'true';
 
-    const filter: any = {};
+    const filter: Record<string, unknown> = {};
+    if (liveOnly) {
+      filter.sourceType = 'scraped';
+    }
     if (category) {
       filter.category = category;
     }
@@ -39,12 +63,41 @@ export async function GET(request: NextRequest) {
     }
 
     try {
-      let query = Vacancy.find(filter).sort({ createdAt: -1 });
+      if (feed) {
+        const live = { sourceType: 'scraped' };
+        const [vacancies, admitCards, results, lastSync] = await Promise.all([
+          Vacancy.find({ category: 'Vacancies', ...live }).sort({ updatedAt: -1 }).limit(5).lean(),
+          Vacancy.find({ category: 'Admit Cards', ...live }).sort({ updatedAt: -1 }).limit(5).lean(),
+          Vacancy.find({ category: 'Results', ...live }).sort({ updatedAt: -1 }).limit(5).lean(),
+          Vacancy.findOne({ sourceType: 'scraped' }).sort({ updatedAt: -1 }).select('updatedAt').lean(),
+        ]);
+        const total = vacancies.length + admitCards.length + results.length;
+        if (total === 0) {
+          return NextResponse.json(await fetchLiveHomeFeed());
+        }
+        return NextResponse.json({
+          vacancies,
+          admitCards,
+          results,
+          lastSyncAt: lastSync?.updatedAt ?? null,
+          refreshHours: 6,
+        });
+      }
+
+      let query = Vacancy.find(filter).sort({ updatedAt: -1 });
       if (limit) {
         query = query.limit(limit);
       }
-      
+
       const vacancies = await query;
+      if ((vacancies?.length ?? 0) === 0 && liveOnly && !search) {
+        if (category === 'Vacancies' || category === 'Admit Cards' || category === 'Results') {
+          return NextResponse.json(await fetchLiveCategoryJobs(category, limit ?? 15));
+        }
+        if (!category) {
+          return NextResponse.json(await fetchAllLiveJobs(limit ?? 15));
+        }
+      }
       return NextResponse.json(vacancies || []);
     } catch (queryError: any) {
       console.error("❌ Error querying vacancies:", queryError);
@@ -179,15 +232,26 @@ export async function POST(request: NextRequest) {
 
         // Create in-app notification
         try {
-          const notificationMessage = savedVacancy.shortDescription 
-            ? `${savedVacancy.title} - ${savedVacancy.shortDescription.substring(0, 100)}...`
-            : savedVacancy.title;
-          
+          const { buildShortNotification, internalJobLink } = await import('@/lib/vacancyNotifications');
+          const short = buildShortNotification({
+            category: savedVacancy.category as 'Vacancies' | 'Results' | 'Admit Cards',
+            title: savedVacancy.title,
+            startDate: savedVacancy.startDate,
+            lastDate: savedVacancy.lastDate,
+            ageLimit: savedVacancy.ageLimit,
+            totalPosts: savedVacancy.totalPosts,
+          });
+
           const notification = new Notification({
-            title: `New ${savedVacancy.category}: ${savedVacancy.title}`,
-            message: notificationMessage,
+            title: short.title,
+            message: short.message,
             type: 'vacancy',
-            link: savedVacancy.link || '',
+            link:
+              savedVacancy.link ||
+              internalJobLink(
+                savedVacancy.category as 'Vacancies' | 'Results' | 'Admit Cards',
+                savedVacancy.slug
+              ),
             relatedId: savedVacancy._id.toString(),
             isActive: true,
           });
@@ -214,7 +278,7 @@ export async function POST(request: NextRequest) {
                 if (subscriber.email && subscriber.email.trim()) {
                   try {
                     const subject = `🔔 नई नौकरी: ${savedVacancy.title} | New Job: ${savedVacancy.title} - Jan Seva Kendra`;
-                    const message = `नई नौकरी की जानकारी:\n\n${savedVacancy.title}\nCategory: ${savedVacancy.category}\nLast Date: ${savedVacancy.lastDate}\nApply Link: ${savedVacancy.officialLink}`;
+                    const message = `${savedVacancy.title}\n${savedVacancy.category} · Last: ${savedVacancy.lastDate || '—'}`;
                     
                     const html = websiteUpdateTemplate({
                       title: `नई नौकरी: ${savedVacancy.title}`,

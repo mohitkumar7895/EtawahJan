@@ -54,6 +54,13 @@ const vacancySchema = new mongoose.Schema({
     type: String,
     default: '',
   },
+  /** Original SarkariExam post URL (for scrape dedup) */
+  sourceUrl: {
+    type: String,
+    trim: true,
+    sparse: true,
+    unique: true,
+  },
   thumbnail: {
     type: String,
     default: '',

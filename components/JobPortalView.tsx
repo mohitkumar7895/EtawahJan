@@ -45,6 +45,9 @@ export default function JobPortalView({
       if (category !== 'All') {
         params.append('category', category);
       }
+      if (!search.trim()) {
+        params.append('limit', '15');
+      }
       if (search.trim()) {
         params.append('search', search.trim());
       }
@@ -113,8 +116,11 @@ export default function JobPortalView({
             <h1 className="text-3xl sm:text-5xl lg:text-6xl font-extrabold tracking-tight mb-4 bg-gradient-to-r from-orange-400 via-amber-200 to-emerald-400 bg-clip-text text-transparent">
               Sarkari Job Portal
             </h1>
-            <p className="text-slate-350 text-base sm:text-xl max-w-2xl mx-auto mb-8 font-light">
-              Get immediate alerts for Vacancies, Exam Results, and Hall Tickets. Automatically synced every 6 hours with official portals.
+            <p className="text-slate-350 text-base sm:text-xl max-w-2xl mx-auto mb-4 font-light">
+              SarkariExam.com se auto-sync — har 6 घंटे में latest 15 updates per category.
+            </p>
+            <p className="text-slate-400 text-sm max-w-xl mx-auto">
+              Vacancy: form & last date · Admit Card: hall ticket · Result: scorecard & merit
             </p>
           </div>
         </section>
@@ -279,13 +285,27 @@ export default function JobPortalView({
                   <div>
                     <div className="grid grid-cols-2 gap-4 pt-4 border-t border-slate-50 text-xs mb-4">
                       <div>
-                        <span className="block text-slate-400 uppercase font-semibold text-[9px] tracking-wider">Start Date</span>
+                        <span className="block text-slate-400 uppercase font-semibold text-[9px] tracking-wider">
+                          {job.category === 'Results'
+                            ? 'Result'
+                            : job.category === 'Admit Cards'
+                              ? 'Admit'
+                              : 'Start'}
+                        </span>
                         <span className="font-bold text-slate-700 truncate block mt-0.5">
-                          {job.startDate || 'Available Now'}
+                          {job.category === 'Results'
+                            ? 'Declared'
+                            : job.startDate || 'Available'}
                         </span>
                       </div>
                       <div>
-                        <span className="block text-slate-400 uppercase font-semibold text-[9px] tracking-wider">Last Date</span>
+                        <span className="block text-slate-400 uppercase font-semibold text-[9px] tracking-wider">
+                          {job.category === 'Results'
+                            ? 'Check'
+                            : job.category === 'Admit Cards'
+                              ? 'Exam Date'
+                              : 'Last Date'}
+                        </span>
                         <span className="font-bold text-red-500 truncate block mt-0.5">
                           {job.lastDate || 'See Details'}
                         </span>

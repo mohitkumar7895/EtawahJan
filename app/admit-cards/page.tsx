@@ -1,13 +1,5 @@
-import Header from '@/components/Header';
-import Footer from '@/components/Footer';
-import JobPortalView from '@/components/JobPortalView';
+import { redirect } from 'next/navigation';
 
-export default function AdmitCards() {
-  return (
-    <>
-      <Header />
-      <JobPortalView initialCategory="Admit Cards" showHero={true} />
-      <Footer />
-    </>
-  );
+export default function AdmitCardsPage() {
+  redirect('/vacancies?tab=admit');
 }
