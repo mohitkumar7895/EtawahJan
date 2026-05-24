@@ -1,0 +1,103 @@
+import {
+  Camera,
+  GraduationCap,
+  PiggyBank,
+  FileText,
+  Image as ImageIcon,
+  FileStack,
+  type LucideIcon,
+} from 'lucide-react';
+
+export interface DigitalTool {
+  id: string;
+  title: string;
+  subtitle: string;
+  description: string;
+  badge: string;
+  icon: LucideIcon;
+  link: string;
+  cta: string;
+  accent: string;
+  iconBg: string;
+}
+
+export const DIGITAL_TOOLS: DigitalTool[] = [
+  {
+    id: 'photo-resizer',
+    title: 'Sarkari Photo & Signature Resizer',
+    subtitle: 'Photo 20KB / 50KB — 1 click',
+    description:
+      'UP Police, SSC, RRB or Board exams ke liye photo & signature size compress karein instantly.',
+    badge: 'Highly Popular',
+    icon: Camera,
+    link: '/photo-resizer',
+    cta: 'Open Resizer',
+    accent: 'border-t-orange-500',
+    iconBg: 'bg-orange-50 text-orange-600',
+  },
+  {
+    id: 'image-background-changer',
+    title: 'Change Image Background Online',
+    subtitle: 'remove.bg jaisa — free',
+    description:
+      'Background auto remove, phir White, Grey ya Blue official color. SSC, UP Police, NEET ke liye.',
+    badge: 'New Release',
+    icon: ImageIcon,
+    link: '/image-background-changer',
+    cta: 'Open Background Changer',
+    accent: 'border-t-emerald-500',
+    iconBg: 'bg-emerald-50 text-emerald-600',
+  },
+  {
+    id: 'pdf-editor',
+    title: 'Free Online PDF Editor & Signer',
+    subtitle: 'Text · Fill · Sign',
+    description:
+      'PDF par text likhein, form fill karein ya digital signature add karke secure download karein.',
+    badge: 'New Release',
+    icon: FileText,
+    link: '/pdf-editor',
+    cta: 'Open PDF Editor',
+    accent: 'border-t-purple-500',
+    iconBg: 'bg-purple-50 text-purple-600',
+  },
+  {
+    id: 'file-converter',
+    title: 'All-in-One File Converter',
+    subtitle: 'PDF, Word, Image — 30+ tools',
+    description:
+      'PDF to JPG, Merge/Split, Word/Excel to PDF, OCR, compress — batch & ZIP download.',
+    badge: 'New Suite',
+    icon: FileStack,
+    link: '/file-converter',
+    cta: 'Open Converter',
+    accent: 'border-t-rose-500',
+    iconBg: 'bg-rose-50 text-rose-600',
+  },
+  {
+    id: 'eligibility-wizard',
+    title: 'Sarkari Scheme Eligibility Wizard',
+    subtitle: 'Yojana eligibility checker',
+    description:
+      'Age, income aur profile se dekhein kaun-si Central & UP Govt schemes eligible hain.',
+    badge: 'Scheme Finder',
+    icon: GraduationCap,
+    link: '/services',
+    cta: 'Check Eligibility',
+    accent: 'border-t-blue-500',
+    iconBg: 'bg-blue-50 text-blue-600',
+  },
+  {
+    id: 'savings-calculator',
+    title: 'Digital Savings & Fee Calculator',
+    subtitle: 'Govt vs market fees',
+    description:
+      'Certificates, PAN Card — official fees vs market rates, kitni bachat hogi dekhein.',
+    badge: 'Money Saver',
+    icon: PiggyBank,
+    link: '/services',
+    cta: 'Calculate Savings',
+    accent: 'border-t-emerald-500',
+    iconBg: 'bg-emerald-50 text-emerald-600',
+  },
+];
