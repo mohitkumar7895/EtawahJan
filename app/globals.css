@@ -31,6 +31,27 @@
   opacity: 0;
 }
 
+.resume-a4 {
+  box-sizing: border-box;
+}
+
+@media print {
+  body * {
+    visibility: hidden;
+  }
+  #resume-print-root,
+  #resume-print-root * {
+    visibility: visible;
+  }
+  #resume-print-root {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 210mm;
+    box-shadow: none !important;
+  }
+}
+
 html {
   color-scheme: light;
 }

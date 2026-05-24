@@ -5,6 +5,7 @@ import {
   FileText,
   Image as ImageIcon,
   FileStack,
+  Briefcase,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -22,6 +23,19 @@ export interface DigitalTool {
 }
 
 export const DIGITAL_TOOLS: DigitalTool[] = [
+  {
+    id: 'resume-builder',
+    title: 'AI Resume Builder',
+    subtitle: '20+ templates · PDF export',
+    description:
+      'Professional CV maker with live preview, AI summary, ATS checker, drag-drop sections, and instant PDF download.',
+    badge: 'New · Premium',
+    icon: Briefcase,
+    link: '/resume-builder',
+    cta: 'Build Resume',
+    accent: 'border-t-indigo-500',
+    iconBg: 'bg-indigo-50 text-indigo-600',
+  },
   {
     id: 'photo-resizer',
     title: 'Sarkari Photo & Signature Resizer',
