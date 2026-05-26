@@ -6,6 +6,7 @@ import {
   Image as ImageIcon,
   FileStack,
   Briefcase,
+  Wallet,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -87,6 +88,19 @@ export const DIGITAL_TOOLS: DigitalTool[] = [
     cta: 'Open Converter',
     accent: 'border-t-rose-500',
     iconBg: 'bg-rose-50 text-rose-600',
+  },
+  {
+    id: 'cash-counter',
+    title: 'Cash & Note Counter',
+    subtitle: '₹500, ₹200, ₹100… ka total',
+    description:
+      '₹500, ₹200, ₹100, ₹50, ₹20, ₹10 notes ki ginti daalo — total ₹ aur shabdon mein. Privacy ke liye total chhipa rakhne ka option.',
+    badge: 'New · Popular',
+    icon: Wallet,
+    link: '/cash-counter',
+    cta: 'Count Cash',
+    accent: 'border-t-emerald-500',
+    iconBg: 'bg-emerald-50 text-emerald-600',
   },
   {
     id: 'eligibility-wizard',
