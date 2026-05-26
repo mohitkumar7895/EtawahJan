@@ -7,6 +7,7 @@ import {
   FileStack,
   Briefcase,
   Wallet,
+  ClipboardList,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -101,6 +102,19 @@ export const DIGITAL_TOOLS: DigitalTool[] = [
     cta: 'Count Cash',
     accent: 'border-t-emerald-500',
     iconBg: 'bg-emerald-50 text-emerald-600',
+  },
+  {
+    id: 'applications',
+    title: 'Application Letter Maker',
+    subtitle: '50+ Sarkari, School, Bank, Office letters',
+    description:
+      'Sarkari (income, caste, FIR), School (TC, leave), Bank (cheque book, loan), Office (resignation, leave) — sab pre-written. Profile ek baar bharo, har letter mein auto-fill. PDF download free.',
+    badge: 'New · 50+ Templates',
+    icon: ClipboardList,
+    link: '/applications',
+    cta: 'Open Application Maker',
+    accent: 'border-t-orange-500',
+    iconBg: 'bg-orange-50 text-orange-600',
   },
   {
     id: 'eligibility-wizard',

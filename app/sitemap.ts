@@ -3,6 +3,7 @@ import { connectDB, isDBConnected } from '@/lib/db'
 import Blog from '@/models/Blog'
 import SitemapLink from '@/models/SitemapLink'
 import { SEO_TOOLS, FILE_CONVERTER_SUB_TOOLS } from '@/lib/seo/tools-catalog'
+import { ALL_TEMPLATES } from '@/lib/applications/templates'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.jan-seva.site'
@@ -24,6 +25,16 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     url: `${baseUrl}${t.path}`,
     lastModified: new Date(),
     changeFrequency: 'weekly' as const,
+    priority: 0.85,
+  }))
+
+  // ── /applications/[slug] — every individual letter template is a
+  // direct SERP target for queries like "income certificate
+  // application format" or "TC application letter".
+  const applicationPages: MetadataRoute.Sitemap = ALL_TEMPLATES.map((t) => ({
+    url: `${baseUrl}/applications/${t.slug}`,
+    lastModified: new Date(),
+    changeFrequency: 'monthly' as const,
     priority: 0.85,
   }))
 
@@ -191,6 +202,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         ...staticPages,
         ...toolPages,
         ...subToolPages,
+        ...applicationPages,
         ...guidePages,
         ...blogPages,
         ...customPages,
@@ -207,6 +219,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     ...staticPages,
     ...toolPages,
     ...subToolPages,
+    ...applicationPages,
     ...guidePages,
     ...districtPages,
   ]

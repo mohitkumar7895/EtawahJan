@@ -34,6 +34,10 @@ Allow: /file-converter
 Allow: /file-converter/
 Allow: /resume-builder
 
+# ── 50+ Application Letter Templates ──────────────────────────
+Allow: /applications
+Allow: /applications/
+
 # ── Long-form guides (cluster content) ────────────────────────
 Allow: /guides
 Allow: /guides/

@@ -360,6 +360,76 @@ export const SEO_TOOLS: SeoTool[] = [
   },
 
   // ──────────────────────────────────────────────────────────────────
+  // APPLICATIONS LIBRARY (50+ templates)
+  // ──────────────────────────────────────────────────────────────────
+  {
+    slug: 'applications',
+    path: '/applications',
+    title: 'Application Maker — 60+ Free Hindi & English Application Letter Formats',
+    description:
+      '60+ professional Hindi & English application letters — Sarkari (Tehsil, FIR, Pension), Bijli Vibhag (new connection, galat bill, meter change), School (TC, leave, scholarship), Bank (loan, cheque book), Office (resignation, leave). Profile bharo, edit karo, PDF download — सब free.',
+    keywords: [
+      'application format hindi',
+      'aavedan patra format',
+      'sarkari application maker',
+      'bijli vibhag application',
+      'electricity application format',
+      'galat bijli bill complaint',
+      'leave letter format hindi',
+      'tc application format',
+      'income certificate application',
+      'cheque book application',
+      'fir application format hindi',
+      'resignation letter format',
+      'free hindi application generator',
+      'devanagari application letter',
+      'jan seva application maker',
+    ],
+    audience: ['CSC operators', 'Students', 'Office workers', 'Citizens', 'Shopkeepers'],
+    steps: [
+      { name: 'Template chunein', text: 'Search bar mein "leave", "bijli", "income", "TC" type karo — ya category se browse karo.' },
+      { name: 'Bhasha chuno', text: 'हिंदी (Devanagari) ya English — top right toggle se kabhi bhi switch kar sakte hain.' },
+      { name: 'Profile bharo (ek baar)', text: 'Naam, pita ka naam, address, mobile — ek baar bharo, har letter mein auto-fill hoga.' },
+      { name: 'Application details bharo', text: 'Iss letter ke specific fields — leave dates, reason, amounts — bharo.' },
+      { name: 'Body edit karo (optional)', text: '"Edit text" dabakar pure letter ko apni marzi se badal sakte ho.' },
+      { name: 'PDF download karo', text: 'A4 letter — apke naam pe, bina kisi brand letterhead ke — seedha download.' },
+    ],
+    faqs: [
+      {
+        q: 'Kitne applications hain isme?',
+        a: '60+ templates — Sarkari (15), Bijli Vibhag (8), School/College (10), Bank (10), Office (10), Property (4), Misc (6). Sab daily-use applications professional Hindi aur English mein.',
+      },
+      {
+        q: 'Kya Hindi (Devanagari) mein letter banta hai?',
+        a: 'Haan — पूरा letter shudh Hindi (Devanagari) mein PDF mein aata hai. Top right "हिंदी / English" toggle se kabhi bhi switch kar sakte hain.',
+      },
+      {
+        q: 'Kya bijli vibhag ki applications bhi hain?',
+        a: 'Bilkul — naya connection, naam transfer, galat bill, bijli na aana, meter badalna, load badhana, permanent disconnection, reconnection — 8 templates milti hain.',
+      },
+      {
+        q: 'Kya body text ko edit kar sakte hain download se pehle?',
+        a: 'Haan — "Edit text" button dabakar full body ko apne hisaab se badal sakte ho. Edit ke baad direct PDF download.',
+      },
+      {
+        q: 'Kya mera data save hota hai?',
+        a: 'Aapki profile sirf aapke browser mein save hoti hai (localStorage). Server pe kuch nahi jaata — privacy 100%.',
+      },
+      {
+        q: 'Kya PDF par Jan Seva ka letterhead aata hai?',
+        a: 'Nahi — yeh aapki personal application hai, isliye PDF saaf hota hai. Sirf aapke naam aur address ke saath, bina kisi brand ke.',
+      },
+      {
+        q: 'Kya CSC operators iska use kar sakte hain?',
+        a: 'Bilkul. Counter pe customer aaye to seedha unka application 2 minute mein Hindi mein bana ke print do. CSC business ke liye perfect tool.',
+      },
+    ],
+    priority: 0.95,
+    changefreq: 'weekly',
+    category: 'document',
+  },
+
+  // ──────────────────────────────────────────────────────────────────
   // TOOLS LANDING PAGE
   // ──────────────────────────────────────────────────────────────────
   {
