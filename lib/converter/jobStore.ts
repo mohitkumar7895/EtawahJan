@@ -1,6 +1,22 @@
 import type { ConversionJob, JobStatus } from './types';
 
-const jobs = new Map<string, ConversionJob>();
+// In Next.js App Router, every route handler bundles its imports independently
+// (and dev-mode HMR re-evaluates modules), so a plain module-level `Map` ends
+// up duplicated per route — the POST handler stores the job in one map and the
+// GET /[id] handler reads from a different one, producing 404s.
+// Pinning the map onto `globalThis` makes every copy of this module share the
+// same singleton within a single Node.js process. (This still does not survive
+// across processes / serverless invocations — see the README note.)
+const globalForJobs = globalThis as unknown as {
+  __converterJobs?: Map<string, ConversionJob>;
+};
+
+const jobs: Map<string, ConversionJob> =
+  globalForJobs.__converterJobs ?? new Map<string, ConversionJob>();
+
+if (!globalForJobs.__converterJobs) {
+  globalForJobs.__converterJobs = jobs;
+}
 
 export function createJobRecord(id: string, toolId: string): ConversionJob {
   const job: ConversionJob = {

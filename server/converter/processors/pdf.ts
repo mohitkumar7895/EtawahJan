@@ -127,21 +127,44 @@ export async function txtToPdf(inputPath: string, outputPath: string) {
   await fs.writeFile(outputPath, await doc.save());
 }
 
+async function loadCreateCanvas(): Promise<(w: number, h: number) => any> {
+  // Prefer @napi-rs/canvas — ships prebuilt binaries for all platforms and
+  // does not need Cairo/libjpeg or a C++ toolchain at install time. Fall back
+  // to node-canvas if a project still has only that installed.
+  const errors: string[] = [];
+
+  const napiPkg = '@napi-rs/canvas';
+  try {
+    const mod: any = await import(/* webpackIgnore: true */ napiPkg);
+    if (mod?.createCanvas) return mod.createCanvas;
+  } catch (e: any) {
+    errors.push(`@napi-rs/canvas: ${e?.message || e}`);
+  }
+
+  const canvasPkg = 'canvas';
+  try {
+    const mod: any = await import(/* webpackIgnore: true */ canvasPkg);
+    if (mod?.createCanvas) return mod.createCanvas;
+  } catch (e: any) {
+    errors.push(`canvas: ${e?.message || e}`);
+  }
+
+  throw new Error(
+    'PDF to image requires a canvas implementation. ' +
+      'Run: npm install @napi-rs/canvas (recommended, prebuilt) ' +
+      'or: npm install canvas (needs Cairo + build tools). ' +
+      'Underlying errors: ' +
+      errors.join(' | ')
+  );
+}
+
 export async function pdfToImages(
   inputPath: string,
   outputDir: string,
   format: 'jpeg' | 'png',
   scale = 2
 ): Promise<string[]> {
-  let createCanvas: any;
-  try {
-    const canvasPkg = 'canvas';
-    createCanvas = (await import(/* webpackIgnore: true */ canvasPkg)).createCanvas;
-  } catch {
-    throw new Error(
-      'PDF to image requires the "canvas" package. Run: npm install canvas'
-    );
-  }
+  const createCanvas = await loadCreateCanvas();
   const pdfjs = await import(
     /* webpackIgnore: true */ 'pdfjs-dist/legacy/build/pdf.mjs'
   );

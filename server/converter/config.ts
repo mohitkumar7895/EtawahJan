@@ -1,4 +1,5 @@
 import path from 'path';
+import os from 'os';
 
 export const PORT = Number(process.env.CONVERTER_PORT || 4000);
 export const REDIS_URL = process.env.REDIS_URL || 'redis://127.0.0.1:6379';
@@ -9,7 +10,18 @@ export const MAX_FILES = Number(process.env.CONVERTER_MAX_FILES || 50);
 export const JOB_TTL_MS = Number(process.env.CONVERTER_JOB_TTL_HOURS || 2) * 60 * 60 * 1000;
 export const CLEANUP_INTERVAL_MS = 30 * 60 * 1000;
 
-export const TMP_ROOT = path.join(process.cwd(), 'tmp', 'converter');
+// On serverless (Vercel / AWS Lambda) `process.cwd()` is read-only; use `/tmp`.
+const cwd = process.cwd();
+const isServerless =
+  !!process.env.VERCEL ||
+  !!process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  !!process.env.LAMBDA_TASK_ROOT ||
+  cwd.startsWith('/var/task') ||
+  cwd === '/';
+
+export const TMP_ROOT = isServerless
+  ? path.join(os.tmpdir(), 'converter')
+  : path.join(cwd, 'tmp', 'converter');
 export const UPLOAD_DIR = path.join(TMP_ROOT, 'uploads');
 export const OUTPUT_DIR = path.join(TMP_ROOT, 'outputs');
 
