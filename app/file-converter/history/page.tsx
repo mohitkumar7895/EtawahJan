@@ -2,9 +2,8 @@
 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { History, Download } from 'lucide-react';
+import { History } from 'lucide-react';
 import type { ConversionJob } from '@/lib/converter/types';
-import { downloadUrl } from '@/lib/converter/api';
 import { getToolById } from '@/lib/converter/tools';
 import ConverterBrandLogo from '@/components/converter/ConverterBrandLogo';
 import ConverterBackButton from '@/components/converter/ConverterBackButton';
@@ -66,24 +65,21 @@ export default function ConverterHistoryPage() {
                     {job.status}
                   </span>
                 </div>
+                {/*
+                  In synchronous-converter mode the actual files are blob URLs
+                  that expire when the original tab closes. We can't
+                  re-download them later, so we just list the file names as
+                  a record of what was converted.
+                */}
                 {job.outputs?.length ? (
                   <div className="mt-3 flex flex-wrap gap-2">
-                    {job.zipUrl && (
-                      <a
-                        href={downloadUrl(job.zipUrl)}
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-rose-500"
+                    {job.outputs.map((o, i) => (
+                      <span
+                        key={`${o.name}-${i}`}
+                        className="inline-flex items-center gap-1 text-xs font-semibold text-slate-500 bg-slate-100 px-2.5 py-1 rounded-full dark:bg-slate-800"
                       >
-                        <Download className="w-4 h-4" /> ZIP
-                      </a>
-                    )}
-                    {job.outputs.map((o) => (
-                      <a
-                        key={o.url}
-                        href={downloadUrl(o.url)}
-                        className="inline-flex items-center gap-1 text-sm font-semibold text-rose-500"
-                      >
-                        <Download className="w-4 h-4" /> {o.name}
-                      </a>
+                        {o.name}
+                      </span>
                     ))}
                   </div>
                 ) : null}

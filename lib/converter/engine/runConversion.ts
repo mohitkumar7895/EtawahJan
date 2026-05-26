@@ -41,16 +41,23 @@ const OFFICE_TOOLS = new Set([
 
 const OCR_TOOLS = new Set(['ocr-pdf', 'pdf-to-text']);
 
+// NOTE: `webpackIgnore: true` was removed from these relative imports.
+// With it, webpack would leave the import statement intact and the
+// referenced files would not be included in the Vercel deployment, causing
+// a runtime "Cannot find module" error. Letting webpack trace and bundle
+// these local TS modules is correct; the *native* packages they depend on
+// (sharp, canvas, etc.) are already externalised via
+// `serverComponentsExternalPackages` in next.config.js.
 async function loadImageSharp() {
-  return import(/* webpackIgnore: true */ '../../../server/converter/processors/image');
+  return import('../../../server/converter/processors/image');
 }
 
 async function loadOffice() {
-  return import(/* webpackIgnore: true */ '../../../server/converter/processors/office');
+  return import('../../../server/converter/processors/office');
 }
 
 async function loadOcr() {
-  return import(/* webpackIgnore: true */ '../../../server/converter/processors/ocr');
+  return import('../../../server/converter/processors/ocr');
 }
 
 export async function runConversion(ctx: ProcessContext): Promise<ProcessResult> {

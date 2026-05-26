@@ -11,7 +11,7 @@ import ConverterBrandLogo from '@/components/converter/ConverterBrandLogo';
 
 export default function FileConverterHomePage() {
   const [query, setQuery] = useState('');
-  const [category, setCategory] = useState<'all' | 'pdf' | 'image' | 'office' | 'utility'>('all');
+  const [category, setCategory] = useState<'all' | 'pdf' | 'image' | 'utility'>('all');
 
   const filtered = useMemo(() => {
     let list = CONVERTER_TOOLS;
@@ -45,8 +45,8 @@ export default function FileConverterHomePage() {
           </h1>
           <p className="mt-5 text-slate-500 dark:text-slate-400 text-lg max-w-2xl mx-auto animate-fade-in">
             <span className="font-semibold text-slate-700 dark:text-slate-200">Arpit Jan Seva Kendra</span>{' '}
-            par PDF, Office, images — convert, merge, compress, OCR. Batch jobs, unlimited pages,
-            background processing — bilkul free.
+            par PDF aur images — convert, merge, split, compress, watermark, protect. Batch jobs aur
+            ZIP download — sab bilkul free.
           </p>
 
           <div className="mt-10 max-w-xl mx-auto relative">
@@ -85,7 +85,7 @@ export default function FileConverterHomePage() {
 
       <section className="max-w-7xl mx-auto px-4 sm:px-6 pb-20">
         <div className="flex flex-wrap gap-2 mb-6">
-          {(['all', 'pdf', 'image', 'office', 'utility'] as const).map((cat) => (
+          {(['all', 'pdf', 'image', 'utility'] as const).map((cat) => (
             <button
               key={cat}
               type="button"

@@ -13,17 +13,20 @@ export const maxDuration = 60; // Vercel Hobby max — Pro can raise to 90/300.
 const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50 MB per uploaded file
 
 /**
- * Tools that cannot run on Vercel's default Node.js serverless runtime
- * because they require external system binaries or large native deps that
- * aren't part of the Lambda image.
- *   - office-*  → needs LibreOffice (`soffice`)
- *   - pdf-to-{jpg,png}  → needs `canvas` / `@napi-rs/canvas` native binary
- *   - ocr-pdf  → tesseract.js worker is too heavy for Lambda cold start
- *   - heic-to-jpg  → sharp on Vercel does not include libheif
+ * Tools that DEFINITELY cannot run on Vercel's default serverless runtime
+ * because LibreOffice / Tesseract aren't part of the Lambda image. We only
+ * gate these on Vercel — locally they work fine if the dev has the right
+ * binaries / npm packages installed.
  *
- * These are surfaced to the user with a helpful message instead of a 500.
+ *   - office-*  → needs LibreOffice (`soffice`)
+ *   - ocr-pdf   → tesseract.js worker bundle is too heavy for cold start
+ *
+ * `pdf-to-jpg`, `pdf-to-png`, `heic-to-jpg` are NOT blocked anymore — they
+ * may work on Vercel when @napi-rs/canvas / sharp's bundled libheif are
+ * available. If they fail, the real error message will surface instead of
+ * being preemptively hidden.
  */
-const SERVER_ONLY_TOOLS = new Set([
+const VERCEL_BLOCKED_TOOLS = new Set([
   'word-to-pdf',
   'excel-to-pdf',
   'ppt-to-pdf',
@@ -31,11 +34,13 @@ const SERVER_ONLY_TOOLS = new Set([
   'pdf-to-excel',
   'pdf-to-ppt',
   'html-to-pdf',
-  'pdf-to-jpg',
-  'pdf-to-png',
   'ocr-pdf',
-  'heic-to-jpg',
 ]);
+
+const IS_SERVERLESS =
+  !!process.env.VERCEL ||
+  !!process.env.AWS_LAMBDA_FUNCTION_NAME ||
+  !!process.env.LAMBDA_TASK_ROOT;
 
 const MIME_BY_EXT: Record<string, string> = {
   '.pdf': 'application/pdf',
@@ -81,14 +86,15 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Invalid tool' }, { status: 400 });
     }
 
-    if (SERVER_ONLY_TOOLS.has(toolId)) {
+    if (IS_SERVERLESS && VERCEL_BLOCKED_TOOLS.has(toolId)) {
       return NextResponse.json(
         {
-          error: 'Tool unavailable',
+          error: 'Tool unavailable on hosted converter',
           message:
-            `${tool.name} requires LibreOffice / native binaries which are not ` +
-            `available on the public web converter. Hum jaldi ise add karenge — ` +
-            `tab tak alternative tools (Compress PDF, Merge PDF, Image conversions) try karein.`,
+            `${tool.name} requires LibreOffice (or a heavy OCR runtime) which ` +
+            `is not available on the public web converter yet. Hum jaldi enable ` +
+            `karenge — tab tak Compress PDF, Merge PDF, Split PDF, Image ` +
+            `conversions try karein.`,
         },
         { status: 503 }
       );
@@ -185,9 +191,20 @@ export async function POST(req: NextRequest) {
       },
     });
   } catch (err) {
-    console.error('POST /api/converter/jobs:', err);
+    // Always log the full error server-side so it's easy to grep in Vercel
+    // logs / `npm run dev` terminal output.
+    console.error('POST /api/converter/jobs: conversion failed', err);
     const msg = err instanceof Error ? err.message : 'Conversion failed';
-    return NextResponse.json({ error: msg }, { status: 500 });
+    const stack = err instanceof Error ? err.stack : undefined;
+    return NextResponse.json(
+      {
+        error: msg,
+        // Expose the stack only in dev — keeps prod responses small and
+        // doesn't leak file paths to end users.
+        stack: process.env.NODE_ENV !== 'production' ? stack : undefined,
+      },
+      { status: 500 }
+    );
   } finally {
     // Best-effort cleanup of /tmp so we don't fill the Lambda's tmpfs.
     rm(uploadDir, { recursive: true, force: true }).catch(() => {});

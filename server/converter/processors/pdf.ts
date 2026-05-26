@@ -1,5 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { pathToFileURL } from 'url';
 import { PDFDocument, degrees, rgb, StandardFonts } from 'pdf-lib';
 
 export async function mergePdfs(inputPaths: string[], outputPath: string) {
@@ -127,35 +128,105 @@ export async function txtToPdf(inputPath: string, outputPath: string) {
   await fs.writeFile(outputPath, await doc.save());
 }
 
-async function loadCreateCanvas(): Promise<(w: number, h: number) => any> {
-  // Prefer @napi-rs/canvas — ships prebuilt binaries for all platforms and
-  // does not need Cairo/libjpeg or a C++ toolchain at install time. Fall back
-  // to node-canvas if a project still has only that installed.
+/**
+ * Try to load a canvas implementation. We prefer @napi-rs/canvas because it
+ * ships prebuilt binaries on all platforms (Windows / macOS / Linux x64+arm)
+ * and needs no C++ toolchain at install time. Plain `canvas` is kept as a
+ * fallback for repos that still have only that installed.
+ *
+ * Returns the underlying module so the caller can use createCanvas AND the
+ * appropriate buffer-extraction API (which differs across implementations).
+ */
+type CanvasImpl = {
+  createCanvas: (w: number, h: number) => any;
+  // @napi-rs/canvas exposes `Image`, plain `canvas` doesn't.
+  flavour: 'napi' | 'node';
+};
+
+async function loadCanvasImpl(): Promise<CanvasImpl> {
   const errors: string[] = [];
 
-  const napiPkg = '@napi-rs/canvas';
   try {
-    const mod: any = await import(/* webpackIgnore: true */ napiPkg);
-    if (mod?.createCanvas) return mod.createCanvas;
+    const mod: any = await import(/* webpackIgnore: true */ '@napi-rs/canvas');
+    if (mod?.createCanvas) return { createCanvas: mod.createCanvas, flavour: 'napi' };
   } catch (e: any) {
     errors.push(`@napi-rs/canvas: ${e?.message || e}`);
   }
 
-  const canvasPkg = 'canvas';
   try {
-    const mod: any = await import(/* webpackIgnore: true */ canvasPkg);
-    if (mod?.createCanvas) return mod.createCanvas;
+    const mod: any = await import(/* webpackIgnore: true */ 'canvas');
+    if (mod?.createCanvas) return { createCanvas: mod.createCanvas, flavour: 'node' };
   } catch (e: any) {
     errors.push(`canvas: ${e?.message || e}`);
   }
 
   throw new Error(
     'PDF to image requires a canvas implementation. ' +
-      'Run: npm install @napi-rs/canvas (recommended, prebuilt) ' +
-      'or: npm install canvas (needs Cairo + build tools). ' +
+      'Run `npm install @napi-rs/canvas` (recommended — prebuilt binaries) ' +
+      'or `npm install canvas` (needs Cairo + build tools). ' +
       'Underlying errors: ' +
       errors.join(' | ')
   );
+}
+
+/**
+ * Extract a PNG/JPEG Buffer from a canvas, transparently handling the API
+ * difference between @napi-rs/canvas and node-canvas.
+ *
+ *   • @napi-rs/canvas: async `encode('jpeg' | 'png')` (preferred)
+ *                     also has sync `toBuffer('image/...')` in newer versions
+ *   • node-canvas:    sync `toBuffer('image/...')`
+ */
+async function canvasToBuffer(canvas: any, format: 'jpeg' | 'png'): Promise<Buffer> {
+  if (typeof canvas.encode === 'function') {
+    const out = await canvas.encode(format === 'jpeg' ? 'jpeg' : 'png');
+    return Buffer.isBuffer(out) ? out : Buffer.from(out);
+  }
+  if (typeof canvas.toBuffer === 'function') {
+    const out = canvas.toBuffer(format === 'jpeg' ? 'image/jpeg' : 'image/png');
+    return Buffer.isBuffer(out) ? out : Buffer.from(out);
+  }
+  throw new Error('Canvas implementation has neither encode() nor toBuffer().');
+}
+
+/**
+ * Locate `pdfjs-dist`'s on-disk asset folders so we can hand them to
+ * pdfjs as `file://` URLs. Without these, pdfjs throws
+ *   "Value is none of these types `String`, `Path`, `URL`."
+ * the moment it tries to resolve a CMap or standard-font asset.
+ *
+ * We probe a few likely paths because Next.js bundling can shift cwd /
+ * __dirname around (especially on Vercel where files live under /var/task).
+ */
+async function getPdfjsAssetUrls(): Promise<{
+  standardFontDataUrl?: string;
+  cMapUrl?: string;
+}> {
+  const candidates = [
+    path.join(process.cwd(), 'node_modules', 'pdfjs-dist'),
+    path.join('/var/task', 'node_modules', 'pdfjs-dist'),
+  ];
+
+  for (const root of candidates) {
+    try {
+      const fontsDir = path.join(root, 'standard_fonts');
+      const cmapsDir = path.join(root, 'cmaps');
+      // standard_fonts is the critical one — fail fast if it's missing.
+      await fs.access(fontsDir);
+      const standardFontDataUrl = pathToFileURL(fontsDir + path.sep).href;
+      const cmapsExists = await fs
+        .access(cmapsDir)
+        .then(() => true)
+        .catch(() => false);
+      return {
+        standardFontDataUrl,
+        cMapUrl: cmapsExists ? pathToFileURL(cmapsDir + path.sep).href : undefined,
+      };
+    } catch {
+      continue;
+    }
+  }
+  return {}; // Caller will run with disableFontFace and accept missing-glyph boxes.
 }
 
 export async function pdfToImages(
@@ -164,32 +235,64 @@ export async function pdfToImages(
   format: 'jpeg' | 'png',
   scale = 2
 ): Promise<string[]> {
-  const createCanvas = await loadCreateCanvas();
-  const pdfjs = await import(
+  const { createCanvas } = await loadCanvasImpl();
+  const pdfjs: any = await import(
     /* webpackIgnore: true */ 'pdfjs-dist/legacy/build/pdf.mjs'
   );
 
+  const assets = await getPdfjsAssetUrls();
   const data = new Uint8Array(await fs.readFile(inputPath));
-  const loadingTask = pdfjs.getDocument({ data, useSystemFonts: true });
+
+  // Production-grade pdfjs config for Node:
+  //   • useSystemFonts:false  — Node has no font-config registry to query
+  //   • disableFontFace:true  — pdfjs would otherwise call FontFace.load()
+  //                              which doesn't exist outside the browser
+  //   • isEvalSupported:false — avoid CSP / SES-blocked Function() calls
+  //   • standardFontDataUrl   — file:// URL to bundled fonts so missing
+  //                              base-14 substitutes render correctly
+  //   • cMapPacked:true       — pdfjs ships .bcmap (binary) by default
+  const loadingTask = pdfjs.getDocument({
+    data,
+    useSystemFonts: false,
+    disableFontFace: true,
+    isEvalSupported: false,
+    cMapPacked: true,
+    ...assets,
+  });
+
   const pdf = await loadingTask.promise;
   const outputs: string[] = [];
 
-  for (let i = 1; i <= pdf.numPages; i++) {
-    const page = await pdf.getPage(i);
-    const viewport = page.getViewport({ scale });
-    const canvas = createCanvas(viewport.width, viewport.height);
-    const ctx = canvas.getContext('2d');
+  try {
+    for (let i = 1; i <= pdf.numPages; i++) {
+      const page = await pdf.getPage(i);
+      try {
+        const viewport = page.getViewport({ scale });
+        const canvas = createCanvas(
+          Math.ceil(viewport.width),
+          Math.ceil(viewport.height)
+        );
+        const ctx = canvas.getContext('2d');
 
-    await page.render({
-      canvasContext: ctx as unknown as CanvasRenderingContext2D,
-      viewport,
-    }).promise;
+        await page.render({
+          canvasContext: ctx as unknown as CanvasRenderingContext2D,
+          viewport,
+        }).promise;
 
-    const ext = format === 'jpeg' ? 'jpg' : 'png';
-    const out = path.join(outputDir, `page-${i}.${ext}`);
-    const buf = canvas.toBuffer(format === 'jpeg' ? 'image/jpeg' : 'image/png');
-    await fs.writeFile(out, buf);
-    outputs.push(out);
+        const ext = format === 'jpeg' ? 'jpg' : 'png';
+        const out = path.join(outputDir, `page-${i}.${ext}`);
+        const buf = await canvasToBuffer(canvas, format);
+        await fs.writeFile(out, buf);
+        outputs.push(out);
+      } finally {
+        // pdfjs holds onto large per-page caches; explicit cleanup matters
+        // a lot for >50-page PDFs on a memory-tight Lambda.
+        page.cleanup();
+      }
+    }
+  } finally {
+    await pdf.cleanup().catch(() => {});
+    await pdf.destroy().catch(() => {});
   }
 
   return outputs;

@@ -168,23 +168,26 @@ export default function ToolWorkspace({ tool }: { tool: ConverterTool }) {
           </div>
 
           <div className="flex flex-col gap-2">
-            {result.zipUrl && (
-              <a
-                href={downloadUrl(result.zipUrl)}
-                className="inline-flex items-center justify-center gap-2 py-3 px-4 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors"
-              >
-                <Download className="w-5 h-5" />
-                Download ZIP
-              </a>
-            )}
+            {/*
+              In synchronous mode the API returns one file (auto-zipped if
+              multiple). `outputs[]` always holds that one file. We skip the
+              separate `zipUrl` button to avoid showing the same download
+              twice when both fields point at the same blob URL.
+            */}
             {result.outputs?.map((o) => (
               <a
                 key={o.url}
                 href={downloadUrl(o.url)}
-                className="inline-flex items-center justify-between gap-2 py-3 px-4 rounded-xl bg-white border border-emerald-200 font-semibold text-sm hover:bg-emerald-50 dark:bg-slate-900 dark:border-emerald-500/30"
+                download={o.name}
+                className="inline-flex items-center justify-between gap-2 py-3 px-4 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 transition-colors"
               >
-                <span className="truncate">{o.name}</span>
-                <Download className="w-4 h-4 shrink-0 text-emerald-600" />
+                <span className="truncate flex items-center gap-2">
+                  <Download className="w-5 h-5 shrink-0" />
+                  {o.name}
+                </span>
+                <span className="text-xs font-semibold opacity-80 whitespace-nowrap">
+                  {formatBytes(o.size)}
+                </span>
               </a>
             ))}
           </div>
@@ -205,9 +208,23 @@ function saveHistory(job: ConversionJob) {
   try {
     const key = 'converter-history';
     const prev = JSON.parse(localStorage.getItem(key) || '[]') as ConversionJob[];
-    const next = [job, ...prev].slice(0, 30);
+    // Don't store blob: URLs in history — they expire when the tab closes
+    // and would render as dead links on the history page.
+    const persistable: ConversionJob = {
+      ...job,
+      outputs: job.outputs?.map(({ name, size }) => ({ name, size, url: '' })),
+      zipUrl: undefined,
+    };
+    const next = [persistable, ...prev].slice(0, 30);
     localStorage.setItem(key, JSON.stringify(next));
   } catch {
     /* ignore */
   }
+}
+
+function formatBytes(n: number): string {
+  if (!n) return '';
+  if (n < 1024) return `${n} B`;
+  if (n < 1024 * 1024) return `${(n / 1024).toFixed(1)} KB`;
+  return `${(n / (1024 * 1024)).toFixed(2)} MB`;
 }

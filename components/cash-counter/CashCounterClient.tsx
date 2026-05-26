@@ -9,9 +9,10 @@ import {
   Eraser,
   Eye,
   EyeOff,
+  FileDown,
+  Loader2,
   Minus,
   Plus,
-  Printer,
   Share2,
   Sparkles,
   Wallet,
@@ -22,6 +23,7 @@ import {
   toIndianWordsEn,
   toIndianWordsHi,
 } from './numberToWords';
+import { generateCashCountPdf } from './generatePdf';
 
 // ────────────────────────────────────────────────────────────────────────────
 // Denominations — NOTES ONLY (no coins)
@@ -120,6 +122,7 @@ export default function CashCounterClient() {
   const [lang, setLang] = useState<'en' | 'hi'>('hi');
   const [showTotal, setShowTotal] = useState(false);
   const [copied, setCopied] = useState(false);
+  const [pdfBusy, setPdfBusy] = useState(false);
 
   // Restore on mount
   useEffect(() => {
@@ -239,14 +242,53 @@ export default function CashCounterClient() {
     handleCopy();
   };
 
-  const handlePrint = () => window.print();
+  const handleDownloadPdf = async () => {
+    if (pdfBusy) return;
+    setPdfBusy(true);
+    try {
+      const bytes = await generateCashCountPdf({
+        rows: rows.map(({ value, label, qty, subtotal }) => ({
+          value,
+          label,
+          qty,
+          subtotal,
+        })),
+        total,
+        totalPieces,
+      });
+      // pdf-lib returns Uint8Array; wrap in a fresh ArrayBuffer-backed
+      // Uint8Array slice so the Blob constructor type-checks cleanly.
+      const blob = new Blob([bytes.slice().buffer], { type: 'application/pdf' });
+      const url = URL.createObjectURL(blob);
+
+      const stamp = new Date()
+        .toISOString()
+        .replace(/[:T]/g, '-')
+        .slice(0, 16);
+      const filename = `cash-count-${stamp}.pdf`;
+
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = filename;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      // Give the browser a moment to start the download before revoking.
+      setTimeout(() => URL.revokeObjectURL(url), 4000);
+    } catch (err) {
+      console.error('PDF generation failed:', err);
+      alert(
+        'PDF banane mein dikkat aayi. Page reload karke dobara try karein, ya Copy button se text copy kar lein.'
+      );
+    } finally {
+      setPdfBusy(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen bg-slate-50 text-slate-800 print:bg-white">
-      <PrintStyles />
-
+    <div className="min-h-screen bg-slate-50 text-slate-800">
       {/* ─── Hero */}
-      <section className="bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-900 text-white px-4 py-10 sm:py-14 relative overflow-hidden print:hidden">
+      <section className="bg-gradient-to-br from-emerald-700 via-emerald-800 to-teal-900 text-white px-4 py-10 sm:py-14 relative overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,rgba(16,185,129,0.25),transparent_50%)]" />
         <div className="container mx-auto max-w-5xl relative z-10">
           <Link
@@ -285,7 +327,7 @@ export default function CashCounterClient() {
       </section>
 
       {/* ─── Main */}
-      <section className="px-4 py-8 md:py-12 print:hidden">
+      <section className="px-4 py-8 md:py-12">
         <div className="container mx-auto max-w-5xl space-y-8">
           {/* Status strip */}
           <div className="bg-white rounded-2xl border border-slate-200 px-4 sm:px-5 py-3.5 flex items-center justify-between gap-3 shadow-sm">
@@ -339,9 +381,10 @@ export default function CashCounterClient() {
               lang={lang}
               setLang={setLang}
               copied={copied}
+              pdfBusy={pdfBusy}
               onCopy={handleCopy}
               onShare={handleShare}
-              onPrint={handlePrint}
+              onDownloadPdf={handleDownloadPdf}
               onReset={resetAll}
             />
           ) : (
@@ -356,7 +399,7 @@ export default function CashCounterClient() {
           {showTotal && hasAny && <BreakdownTable rows={rows} totalPieces={totalPieces} total={total} />}
 
           {/* Help */}
-          <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6 print:hidden">
+          <div className="bg-white rounded-2xl border border-slate-200 p-5 sm:p-6">
             <h2 className="font-extrabold text-slate-800 mb-3">Kaise use karein?</h2>
             <ol className="list-decimal pl-5 space-y-1.5 text-sm text-slate-600">
               <li>Har note ke saamne kitne note hain wo number daalo.</li>
@@ -365,15 +408,15 @@ export default function CashCounterClient() {
                 <strong>“Total dekhna hai?”</strong> checkbox on karoge tabhi grand
                 total dikhega — privacy ke liye safe.
               </li>
-              <li>Copy / Print kar ke receipt rakh sakte ho.</li>
+              <li>
+                <strong>“Download PDF Receipt”</strong> click karke proper A4 receipt
+                download kar sakte ho — WhatsApp/email pe share karne layak.
+              </li>
               <li>Page refresh karo phir bhi tumhari ginti save rahegi (auto-save).</li>
             </ol>
           </div>
         </div>
       </section>
-
-      {/* ─── Print-only receipt (hidden on screen, visible only when printing) */}
-      <PrintReceipt rows={rows} total={total} totalPieces={totalPieces} />
     </div>
   );
 }
@@ -495,7 +538,7 @@ function ShowTotalToggle({
 }) {
   return (
     <label
-      className={`relative flex items-center justify-between gap-4 cursor-pointer rounded-2xl border-2 p-4 sm:p-5 shadow-sm transition print:hidden ${
+      className={`relative flex items-center justify-between gap-4 cursor-pointer rounded-2xl border-2 p-4 sm:p-5 shadow-sm transition ${
         value
           ? 'bg-emerald-50 border-emerald-300'
           : 'bg-white border-slate-200 hover:border-slate-300'
@@ -570,7 +613,7 @@ function HiddenTotalCard({
   onShow: () => void;
 }) {
   return (
-    <div className="rounded-3xl border-2 border-dashed border-slate-300 bg-white px-6 py-8 sm:py-10 text-center print:hidden">
+    <div className="rounded-3xl border-2 border-dashed border-slate-300 bg-white px-6 py-8 sm:py-10 text-center">
       <div className="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-slate-100 text-slate-500 mb-4">
         <EyeOff className="w-7 h-7" />
       </div>
@@ -600,9 +643,10 @@ function TotalCard({
   lang,
   setLang,
   copied,
+  pdfBusy,
   onCopy,
   onShare,
-  onPrint,
+  onDownloadPdf,
   onReset,
 }: {
   hasAny: boolean;
@@ -611,9 +655,10 @@ function TotalCard({
   lang: 'en' | 'hi';
   setLang: (l: 'en' | 'hi') => void;
   copied: boolean;
+  pdfBusy: boolean;
   onCopy: () => void;
   onShare: () => void;
-  onPrint: () => void;
+  onDownloadPdf: () => void;
   onReset: () => void;
 }) {
   return (
@@ -721,8 +766,32 @@ function TotalCard({
           </p>
         </div>
 
-        {/* Action bar */}
-        <div className="flex flex-wrap gap-2 pt-2 print:hidden">
+        {/* Primary action: Download PDF (big, prominent) */}
+        <button
+          type="button"
+          onClick={onDownloadPdf}
+          disabled={pdfBusy || !hasAny}
+          className={`mt-1 w-full inline-flex items-center justify-center gap-2 py-3.5 px-4 rounded-2xl font-extrabold text-sm sm:text-base shadow-md transition active:scale-[0.99] ${
+            hasAny
+              ? 'bg-white text-emerald-700 hover:bg-emerald-50'
+              : 'bg-slate-100 text-slate-400 cursor-not-allowed'
+          } disabled:opacity-70 disabled:cursor-wait`}
+        >
+          {pdfBusy ? (
+            <>
+              <Loader2 className="w-5 h-5 animate-spin" />
+              PDF banaya ja raha hai…
+            </>
+          ) : (
+            <>
+              <FileDown className="w-5 h-5" />
+              Download PDF Receipt
+            </>
+          )}
+        </button>
+
+        {/* Secondary actions */}
+        <div className="flex flex-wrap gap-2 pt-1">
           <ActionButton onClick={onCopy} dark={hasAny}>
             {copied ? (
               <>
@@ -730,15 +799,12 @@ function TotalCard({
               </>
             ) : (
               <>
-                <Copy className="w-4 h-4" /> Copy
+                <Copy className="w-4 h-4" /> Copy text
               </>
             )}
           </ActionButton>
           <ActionButton onClick={onShare} dark={hasAny}>
             <Share2 className="w-4 h-4" /> Share
-          </ActionButton>
-          <ActionButton onClick={onPrint} dark={hasAny}>
-            <Printer className="w-4 h-4" /> Print / PDF
           </ActionButton>
           <ActionButton onClick={onReset} dark={hasAny} danger>
             <Eraser className="w-4 h-4" /> Reset
@@ -815,126 +881,6 @@ function BreakdownTable({
   );
 }
 
-function PrintReceipt({
-  rows,
-  total,
-  totalPieces,
-}: {
-  rows: NoteRow[];
-  total: number;
-  totalPieces: number;
-}) {
-  const filled = rows.filter((r) => r.qty > 0);
-  const dateStr = new Date().toLocaleString('en-IN', {
-    day: '2-digit',
-    month: 'short',
-    year: 'numeric',
-    hour: '2-digit',
-    minute: '2-digit',
-    hour12: true,
-  });
-
-  return (
-    <div className="hidden print:block print-receipt text-black">
-      {/* Header */}
-      <div className="flex items-start justify-between border-b-2 border-black pb-3 mb-4">
-        <div>
-          <h1 className="text-2xl font-extrabold">Cash Count Receipt</h1>
-          <p className="text-xs">Arpit Jan Seva Kendra · Bharthana, Etawah</p>
-          <p className="text-xs">www.jan-seva.site/cash-counter</p>
-        </div>
-        <div className="text-right">
-          <p className="text-[11px] uppercase font-bold tracking-widest">
-            Date &amp; Time
-          </p>
-          <p className="text-sm font-semibold">{dateStr}</p>
-        </div>
-      </div>
-
-      {filled.length === 0 ? (
-        <div className="text-center py-12">
-          <p className="text-lg font-bold">Koi note count nahi hua.</p>
-          <p className="text-sm mt-1">
-            Pehle denominations mein ginti daalein, fir print karein.
-          </p>
-        </div>
-      ) : (
-        <>
-          {/* Itemised table */}
-          <table className="w-full text-sm border-collapse">
-            <thead>
-              <tr className="border-b-2 border-black">
-                <th className="text-left py-2 px-2 font-extrabold w-1/3">
-                  Denomination
-                </th>
-                <th className="text-right py-2 px-2 font-extrabold">Rate (₹)</th>
-                <th className="text-right py-2 px-2 font-extrabold">Notes</th>
-                <th className="text-right py-2 px-2 font-extrabold">
-                  Amount (₹)
-                </th>
-              </tr>
-            </thead>
-            <tbody>
-              {filled.map((r) => (
-                <tr key={r.value} className="border-b border-black/30">
-                  <td className="py-2 px-2 font-semibold">{r.label} note</td>
-                  <td className="py-2 px-2 text-right tabular-nums">
-                    {formatIndianRupees(r.value)}
-                  </td>
-                  <td className="py-2 px-2 text-right tabular-nums">{r.qty}</td>
-                  <td className="py-2 px-2 text-right tabular-nums font-semibold">
-                    {formatIndianRupees(r.subtotal)}
-                  </td>
-                </tr>
-              ))}
-              <tr className="border-t-2 border-black bg-black/5">
-                <td className="py-3 px-2 font-extrabold" colSpan={2}>
-                  TOTAL
-                </td>
-                <td className="py-3 px-2 text-right font-extrabold tabular-nums">
-                  {totalPieces}
-                </td>
-                <td className="py-3 px-2 text-right font-extrabold tabular-nums text-base">
-                  ₹{formatIndianRupees(total)}
-                </td>
-              </tr>
-            </tbody>
-          </table>
-
-          {/* Total in words */}
-          <div className="mt-5 border border-black/40 rounded p-3 text-sm">
-            <p className="font-bold mb-1">Amount in Words:</p>
-            <p className="font-semibold">
-              {toIndianWordsEn(total)} Rupees Only
-            </p>
-            <p className="text-xs mt-2 italic">
-              {toIndianWordsHi(total)} Rupaye Maatra
-            </p>
-          </div>
-
-          {/* Signature block */}
-          <div className="mt-10 grid grid-cols-2 gap-8 text-xs">
-            <div className="border-t border-black pt-2 text-center">
-              <p className="font-bold">Counted By</p>
-              <p>(Signature with Date)</p>
-            </div>
-            <div className="border-t border-black pt-2 text-center">
-              <p className="font-bold">Verified By</p>
-              <p>(Signature with Date)</p>
-            </div>
-          </div>
-        </>
-      )}
-
-      {/* Footer */}
-      <div className="mt-6 pt-3 border-t border-black/40 text-[10px] text-center text-black/70">
-        Generated by Jan Seva Kendra Cash Counter ·
-        Free online tool · jan-seva.site/cash-counter
-      </div>
-    </div>
-  );
-}
-
 function ActionButton({
   children,
   onClick,
@@ -964,42 +910,3 @@ function ActionButton({
   );
 }
 
-function PrintStyles() {
-  return (
-    <style jsx global>{`
-      @media print {
-        @page {
-          size: A4;
-          margin: 14mm;
-        }
-        html,
-        body {
-          background: #fff !important;
-          color: #000 !important;
-          -webkit-print-color-adjust: exact;
-          print-color-adjust: exact;
-        }
-        .print-receipt {
-          font-size: 12pt;
-          font-family:
-            ui-sans-serif,
-            system-ui,
-            -apple-system,
-            "Segoe UI",
-            Roboto,
-            sans-serif;
-          color: #000 !important;
-          padding: 0 !important;
-          margin: 0 !important;
-        }
-        .print-receipt table {
-          page-break-inside: auto;
-        }
-        .print-receipt tr {
-          page-break-inside: avoid;
-          page-break-after: auto;
-        }
-      }
-    `}</style>
-  );
-}
