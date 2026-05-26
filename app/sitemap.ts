@@ -2,10 +2,49 @@ import { MetadataRoute } from 'next'
 import { connectDB, isDBConnected } from '@/lib/db'
 import Blog from '@/models/Blog'
 import SitemapLink from '@/models/SitemapLink'
+import { SEO_TOOLS, FILE_CONVERTER_SUB_TOOLS } from '@/lib/seo/tools-catalog'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.jan-seva.site'
-  
+
+  // ── Tool pages — every standalone tool gets its own high-priority
+  // entry so Google indexes a deep link straight to the tool, not just
+  // the homepage. lastModified is set to "now" on every build so each
+  // deploy refreshes the crawl signal.
+  const toolPages: MetadataRoute.Sitemap = SEO_TOOLS.map((t) => ({
+    url: `${baseUrl}${t.path}`,
+    lastModified: new Date(),
+    changeFrequency: t.changefreq,
+    priority: t.priority,
+  }))
+
+  // ── /file-converter/[toolId] — every individual converter is a
+  // separate landing target for keywords like "PDF to JPG online".
+  const subToolPages: MetadataRoute.Sitemap = FILE_CONVERTER_SUB_TOOLS.map((t) => ({
+    url: `${baseUrl}${t.path}`,
+    lastModified: new Date(),
+    changeFrequency: 'weekly' as const,
+    priority: 0.85,
+  }))
+
+  // ── /guides hub + per-tool guide pages (long-form HowTo content
+  // that internally links back to the tool — the cluster pattern
+  // Google rewards).
+  const guidePages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/guides`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    ...SEO_TOOLS.map((t) => ({
+      url: `${baseUrl}/guides/${t.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    })),
+  ]
+
   const staticPages: MetadataRoute.Sitemap = [
     {
       url: `${baseUrl}/`,
@@ -148,13 +187,29 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
         console.error('Error fetching custom sitemap links:', customErr)
       }
 
-      return [...staticPages, ...blogPages, ...customPages, ...districtPages]
+      return [
+        ...staticPages,
+        ...toolPages,
+        ...subToolPages,
+        ...guidePages,
+        ...blogPages,
+        ...customPages,
+        ...districtPages,
+      ]
     }
   } catch (error) {
     console.error('Error fetching blogs for sitemap:', error)
   }
 
-  return [...staticPages, ...districtPages]
+  // Fallback when DB is unavailable: still emit tools + guides so the
+  // SEO surface never depends on MongoDB connectivity.
+  return [
+    ...staticPages,
+    ...toolPages,
+    ...subToolPages,
+    ...guidePages,
+    ...districtPages,
+  ]
 }
 
 

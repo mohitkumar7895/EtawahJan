@@ -7,6 +7,11 @@ Sitemap: https://www.jan-seva.site/sitemap.xml
 # Disallow admin and API routes
 Disallow: /admin/
 Disallow: /api/
+Disallow: /payment/
+Disallow: /resume-builder/dashboard
+Disallow: /resume-builder/editor
+Disallow: /file-converter/admin
+Disallow: /file-converter/history
 
 # Allow important pages
 Allow: /
@@ -19,13 +24,19 @@ Allow: /announcements
 Allow: /faq
 Allow: /track
 
+# ── Free digital tools (high priority for search) ─────────────
+Allow: /tools
+Allow: /cash-counter
+Allow: /photo-resizer
+Allow: /image-background-changer
+Allow: /pdf-editor
+Allow: /file-converter
+Allow: /file-converter/
+Allow: /resume-builder
+
+# ── Long-form guides (cluster content) ────────────────────────
+Allow: /guides
+Allow: /guides/
+
 # Crawl-delay for better indexing
 Crawl-delay: 1
-
-
-
-
-
-
-
-

@@ -1,12 +1,39 @@
 import Link from 'next/link';
+import type { Metadata } from 'next';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import { Briefcase, Sparkles, Download, LayoutTemplate, Shield, Zap } from 'lucide-react';
 import { RESUME_TEMPLATES } from '@/lib/resume-builder/templates';
+import ToolJsonLd from '@/components/seo/ToolJsonLd';
+import { getSeoToolBySlug, SITE_ORIGIN } from '@/lib/seo/tools-catalog';
+
+const TOOL = getSeoToolBySlug('resume-builder')!;
+
+export const metadata: Metadata = {
+  title: TOOL.title,
+  description: TOOL.description,
+  keywords: TOOL.keywords,
+  openGraph: {
+    title: TOOL.title,
+    description: TOOL.description,
+    url: `${SITE_ORIGIN}${TOOL.path}`,
+    type: 'website',
+    images: [{ url: `${SITE_ORIGIN}/jan-seva-logo-1.png`, width: 512, height: 512 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TOOL.title,
+    description: TOOL.description,
+  },
+  alternates: {
+    canonical: `${SITE_ORIGIN}${TOOL.path}`,
+  },
+};
 
 export default function ResumeBuilderLandingPage() {
   return (
     <>
+      <ToolJsonLd tool={TOOL} />
       <Header />
       <div className="min-h-screen bg-gradient-to-br from-slate-950 via-indigo-950 to-blue-950 text-white">
         <section className="relative overflow-hidden px-4 py-16 sm:py-24">

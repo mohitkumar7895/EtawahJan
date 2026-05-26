@@ -1,6 +1,8 @@
 import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import ToolPageLoader from '@/components/tools/ToolPageLoader';
+import ToolJsonLd from '@/components/seo/ToolJsonLd';
+import { getSeoToolBySlug, SITE_ORIGIN } from '@/lib/seo/tools-catalog';
 
 const CashCounterClient = dynamic(
   () => import('@/components/cash-counter/CashCounterClient'),
@@ -10,33 +12,34 @@ const CashCounterClient = dynamic(
   }
 );
 
+const TOOL = getSeoToolBySlug('cash-counter')!;
+
 export const metadata: Metadata = {
-  title: 'Cash & Note Counter — Kitne paise hain? | Jan Seva Kendra',
-  description:
-    'Free online cash counter — ₹500, ₹200, ₹100, ₹50, ₹20, ₹10 notes aur ₹1/₹2/₹5 sikke ki ginti daalo, total ₹ aur shabdon mein turant. Shopkeepers, CSC operators, bank ke liye.',
-  keywords: [
-    'cash counter online',
-    'note counter india',
-    'paise count karne wala tool',
-    'rupee note counter',
-    'currency counter india',
-    'shopkeeper cash calculator',
-    'jan seva kendra tools',
-    'rupees counter',
-    'denominations calculator',
-  ],
+  title: TOOL.title,
+  description: TOOL.description,
+  keywords: TOOL.keywords,
   openGraph: {
-    title: 'Cash & Note Counter — ₹ Total Calculator',
-    description:
-      '₹500, ₹200, ₹100, ₹50… har note aur sikke ka total turant. Hindi + English shabdon mein bhi.',
-    url: 'https://www.jan-seva.site/cash-counter',
+    title: TOOL.title,
+    description: TOOL.description,
+    url: `${SITE_ORIGIN}${TOOL.path}`,
     type: 'website',
+    images: [{ url: `${SITE_ORIGIN}/jan-seva-logo-1.png`, width: 512, height: 512 }],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: TOOL.title,
+    description: TOOL.description,
   },
   alternates: {
-    canonical: 'https://www.jan-seva.site/cash-counter',
+    canonical: `${SITE_ORIGIN}${TOOL.path}`,
   },
 };
 
 export default function CashCounterPage() {
-  return <CashCounterClient />;
+  return (
+    <>
+      <ToolJsonLd tool={TOOL} />
+      <CashCounterClient />
+    </>
+  );
 }
