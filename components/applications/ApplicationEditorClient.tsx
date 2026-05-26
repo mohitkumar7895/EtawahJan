@@ -637,7 +637,13 @@ export default function ApplicationEditorClient({ slug }: Props) {
 interface FieldInputProps {
   label: string;
   hint?: string;
-  type?: ApplicationField['type'];
+  /**
+   * Union covers both `ApplicationField['type']` (used by template
+   * fields) and the additional `'email'` variant used by the citizen
+   * profile group. Kept as a local union so we don't have to widen
+   * the public template type.
+   */
+  type?: ApplicationField['type'] | 'email';
   multiline?: boolean;
   rows?: number;
   required?: boolean;
