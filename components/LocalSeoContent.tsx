@@ -3,7 +3,7 @@
 import { Phone, MessageCircle, MapPin, CheckCircle, Clock, Shield } from 'lucide-react';
 import Link from 'next/link';
 
-const WHATSAPP_NUMBER = '9193898182';
+const WHATSAPP_NUMBER = '7895094129';
 
 export default function LocalSeoContent() {
   return (
@@ -136,7 +136,7 @@ export default function LocalSeoContent() {
 
           {/* CTA Block */}
           <div className="bg-gradient-to-r from-blue-600 to-blue-800 rounded-xl p-6 sm:p-8 text-white text-center">
-            <h2 className="text-xl sm:text-2xl font-bold mb-2">Visit Today | Call Now | WhatsApp Now</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-2">Visit Today | Call 9193898182 | WhatsApp 7895094129</h2>
             <p className="text-blue-100 mb-4 text-sm sm:text-base">
               आज ही आएं या फोन करें। Same day service, no tension. Jan Seva Kendra – आपके पास का भरोसेमंद सेंटर।
             </p>
@@ -146,7 +146,7 @@ export default function LocalSeoContent() {
                 className="inline-flex items-center justify-center gap-2 bg-white text-blue-700 px-5 py-3 rounded-lg font-bold hover:bg-blue-50 transition w-full sm:w-auto"
               >
                 <Phone className="w-5 h-5" />
-                Call Now: 9193898182
+                Call Now: 9193898182, 7895094129
               </a>
               <a
                 href={`https://wa.me/${WHATSAPP_NUMBER}`}
@@ -155,7 +155,7 @@ export default function LocalSeoContent() {
                 className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white px-5 py-3 rounded-lg font-bold transition w-full sm:w-auto"
               >
                 <MessageCircle className="w-5 h-5" />
-                WhatsApp Now
+                WhatsApp: 7895094129 / 9193898182
               </a>
               <Link
                 href="/contact"

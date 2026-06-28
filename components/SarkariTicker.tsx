@@ -18,7 +18,7 @@ export default function SarkariTicker() {
       <div className="container mx-auto px-4 flex items-center justify-between gap-4">
         
         {/* Hot Badge Label */}
-        <div className="flex items-center gap-1.5 bg-white text-red-600 px-2 sm:px-3 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-black uppercase tracking-wider animate-pulse flex-shrink-0 shadow shadow-red-700/50">
+        <div className="flex items-center gap-1.5 bg-white text-red-600 px-2 sm:px-3 py-0.5 sm:py-1 rounded-md text-[10px] sm:text-xs font-black uppercase tracking-wider flex-shrink-0 shadow shadow-red-700/50">
           <Flame className="w-3 h-3 sm:w-3.5 sm:h-3.5 fill-current" />
           <span>Latest updates</span>
         </div>
@@ -34,7 +34,7 @@ export default function SarkariTicker() {
                 href={up.link} 
                 className="inline-flex items-center gap-1.5 hover:text-yellow-100 hover:underline transition"
               >
-                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-300 flex-shrink-0 animate-spin" />
+                <Sparkles className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-yellow-300 flex-shrink-0" />
                 <span>{up.text}</span>
               </Link>
             ))}

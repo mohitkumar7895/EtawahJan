@@ -164,12 +164,12 @@ export default function DistrictPage({ params }: PageProps) {
                       <Phone className="w-4 h-4" /> Call Now: 9193898182
                     </a>
                     <a 
-                      href="https://wa.me/9193898182"
+                      href="https://wa.me/7895094129"
                       target="_blank"
                       rel="noopener noreferrer"
                       className="inline-flex items-center justify-center gap-2 bg-green-500 hover:bg-green-600 text-white font-bold px-6 py-3 rounded-xl transition duration-150 shadow-md shadow-green-200 text-sm sm:text-base"
                     >
-                      <MessageCircle className="w-4 h-4" /> WhatsApp Support
+                      <MessageCircle className="w-4 h-4" /> WhatsApp: 7895094129 / 9193898182
                     </a>
                   </div>
                 </div>

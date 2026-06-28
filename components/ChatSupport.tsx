@@ -4,6 +4,9 @@ import { useEffect, useState, useRef, useCallback } from 'react';
 import { MessageCircle, X, Send, Image as ImageIcon, Video, Download } from 'lucide-react';
 import { getChat, sendMessage, uploadChatFile, saveUser, updateUser, type Chat, type ChatMessage } from '@/lib/api';
 
+const OPEN_CHAT_POLL_MS = 15000;
+const BACKGROUND_CHAT_POLL_MS = 60000;
+
 export default function ChatSupport() {
   const [isOpen, setIsOpen] = useState(false);
   const [phoneNumber, setPhoneNumber] = useState('');
@@ -93,26 +96,22 @@ export default function ChatSupport() {
     }
   }, [lastAdminMessageTime, phoneEntered, phoneNumber]);
 
-  // Check notification permission on mount
+  // Check notification permission without keeping a timer alive on every page.
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'Notification' in window) {
-      setNotificationPermission(Notification.permission);
-      
-      // Listen for permission changes
-      const handlePermissionChange = () => {
-        setNotificationPermission(Notification.permission);
-      };
-      
-      // Check permission periodically (some browsers don't fire events)
-      const checkInterval = setInterval(() => {
-        if (Notification.permission !== notificationPermission) {
-          setNotificationPermission(Notification.permission);
-        }
-      }, 1000);
-      
-      return () => clearInterval(checkInterval);
+    if (typeof window === 'undefined' || !('Notification' in window)) {
+      return;
     }
-  }, [notificationPermission]);
+
+    const syncPermission = () => setNotificationPermission(Notification.permission);
+    syncPermission();
+    window.addEventListener('focus', syncPermission);
+    document.addEventListener('visibilitychange', syncPermission);
+
+    return () => {
+      window.removeEventListener('focus', syncPermission);
+      document.removeEventListener('visibilitychange', syncPermission);
+    };
+  }, []);
 
   // Handle window focus from notification click
   useEffect(() => {
@@ -336,7 +335,7 @@ export default function ChatSupport() {
 
   // Register Service Worker for background notifications
   useEffect(() => {
-    if (typeof window !== 'undefined' && 'serviceWorker' in navigator) {
+    if (typeof window !== 'undefined' && 'serviceWorker' in navigator && phoneEntered && phoneNumber) {
       navigator.serviceWorker
         .register('/sw.js')
         .then((registration) => {
@@ -364,7 +363,7 @@ export default function ChatSupport() {
         navigator.serviceWorker.removeEventListener('message', onSwMessage);
       };
     }
-  }, [loadChat, phoneNumber]);
+  }, [loadChat, phoneEntered, phoneNumber]);
 
   // Clear notification when chat opens
   useEffect(() => {
@@ -383,10 +382,10 @@ export default function ChatSupport() {
       // Initial load
       loadChat(true);
 
-      // Poll every 5 seconds for new messages (reduced from 2s for better performance)
+      // Poll less aggressively to keep the rest of the page smooth.
       const interval = setInterval(() => {
         loadChat(false); // false = don't update user on polling
-      }, 5000);
+      }, OPEN_CHAT_POLL_MS);
 
       setPollingInterval(interval);
 
@@ -403,10 +402,12 @@ export default function ChatSupport() {
       // Initial background check
       loadChat(false, true);
 
-      // Poll every 10 seconds for new messages in background
+      // Background checks should be light and only run while the tab is visible.
       const interval = setInterval(() => {
-        loadChat(false, true); // Background check
-      }, 10000); // 10 seconds for background polling
+        if (document.visibilityState === 'visible') {
+          loadChat(false, true);
+        }
+      }, BACKGROUND_CHAT_POLL_MS);
 
       setBackgroundPollingInterval(interval);
 

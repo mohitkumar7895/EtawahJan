@@ -22,6 +22,7 @@ export default function Header() {
     { path: '/', label: 'Home' },
     { path: '/about', label: 'About' },
     { path: '/services', label: 'Services' },
+    { path: '/digital-services', label: 'Digital Work' },
     { path: '/tools', label: 'Tools' },
     { path: '/vacancies', label: 'Vacancies' },
     { path: '/announcements', label: 'Announcements' },

@@ -85,7 +85,7 @@ export default function QuickLeadWidget() {
           {!success ? (
             <form onSubmit={handleSubmit} className="space-y-4">
               <div className="flex items-center gap-2 mb-1">
-                <Sparkles className="w-5 h-5 text-blue-600 animate-pulse flex-shrink-0" />
+                <Sparkles className="w-5 h-5 text-blue-600 flex-shrink-0" />
                 <div>
                   <h3 className="font-extrabold text-gray-900 text-sm sm:text-base">Get a Call Back in 5 Mins!</h3>
                   <p className="text-xs text-gray-500">5 मिनट में तुरंत कॉल-बैक पाएं</p>
@@ -162,7 +162,7 @@ export default function QuickLeadWidget() {
                   </>
                 ) : (
                   <>
-                    <PhoneCall className="w-4 h-4 animate-bounce" />
+                    <PhoneCall className="w-4 h-4" />
                     <span>Call Me Back / मुझे फोन करें</span>
                   </>
                 )}
@@ -204,7 +204,7 @@ export default function QuickLeadWidget() {
           className={`h-12 sm:h-14 px-4 sm:px-5 rounded-full flex items-center gap-2 text-white font-bold text-xs sm:text-sm shadow-2xl transition duration-300 transform hover:scale-105 active:scale-95 ${
             isOpen 
               ? 'bg-zinc-800 hover:bg-zinc-950' 
-              : 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700 animate-pulse'
+              : 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700'
           }`}
         >
           {isOpen ? (
@@ -214,7 +214,7 @@ export default function QuickLeadWidget() {
             </>
           ) : (
             <>
-              <PhoneCall className="w-5 h-5 flex-shrink-0 animate-bounce" />
+              <PhoneCall className="w-5 h-5 flex-shrink-0" />
               <span>Callback / कॉल-बैक</span>
             </>
           )}

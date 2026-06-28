@@ -3,6 +3,8 @@
 import { useEffect } from 'react';
 import { trackVisitor } from '@/lib/api';
 
+const VISITOR_HEARTBEAT_MS = 2 * 60 * 1000;
+
 // Generate or get session ID
 function getSessionId(): string {
   if (typeof window === 'undefined') return '';
@@ -78,19 +80,28 @@ export default function VisitorTracker() {
       }
     };
 
-    // Track immediately when page loads
-    track();
+    const scheduleTrack = () => {
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(() => track(), { timeout: 2000 });
+        return;
+      }
+
+      setTimeout(track, 0);
+    };
+
+    // Track after the browser has had a chance to paint the page.
+    scheduleTrack();
 
     // Track on route change (for Next.js)
     const handleRouteChange = () => {
-      setTimeout(track, 100);
+      setTimeout(scheduleTrack, 100);
     };
 
     // Listen for popstate (back/forward navigation)
     window.addEventListener('popstate', handleRouteChange);
 
-    // Track every 30 seconds to keep visitor active
-    const interval = setInterval(track, 30000);
+    // Keep visitor active without frequent background network work.
+    const interval = setInterval(scheduleTrack, VISITOR_HEARTBEAT_MS);
 
     return () => {
       window.removeEventListener('popstate', handleRouteChange);

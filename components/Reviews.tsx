@@ -1,6 +1,5 @@
 'use client';
 
-import { useState, useEffect } from 'react';
 import { Star, ExternalLink } from 'lucide-react';
 
 interface Review {
@@ -224,6 +223,8 @@ const reviews: Review[] = [
 ];
 
 export default function Reviews() {
+  const visibleReviews = reviews.slice(0, 10);
+
   const getInitials = (name: string) => {
     return name
       .split(' ')
@@ -234,7 +235,7 @@ export default function Reviews() {
   };
 
   // Duplicate reviews for seamless infinite scroll
-  const duplicatedReviews = [...reviews, ...reviews, ...reviews];
+  const duplicatedReviews = [...visibleReviews, ...visibleReviews];
 
   return (
     <section id="reviews" className="bg-white pt-0 pb-2 md:pt-0 md:pb-8 lg:pt-0 lg:pb-8 overflow-hidden -mt-4 md:-mt-6">
@@ -255,7 +256,7 @@ export default function Reviews() {
           <div className="absolute right-0 top-0 bottom-0 w-16 sm:w-24 md:w-32 bg-gradient-to-l from-white to-transparent z-10 pointer-events-none" />
           
           {/* Scrolling container */}
-          <div className="flex gap-4 sm:gap-5 md:gap-6 animate-scroll">
+          <div className="flex gap-4 sm:gap-5 md:gap-6 animate-scroll will-change-transform">
             {duplicatedReviews.map((review, index) => (
               <div
                 key={`${review.id}-${index}`}
@@ -332,7 +333,7 @@ export default function Reviews() {
             transform: translateX(0);
           }
           100% {
-            transform: translateX(calc(-250px * ${reviews.length} - 16px * ${reviews.length}));
+            transform: translateX(calc(-250px * ${visibleReviews.length} - 16px * ${visibleReviews.length}));
           }
         }
         
@@ -342,7 +343,7 @@ export default function Reviews() {
               transform: translateX(0);
             }
             100% {
-              transform: translateX(calc(-280px * ${reviews.length} - 20px * ${reviews.length}));
+              transform: translateX(calc(-280px * ${visibleReviews.length} - 20px * ${visibleReviews.length}));
             }
           }
         }
@@ -353,7 +354,7 @@ export default function Reviews() {
               transform: translateX(0);
             }
             100% {
-              transform: translateX(calc(-300px * ${reviews.length} - 24px * ${reviews.length}));
+              transform: translateX(calc(-300px * ${visibleReviews.length} - 24px * ${visibleReviews.length}));
             }
           }
         }
@@ -364,13 +365,13 @@ export default function Reviews() {
               transform: translateX(0);
             }
             100% {
-              transform: translateX(calc(-380px * ${reviews.length} - 24px * ${reviews.length}));
+              transform: translateX(calc(-380px * ${visibleReviews.length} - 24px * ${visibleReviews.length}));
             }
           }
         }
         
         .animate-scroll {
-          animation: scroll ${reviews.length * 10}s linear infinite;
+          animation: scroll ${visibleReviews.length * 10}s linear infinite;
         }
         
         .animate-scroll:hover {

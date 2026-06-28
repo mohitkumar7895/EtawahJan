@@ -198,6 +198,8 @@ type Service = {
   category: string;
 };
 
+const VACANCIES_REFRESH_MS = 5 * 60 * 1000;
+
 export default function Services() {
   const [vacancies, setVacancies] = useState<Vacancy[]>([]);
   const [selectedService, setSelectedService] = useState<Service | null>(null);
@@ -227,7 +229,7 @@ export default function Services() {
     
     const interval = setInterval(() => {
       loadVacancies();
-    }, 5000);
+    }, VACANCIES_REFRESH_MS);
 
     return () => clearInterval(interval);
   }, []);

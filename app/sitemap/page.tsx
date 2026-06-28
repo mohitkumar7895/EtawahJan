@@ -38,6 +38,7 @@ export default async function HTMLSitemapPage() {
     { name: 'Home / मुख्य पृष्ठ', href: '/' },
     { name: 'About Us / हमारे बारे में', href: '/about' },
     { name: 'Services / हमारी सेवाएं', href: '/services' },
+    { name: 'Digital Work / वेबसाइट सॉफ्टवेयर सेवाएं', href: '/digital-services' },
     { name: 'Track Application / आवेदन स्थिति', href: '/track' },
     { name: 'FAQ / अक्सर पूछे जाने वाले सवाल', href: '/faq' },
     { name: 'Contact Us / संपर्क करें', href: '/contact' },
@@ -242,12 +243,12 @@ export default async function HTMLSitemapPage() {
                         Call: 9193898182
                       </a>
                       <a 
-                        href="https://wa.me/9193898182"
+                        href="https://wa.me/917895094129"
                         target="_blank"
                         rel="noopener noreferrer"
                         className="bg-green-500 hover:bg-green-600 text-white font-bold px-5 py-2.5 rounded-xl transition text-sm w-full sm:w-auto text-center flex items-center justify-center gap-1.5"
                       >
-                        💬 WhatsApp Now
+                        💬 WhatsApp: 7895094129 / 9193898182
                       </a>
                     </div>
                   </div>

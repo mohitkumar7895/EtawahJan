@@ -6,6 +6,8 @@ import { getAnnouncements, type Announcement } from '@/lib/api';
 import { resolveAnnouncementMedia, videoMimeTypeForUrl } from '@/lib/announcementMedia';
 import Link from 'next/link';
 
+const ANNOUNCEMENTS_REFRESH_MS = 2 * 60 * 1000;
+
 export default function Announcements() {
   const [announcements, setAnnouncements] = useState<Announcement[]>([]);
   const [loading, setLoading] = useState(false);
@@ -28,7 +30,7 @@ export default function Announcements() {
     
     const interval = setInterval(() => {
       loadAnnouncements();
-    }, 5000); // Refresh every 5 seconds for faster updates
+    }, ANNOUNCEMENTS_REFRESH_MS);
 
     return () => clearInterval(interval);
   }, []);

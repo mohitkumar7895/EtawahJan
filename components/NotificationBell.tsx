@@ -5,6 +5,8 @@ import { Bell, X, CheckCircle } from 'lucide-react';
 import Link from 'next/link';
 import CallbackRequestForm from '@/components/CallbackRequestForm';
 
+const NOTIFICATION_POLL_MS = 60 * 1000;
+
 interface Notification {
   _id: string;
   title: string;
@@ -126,7 +128,11 @@ export default function NotificationBell() {
   useEffect(() => {
     if (userId && userId !== 'anonymous') {
       fetchNotifications();
-      pollingIntervalRef.current = setInterval(() => fetchNotifications(), 5000);
+      pollingIntervalRef.current = setInterval(() => {
+        if (document.visibilityState === 'visible') {
+          fetchNotifications();
+        }
+      }, NOTIFICATION_POLL_MS);
 
       return () => {
         if (pollingIntervalRef.current) {

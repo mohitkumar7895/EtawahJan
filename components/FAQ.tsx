@@ -256,12 +256,12 @@ export default function FAQ() {
                 📞 Call: 9193898182, 7895094129
               </a>
               <a
-                href="https://wa.me/9193898182"
+                href="https://wa.me/7895094129"
                 target="_blank"
                 rel="noopener noreferrer"
                 className="bg-green-500 hover:bg-green-600 text-white px-6 py-3 rounded-lg font-bold transition text-center"
               >
-                💬 WhatsApp Now
+                💬 WhatsApp: 7895094129 / 9193898182
               </a>
               <a
                 href="/contact"

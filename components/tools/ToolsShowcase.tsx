@@ -79,7 +79,7 @@ export default function ToolsShowcase() {
                 rel="noopener noreferrer"
                 className="bg-yellow-400 hover:bg-yellow-300 text-slate-900 font-black px-6 py-3.5 rounded-xl text-center text-sm transition active:scale-[0.98]"
               >
-                WhatsApp करें
+                WhatsApp: 7895094129 / 9193898182
               </a>
               <a
                 href="tel:9193898182"

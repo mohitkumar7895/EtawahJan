@@ -10,7 +10,7 @@ import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
   title: 'Jan Seva Kendra Near Me | CSC Center Etawah | Website & App Development',
-  description: 'Jan Seva Kendra & CSC center near me—Etawah, Bharthana. PAN card, certificates. Premium IT Services: Website Development, Mobile Apps, Games, Custom Software. Grow your business 10x! Call 9193898182 | WhatsApp Now.',
+  description: 'Jan Seva Kendra & CSC center near me—Etawah, Bharthana. PAN card, certificates. Premium IT Services: Website Development, Mobile Apps, Games, Custom Software. Grow your business 10x! Call 9193898182 | WhatsApp 7895094129.',
   keywords: [
     'jan seva kendra near me',
     'csc center near me',

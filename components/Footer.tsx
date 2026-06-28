@@ -70,6 +70,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/digital-services" className="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>Digital Work</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/vacancies" className="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition flex items-center py-0.5">
                   <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full mr-1.5 flex-shrink-0"></span>
                   <span>Vacancies</span>
@@ -164,7 +170,7 @@ export default function Footer() {
                   arpitcsc1707@gmail.com
                 </a>
               </div>
-              <div className="flex items-start space-x-1.5 sm:space-x-2 mt-2 sm:mt-3 hidden sm:block">
+              <div className="mt-2 hidden items-start space-x-1.5 sm:mt-3 sm:flex sm:space-x-2">
                 <Clock className="w-3.5 h-3.5 sm:w-4 sm:h-4 flex-shrink-0 mt-0.5 text-blue-400" />
                 <div>
                   <p className="font-semibold text-white text-xs">Mon-Sat: 9AM-7PM</p>
@@ -197,15 +203,21 @@ export default function Footer() {
                 <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 text-green-400 flex-shrink-0" />
                 <span>Banking & Insurance</span>
               </li>
-              <li className="flex items-center hidden sm:flex">
+              <li className="hidden items-center sm:flex">
                 <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 text-green-400 flex-shrink-0" />
                 <span>Property & Vehicle</span>
               </li>
-              <li className="flex items-center hidden sm:flex">
+              <li className="hidden items-center sm:flex">
                 <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 text-green-400 flex-shrink-0" />
                 <span>And Many More...</span>
               </li>
             </ul>
+            <Link 
+              href="/digital-services" 
+              className="inline-block mt-2 sm:mt-3 bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition font-semibold text-xs sm:text-sm w-full sm:w-auto text-center"
+            >
+              Digital Work →
+            </Link>
             <Link 
               href="/services" 
               className="inline-block mt-2 sm:mt-3 bg-blue-600 hover:bg-blue-700 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition font-semibold text-xs sm:text-sm w-full sm:w-auto text-center"
@@ -231,8 +243,8 @@ export default function Footer() {
                 📞 9193898182, 7895094129
               </a>
               <span className="hidden sm:inline text-gray-600">|</span>
-              <a href="https://wa.me/9193898182" target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition whitespace-nowrap">
-                💬 WhatsApp Now
+              <a href="https://wa.me/7895094129" target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition whitespace-nowrap">
+                💬 WhatsApp: 7895094129 / 9193898182
               </a>
               <span className="hidden sm:inline text-gray-600">|</span>
               <a href="mailto:arpitcsc1707@gmail.com" className="hover:text-blue-400 transition whitespace-nowrap hidden sm:inline">
