@@ -11,8 +11,14 @@ import {
   fetchLiveCategoryJobs,
   fetchAllLiveJobs,
 } from '@/lib/scraper';
+import {
+  ensureJobPortalCron,
+  startJobPortalScrapeIfStale,
+} from '@/lib/jobPortalCron';
 
 export async function GET(request: NextRequest) {
+  ensureJobPortalCron();
+
   const { searchParams } = new URL(request.url);
   const feed = searchParams.get('feed') === 'home';
 
@@ -73,16 +79,19 @@ export async function GET(request: NextRequest) {
         ]);
         const total = vacancies.length + admitCards.length + results.length;
         if (total === 0) {
+          startJobPortalScrapeIfStale(null);
           return NextResponse.json(await fetchLiveHomeFeed());
         }
+        const lastSyncAt =
+          lastSync && !Array.isArray(lastSync)
+            ? (lastSync as { updatedAt?: Date }).updatedAt ?? null
+            : null;
+        startJobPortalScrapeIfStale(lastSyncAt);
         return NextResponse.json({
           vacancies,
           admitCards,
           results,
-          lastSyncAt:
-            lastSync && !Array.isArray(lastSync)
-              ? (lastSync as { updatedAt?: Date }).updatedAt ?? null
-              : null,
+          lastSyncAt,
           refreshHours: 6,
         });
       }
@@ -94,6 +103,7 @@ export async function GET(request: NextRequest) {
 
       const vacancies = await query;
       if ((vacancies?.length ?? 0) === 0 && liveOnly && !search) {
+        startJobPortalScrapeIfStale(null);
         if (category === 'Vacancies' || category === 'Admit Cards' || category === 'Results') {
           return NextResponse.json(await fetchLiveCategoryJobs(category, limit ?? 15));
         }
@@ -101,6 +111,7 @@ export async function GET(request: NextRequest) {
           return NextResponse.json(await fetchAllLiveJobs(limit ?? 15));
         }
       }
+      startJobPortalScrapeIfStale((vacancies?.[0] as { updatedAt?: Date } | undefined)?.updatedAt);
       return NextResponse.json(vacancies || []);
     } catch (queryError: any) {
       console.error("❌ Error querying vacancies:", queryError);

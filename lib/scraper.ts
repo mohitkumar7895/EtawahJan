@@ -28,9 +28,27 @@ export function slugify(text: string): string {
 }
 
 const SOURCES = [
-  { category: 'Vacancies' as const, url: 'https://www.sarkariexam.com/category/top-online-form/' },
-  { category: 'Results' as const, url: 'https://www.sarkariexam.com/category/exam-result/' },
-  { category: 'Admit Cards' as const, url: 'https://www.sarkariexam.com/category/admit-card/' },
+  {
+    category: 'Vacancies' as const,
+    urls: [
+      'https://www.sarkariexam.com/category/top-online-form/',
+      'https://www.sarkariresult.com/latestjob/',
+    ],
+  },
+  {
+    category: 'Results' as const,
+    urls: [
+      'https://www.sarkariexam.com/category/exam-result/',
+      'https://www.sarkariresult.com/result/',
+    ],
+  },
+  {
+    category: 'Admit Cards' as const,
+    urls: [
+      'https://www.sarkariexam.com/category/admit-card/',
+      'https://www.sarkariresult.com/admitcard/',
+    ],
+  },
 ];
 
 const FETCH_HEADERS = {
@@ -52,28 +70,42 @@ export interface ListingPost {
   lastDate: string;
 }
 
-export function parseCategoryListings(html: string): ListingPost[] {
+export function parseCategoryListings(html: string, sourceUrl = 'https://www.sarkariexam.com/'): ListingPost[] {
   const $ = cheerio.load(html);
   const posts: ListingPost[] = [];
   const seen = new Set<string>();
 
-  $('a[href*="sarkariexam.com"]').each((_, el) => {
+  $('a[href]').each((_, el) => {
     const href = $(el).attr('href')?.trim();
     const title = $(el).text().replace(/\s+/g, ' ').trim();
     if (!href || !title || title.length < 8) return;
+
+    let url = '';
+    try {
+      const parsed = new URL(href, sourceUrl);
+      const supportedHost =
+        parsed.hostname.includes('sarkariexam.com') || parsed.hostname.includes('sarkariresult.com');
+      if (!supportedHost) return;
+      url = parsed.toString();
+    } catch {
+      return;
+    }
+
+    const normalizedPath = new URL(url).pathname.toLowerCase();
     if (
-      href.includes('/category/') ||
-      href.includes('/tag/') ||
-      href.includes('/author/') ||
-      href.includes('/page/') ||
-      href.includes('#') ||
-      href.endsWith('sarkariexam.com/') ||
-      href.endsWith('sarkariexam.com')
+      normalizedPath === '/' ||
+      normalizedPath.includes('/category/') ||
+      normalizedPath.includes('/tag/') ||
+      normalizedPath.includes('/author/') ||
+      normalizedPath.includes('/page/') ||
+      normalizedPath.includes('/latestjob/') ||
+      normalizedPath.includes('/result/') ||
+      normalizedPath.includes('/admitcard/') ||
+      href.includes('#')
     ) {
       return;
     }
 
-    const url = href.startsWith('http') ? href : `https://www.sarkariexam.com${href}`;
     try {
       if (!new URL(url).pathname.split('/').filter(Boolean).length) return;
     } catch {
@@ -91,6 +123,30 @@ export function parseCategoryListings(html: string): ListingPost[] {
   });
 
   return posts.slice(0, ITEMS_PER_CATEGORY);
+}
+
+async function fetchListingsFromSource(source: (typeof SOURCES)[number]): Promise<ListingPost[]> {
+  let lastError = '';
+
+  for (const url of source.urls) {
+    try {
+      const { data } = await axios.get(url, fetchConfig);
+      const listings = parseCategoryListings(data, url);
+      if (listings.length) {
+        if (url !== source.urls[0]) {
+          console.log(`✅ ${source.category}: using fallback source ${url}`);
+        }
+        return listings;
+      }
+      lastError = `No listings found at ${url}`;
+    } catch (err: unknown) {
+      lastError = err instanceof Error ? err.message : String(err);
+      console.error(`❌ ${source.category} source failed ${url}:`, lastError);
+    }
+  }
+
+  console.error(`❌ ${source.category}: all sources failed. Last error: ${lastError}`);
+  return [];
 }
 
 function parseTableField(label: string, value: string): Partial<Record<string, string>> {
@@ -379,8 +435,7 @@ export async function fetchLiveHomeFeed() {
 
   for (const source of SOURCES) {
     try {
-      const { data } = await axios.get(source.url, { ...fetchConfig, timeout: 12000 });
-      const items = parseCategoryListings(data)
+      const items = (await fetchListingsFromSource(source))
         .slice(0, 5)
         .map((l) => listingToJob(l, source.category));
       if (source.category === 'Vacancies') result.vacancies = items;
@@ -399,8 +454,7 @@ export async function fetchLiveCategoryJobs(category: JobCategory, limit = ITEMS
   if (!source) return [];
 
   try {
-      const { data } = await axios.get(source.url, { ...fetchConfig, timeout: 12000 });
-    return parseCategoryListings(data)
+    return (await fetchListingsFromSource(source))
       .slice(0, limit)
       .map((l) => listingToJob(l, source.category));
   } catch (err: unknown) {
@@ -427,8 +481,7 @@ export async function scrapeLatestJobs() {
 
   for (const source of SOURCES) {
     try {
-      const { data } = await axios.get(source.url, fetchConfig);
-      const listings = parseCategoryListings(data);
+      const listings = await fetchListingsFromSource(source);
       if (!listings.length) continue;
 
       await Vacancy.updateMany({ category: source.category, sourceType: 'scraped' }, { isNew: false });
