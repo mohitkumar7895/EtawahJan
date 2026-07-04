@@ -1,6 +1,7 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import IndiaWebsiteSitemapClient from '@/components/IndiaWebsiteSitemapClient'
+import Link from 'next/link'
 import { Globe, Map } from 'lucide-react'
 import type { Metadata } from 'next'
 import { INDIA_STATES, WEBSITE_SITEMAP_STATS } from '@/lib/seo/india-locations'
