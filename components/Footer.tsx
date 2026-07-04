@@ -88,6 +88,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/build-website" className="text-xs sm:text-sm text-gray-300 hover:text-indigo-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-indigo-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>Apni Website Banvaiye</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/track" className="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition flex items-center py-0.5">
                   <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full mr-1.5 flex-shrink-0"></span>
                   <span>Track Application</span>
@@ -112,7 +118,7 @@ export default function Footer() {
               <li>
                 <Link href="/build-website" className="text-xs sm:text-sm text-gray-300 hover:text-indigo-400 transition flex items-center py-0.5">
                   <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-indigo-400 rounded-full mr-1.5 flex-shrink-0"></span>
-                  <span>Build Website</span>
+                  <span>Apni Website Banvaiye</span>
                 </Link>
               </li>
               <li>

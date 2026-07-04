@@ -1,33 +1,44 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
+import WebsiteLeadsHomeSection from '@/components/WebsiteLeadsHomeSection'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { WEBSITE_BUILD_SERVICES } from '@/lib/seo/website-build-services'
 import { WEBSITE_INDUSTRIES } from '@/lib/seo/website-industries'
-import { ArrowRight, MessageCircle } from 'lucide-react'
+import { ArrowRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Build Website — All Services & Industries | Jan Seva Kendra India',
-  description: 'Choose website type: business, ecommerce, billing software, mobile app, SEO. 15 industries, 12 services. All India. WhatsApp 7895094129.',
+  title: 'Apni Website Banvaiye — All India | Business Website & Software',
+  description:
+    'Apni website banvaiye — business website, e-commerce, billing software, mobile app, SEO. 36 states, 780+ cities. WhatsApp 7895094129 | Call 9193898182. Same day free quote.',
+  keywords: [
+    'website banwana',
+    'apni website banvaiye',
+    'business website India',
+    'website development all India',
+    'software banwana',
+  ],
   alternates: { canonical: 'https://www.jan-seva.site/build-website' },
+  openGraph: {
+    title: 'Apni Website Banvaiye — Customers Badhao',
+    url: 'https://www.jan-seva.site/build-website',
+  },
 }
 
 export default function BuildWebsiteHubPage() {
   return (
     <>
       <Header />
-      <div className="min-h-screen bg-gradient-to-b from-blue-50 to-white py-12">
+      <WebsiteLeadsHomeSection />
+      <div className="bg-white py-12 border-t border-slate-200">
         <div className="container mx-auto px-4 max-w-5xl">
-          <h1 className="text-3xl sm:text-4xl font-black text-slate-900 mb-4">Kya Banwana Hai? — Website Services</h1>
-          <p className="text-slate-600 mb-8 max-w-2xl">
-            Har type ki website aur software — seedha page choose karein, WhatsApp par quote lein.
-          </p>
-          <div className="grid sm:grid-cols-2 gap-4 mb-12">
+          <h2 className="text-2xl font-black text-slate-900 mb-6">Detail — Kya Banwana Hai?</h2>
+          <div className="grid sm:grid-cols-2 gap-4 mb-10">
             {WEBSITE_BUILD_SERVICES.map((svc) => (
               <Link
                 key={svc.slug}
                 href={`/build-website/${svc.slug}`}
-                className="flex items-center justify-between rounded-2xl border bg-white p-5 shadow-sm hover:border-indigo-300 hover:shadow-md transition group"
+                className="flex items-center justify-between rounded-2xl border bg-slate-50 p-5 hover:border-indigo-300 hover:shadow-md transition group"
               >
                 <div>
                   <p className="font-black text-slate-900">{svc.name}</p>
@@ -37,8 +48,8 @@ export default function BuildWebsiteHubPage() {
               </Link>
             ))}
           </div>
-          <h2 className="text-2xl font-black mb-4">Industry-wise</h2>
-          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3 mb-10">
+          <h2 className="text-xl font-black text-slate-900 mb-4">Industry-wise pages</h2>
+          <div className="grid sm:grid-cols-2 md:grid-cols-3 gap-3">
             {WEBSITE_INDUSTRIES.map((ind) => (
               <Link
                 key={ind.slug}
@@ -49,15 +60,6 @@ export default function BuildWebsiteHubPage() {
               </Link>
             ))}
           </div>
-          <a
-            href="https://wa.me/917895094129?text=Hello,%20mujhe%20website%20banwana%20hai."
-            target="_blank"
-            rel="noopener noreferrer"
-            className="inline-flex items-center gap-2 rounded-xl bg-green-500 px-6 py-3 font-black text-white"
-          >
-            <MessageCircle className="h-5 w-5" />
-            WhatsApp Quote
-          </a>
         </div>
       </div>
       <Footer />
