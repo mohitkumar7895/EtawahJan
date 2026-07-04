@@ -71,20 +71,20 @@ export default function ITServicesBanner() {
 
                 <div className="space-y-4">
                   <a 
-                    href="tel:7895094129" 
+                    href="tel:9193898182" 
                     className="flex items-center justify-center gap-3 w-full bg-gradient-to-r from-blue-600 to-indigo-600 text-white px-6 py-4 rounded-xl font-bold text-lg hover:from-blue-500 hover:to-indigo-500 transition-all shadow-[0_0_20px_rgba(79,70,229,0.3)] hover:shadow-[0_0_25px_rgba(79,70,229,0.5)] hover:-translate-y-0.5"
                   >
                     <PhoneCall className="w-5 h-5 animate-wiggle" />
-                    <span>Call: +91-7895094129</span>
+                    <span>Call: +91-9193898182</span>
                   </a>
                   
                   <a 
-                    href="https://wa.me/917895094129?text=Hello,%20I%20am%20interested%20in%20your%20IT/Digital%20services%20like%20Website%20or%20App%20development." 
+                    href="https://wa.me/9193898182?text=Hello,%20I%20am%20interested%20in%20your%20IT/Digital%20services%20like%20Website%20or%20App%20development." 
                     target="_blank"
                     rel="noopener noreferrer"
                     className="flex items-center justify-center gap-3 w-full bg-[#25D366] text-white px-6 py-4 rounded-xl font-bold text-lg hover:bg-[#22bf5b] transition-all shadow-[0_0_20px_rgba(37,211,102,0.3)] hover:shadow-[0_0_25px_rgba(37,211,102,0.5)] hover:-translate-y-0.5"
                   >
-                    <span>WhatsApp: 7895094129 / 9193898182</span>
+                    <span>WhatsApp: 9193898182</span>
                     <ArrowRight className="w-5 h-5" />
                   </a>
 

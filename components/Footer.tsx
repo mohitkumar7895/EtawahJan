@@ -110,6 +110,18 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/build-website" className="text-xs sm:text-sm text-gray-300 hover:text-indigo-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-indigo-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>Build Website</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/website-sitemap" className="text-xs sm:text-sm text-gray-300 hover:text-indigo-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-indigo-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>All India Website</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/state-sitemap" className="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition flex items-center py-0.5">
                   <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full mr-1.5 flex-shrink-0"></span>
                   <span>State Sitemap</span>
@@ -240,11 +252,11 @@ export default function Footer() {
             </div>
             <div className="flex flex-wrap justify-center md:justify-end gap-1.5 sm:gap-2 text-xs text-gray-400 w-full md:w-auto">
               <a href="tel:9193898182" className="hover:text-blue-400 transition whitespace-nowrap">
-                📞 9193898182, 7895094129
+                📞 9193898182
               </a>
               <span className="hidden sm:inline text-gray-600">|</span>
-              <a href="https://wa.me/7895094129" target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition whitespace-nowrap">
-                💬 WhatsApp: 7895094129 / 9193898182
+              <a href="https://wa.me/9193898182" target="_blank" rel="noopener noreferrer" className="hover:text-green-400 transition whitespace-nowrap">
+                💬 WhatsApp: 9193898182
               </a>
               <span className="hidden sm:inline text-gray-600">|</span>
               <a href="mailto:arpitcsc1707@gmail.com" className="hover:text-blue-400 transition whitespace-nowrap hidden sm:inline">

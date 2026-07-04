@@ -6,6 +6,7 @@ import Services from '@/components/Services'
 import Announcements from '@/components/Announcements'
 import Reviews from '@/components/Reviews'
 import HomeJobsFeed from '@/components/HomeJobsFeed'
+import WebsiteLeadsHomeSection from '@/components/WebsiteLeadsHomeSection'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -63,6 +64,7 @@ export default function Home() {
       <Header />
       <Hero />
       <ITServicesBanner />
+      <WebsiteLeadsHomeSection />
       <Announcements />
       <Services />
       <HomeJobsFeed />

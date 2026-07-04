@@ -10,6 +10,7 @@ export interface ContactFormData {
   address: string;
   service_type: string;
   email?: string;
+  remarks?: string;
 }
 
 export interface ContactUsData {

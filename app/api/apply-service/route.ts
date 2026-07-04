@@ -25,6 +25,7 @@ export async function POST(request: NextRequest) {
       mobile: phone,
       service_type: service,
       address,
+      remarks,
     } = body;
 
     const errorMsg = validateFields(body, [
@@ -59,6 +60,7 @@ export async function POST(request: NextRequest) {
         mobile: phone.trim(),
         address: address.trim(),
         service_type: service.trim(),
+        remarks: remarks ? String(remarks).trim() : '',
         status: 'pending',
         trackingId: generatedTrackingId,
       });
@@ -118,6 +120,7 @@ export async function POST(request: NextRequest) {
         phone,
         service,
         address,
+        remarks,
       });
 
       // Send emails sequentially to admin recipients

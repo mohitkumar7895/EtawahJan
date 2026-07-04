@@ -45,7 +45,7 @@ export default function ContactPage() {
                         <div className="min-w-0 flex-1">
                           <h3 className="font-semibold text-gray-900 mb-1 sm:mb-2 text-sm sm:text-base">Phone</h3>
                           <a href="tel:9193898182" className="text-blue-600 hover:text-blue-700 text-base sm:text-lg font-medium break-all">
-                            9193898182, 7895094129
+                            9193898182
                           </a>
                           <p className="text-xs sm:text-sm text-gray-600 mt-1">Call us for immediate assistance</p>
                         </div>

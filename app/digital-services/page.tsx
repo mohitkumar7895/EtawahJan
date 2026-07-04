@@ -23,13 +23,13 @@ import {
 
 const baseUrl = 'https://www.jan-seva.site'
 const phoneNumber = '9193898182'
-const whatsappNumber = '7895094129'
-const whatsappHrefNumber = '917895094129'
+const whatsappNumber = '9193898182'
+const whatsappHrefNumber = '9193898182'
 
 export const metadata: Metadata = {
   title: 'Website, Software, Game, Logo & Video Editing Services in UP India',
   description:
-    'Jan Seva Kendra provides website development, software development, logo design, video editing, game development, mobile app, graphics, SEO and digital marketing services for Etawah, Uttar Pradesh and all India customers. Call 9193898182 or WhatsApp 7895094129.',
+    'Jan Seva Kendra provides website development, software development, logo design, video editing, game development, mobile app, graphics, SEO and digital marketing services for Etawah, Uttar Pradesh and all India customers. Call 9193898182 or WhatsApp 9193898182.',
   keywords: [
     'website development company in UP',
     'website developer Etawah',
@@ -363,7 +363,7 @@ export default function DigitalServicesPage() {
                       href="/contact"
                       className="inline-flex items-center justify-center rounded-xl border border-white/30 px-6 py-3 font-bold text-white transition hover:bg-white/10"
                     >
-                      Contact Form
+                      Contact Us
                     </Link>
                   </div>
                 </div>
@@ -379,6 +379,38 @@ export default function DigitalServicesPage() {
                   </div>
                 </div>
               </div>
+            </div>
+          </div>
+        </section>
+
+        <section className="bg-slate-900 px-4 py-14 text-white sm:px-6">
+          <div className="mx-auto max-w-7xl text-center">
+            <h2 className="text-3xl font-black mb-4">Poore India se website customers — 780+ city pages</h2>
+            <p className="text-slate-300 max-w-2xl mx-auto mb-6 text-sm sm:text-base leading-relaxed">
+              Har state, har district ke liye alag SEO page. Coaching, shop, hospital, restaurant — 15 industries.
+              Business website, ecommerce, software — 12 service types. Sab kuch add kiya gaya hai leads ke liye.
+            </p>
+            <div className="flex flex-col sm:flex-row gap-3 justify-center">
+              <Link
+                href="/website-sitemap"
+                className="inline-flex items-center justify-center rounded-xl bg-indigo-500 px-6 py-3 font-black hover:bg-indigo-600 transition"
+              >
+                All India Website Sitemap →
+              </Link>
+              <Link
+                href="/build-website"
+                className="inline-flex items-center justify-center rounded-xl bg-yellow-400 px-6 py-3 font-black text-slate-900 hover:bg-yellow-300 transition"
+              >
+                Kya Banwana Hai? — Services
+              </Link>
+              <a
+                href="https://wa.me/9193898182?text=Hello,%20mujhe%20website%20banwana%20hai."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center justify-center rounded-xl bg-green-500 px-6 py-3 font-black hover:bg-green-600 transition"
+              >
+                WhatsApp Quote
+              </a>
             </div>
           </div>
         </section>

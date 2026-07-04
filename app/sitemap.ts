@@ -4,6 +4,8 @@ import Blog from '@/models/Blog'
 import SitemapLink from '@/models/SitemapLink'
 import { SEO_TOOLS, FILE_CONVERTER_SUB_TOOLS } from '@/lib/seo/tools-catalog'
 import { ALL_TEMPLATES } from '@/lib/applications/templates'
+import { getWebsiteSitemapEntries } from '@/lib/seo/india-locations'
+import { getWebsiteIndustrySitemapEntries } from '@/lib/seo/website-sitemap-entries'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.jan-seva.site'
@@ -64,10 +66,10 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 1,
     },
     {
-      url: `${baseUrl}/about`,
+      url: `${baseUrl}/digital-services`,
       lastModified: new Date(),
-      changeFrequency: 'monthly',
-      priority: 0.8,
+      changeFrequency: 'weekly',
+      priority: 0.95,
     },
     {
       url: `${baseUrl}/services`,
@@ -76,21 +78,57 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
-      url: `${baseUrl}/digital-services`,
+      url: `${baseUrl}/about`,
       lastModified: new Date(),
-      changeFrequency: 'weekly',
-      priority: 0.95,
+      changeFrequency: 'monthly',
+      priority: 0.8,
     },
     {
       url: `${baseUrl}/contact`,
       lastModified: new Date(),
       changeFrequency: 'monthly',
-      priority: 0.7,
+      priority: 0.8,
     },
     {
-      url: `${baseUrl}/vacancies`,
+      url: `${baseUrl}/tools`,
       lastModified: new Date(),
-      changeFrequency: 'daily',
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/applications`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/file-converter`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.85,
+    },
+    {
+      url: `${baseUrl}/resume-builder`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/photo-resizer`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/pdf-editor`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/image-background-changer`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
       priority: 0.8,
     },
     {
@@ -100,10 +138,40 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.9,
     },
     {
+      url: `${baseUrl}/vacancies`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/admit-cards`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.75,
+    },
+    {
+      url: `${baseUrl}/results`,
+      lastModified: new Date(),
+      changeFrequency: 'daily',
+      priority: 0.75,
+    },
+    {
       url: `${baseUrl}/announcements`,
       lastModified: new Date(),
       changeFrequency: 'daily',
       priority: 0.8,
+    },
+    {
+      url: `${baseUrl}/track`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.75,
+    },
+    {
+      url: `${baseUrl}/payment`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.7,
     },
     {
       url: `${baseUrl}/faq`,
@@ -118,18 +186,36 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       priority: 0.75,
     },
     {
-      url: `${baseUrl}/sitemap`,
+      url: `${baseUrl}/build-website`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
-      priority: 0.7,
+      priority: 0.9,
     },
     {
-      url: `${baseUrl}/state-sitemap`,
+      url: `${baseUrl}/website-sitemap`,
       lastModified: new Date(),
       changeFrequency: 'weekly',
-      priority: 0.7,
+      priority: 0.9,
     },
   ]
+
+  const websiteLocationPages: MetadataRoute.Sitemap = getWebsiteSitemapEntries(baseUrl).map(
+    (entry) => ({
+      url: entry.url,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: entry.priority,
+    })
+  )
+
+  const websiteIndustryPages: MetadataRoute.Sitemap = getWebsiteIndustrySitemapEntries(baseUrl).map(
+    (entry) => ({
+      url: entry.url,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: entry.priority,
+    })
+  )
 
   const UP_DISTRICTS = [
     'Agra', 'Aligarh', 'Ambedkar Nagar', 'Amethi', 'Amroha', 'Auraiya', 'Azamgarh',
@@ -206,6 +292,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
       return [
         ...staticPages,
+        ...websiteLocationPages,
+        ...websiteIndustryPages,
         ...toolPages,
         ...subToolPages,
         ...applicationPages,
@@ -223,6 +311,8 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   // SEO surface never depends on MongoDB connectivity.
   return [
     ...staticPages,
+    ...websiteLocationPages,
+    ...websiteIndustryPages,
     ...toolPages,
     ...subToolPages,
     ...applicationPages,

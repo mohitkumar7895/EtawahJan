@@ -146,6 +146,13 @@ export const serviceApplicationTemplate = (data: any) => `
             </div>
             ` : ''}
 
+            ${data.remarks ? `
+            <div class="field">
+                <span class="field-label">📝 विवरण / Project Details</span>
+                <div class="field-value" style="white-space: pre-wrap;">${data.remarks}</div>
+            </div>
+            ` : ''}
+
             <div class="timestamp">
                 📅 Received at: ${new Date().toLocaleString('en-IN', { 
                     timeZone: 'Asia/Kolkata',

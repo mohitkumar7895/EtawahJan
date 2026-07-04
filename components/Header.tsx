@@ -23,6 +23,7 @@ export default function Header() {
     { path: '/about', label: 'About' },
     { path: '/services', label: 'Services' },
     { path: '/digital-services', label: 'Digital Work' },
+    { path: '/build-website', label: 'Website Banwana' },
     { path: '/tools', label: 'Tools' },
     { path: '/vacancies', label: 'Vacancies' },
     { path: '/announcements', label: 'Announcements' },
@@ -108,7 +109,7 @@ export default function Header() {
               className="hidden md:flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition group"
             >
               <Phone className="w-4 h-4 group-hover:scale-110 transition" />
-              <span className="font-semibold text-sm">9193898182, 7895094129</span>
+              <span className="font-semibold text-sm">9193898182</span>
             </a>
 
             {/* Call Button - Mobile */}

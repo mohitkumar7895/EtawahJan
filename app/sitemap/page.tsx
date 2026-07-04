@@ -1,18 +1,19 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
-import { FileText, MapPin, Globe, ArrowRight, Shield, Award, Users, Phone, HelpCircle, Briefcase, Info, List, Link2 } from 'lucide-react'
+import { FileText, MapPin, Globe, ArrowRight, Shield, Award, Users, Phone, HelpCircle, Briefcase, Info, List, Link2, Code2, MonitorSmartphone, Brush, Video, Gamepad2 } from 'lucide-react'
 import type { Metadata } from 'next'
+import { INDIA_STATES, WEBSITE_SITEMAP_STATS } from '@/lib/seo/india-locations'
 import { connectDB, isDBConnected } from '@/lib/db'
 import SitemapLink from '@/models/SitemapLink'
 
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'Sitemap | Explore All Pages & Services',
-  description: 'Complete HTML sitemap of Jan Seva Kendra. Find government schemes, document services, and premium IT services across UP easily.',
+  title: 'Sitemap | Website, Software & All Services — Jan Seva Kendra',
+  description: 'Sitemap for Jan Seva Kendra — website development, software, mobile app, logo, video editing, government services, tools and UP district pages.',
   openGraph: {
-    title: 'Sitemap | Jan Seva Kendra',
+    title: 'Sitemap | Jan Seva Kendra — Website & Digital Services',
     url: 'https://www.jan-seva.site/sitemap',
   },
 }
@@ -36,36 +37,69 @@ export default async function HTMLSitemapPage() {
 
   const mainLinks = [
     { name: 'Home / मुख्य पृष्ठ', href: '/' },
+    { name: 'Website & Digital Services / वेबसाइट सॉफ्टवेयर', href: '/digital-services' },
+    { name: 'All India Website Sitemap / पूरे भारत की वेबसाइट सूची', href: '/website-sitemap' },
     { name: 'About Us / हमारे बारे में', href: '/about' },
     { name: 'Services / हमारी सेवाएं', href: '/services' },
-    { name: 'Digital Work / वेबसाइट सॉफ्टवेयर सेवाएं', href: '/digital-services' },
+    { name: 'Online Tools / ऑनलाइन टूल्स', href: '/tools' },
+    { name: 'Application Letters / आवेदन पत्र', href: '/applications' },
+    { name: 'File Converter / फाइल कन्वर्टर', href: '/file-converter' },
+    { name: 'Resume Builder / रिज्यूमे बनाएं', href: '/resume-builder' },
     { name: 'Track Application / आवेदन स्थिति', href: '/track' },
+    { name: 'Make Payment / भुगतान', href: '/payment' },
     { name: 'FAQ / अक्सर पूछे जाने वाले सवाल', href: '/faq' },
     { name: 'Contact Us / संपर्क करें', href: '/contact' },
     { name: 'Sarkari Vacancies / सरकारी नौकरियाँ', href: '/vacancies' },
+    { name: 'Admit Cards / एडमिट कार्ड', href: '/admit-cards' },
+    { name: 'Exam Results / परिणाम', href: '/results' },
     { name: 'Government Links / महत्वपूर्ण सरकारी लिंक्स', href: '/government-links' },
     { name: 'Blog & News / ब्लॉग और समाचार', href: '/blog' },
+    { name: 'Announcements / घोषणाएं', href: '/announcements' },
+  ]
+
+  const digitalServiceLinks = [
+    { name: 'Business Website Development', href: '/digital-services', icon: Globe },
+    { name: 'Custom Software & Billing System', href: '/digital-services', icon: Code2 },
+    { name: 'Mobile App Development', href: '/digital-services', icon: MonitorSmartphone },
+    { name: 'Logo & Graphic Design', href: '/digital-services', icon: Brush },
+    { name: 'Video Editing & Reels', href: '/digital-services', icon: Video },
+    { name: 'Game Development', href: '/digital-services', icon: Gamepad2 },
+    { name: 'SEO & Digital Marketing', href: '/digital-services', icon: Briefcase },
+    { name: 'E-commerce Website', href: '/digital-services', icon: Globe },
+  ]
+
+  const toolLinks = [
+    { name: 'Photo Resizer', href: '/photo-resizer' },
+    { name: 'PDF Editor', href: '/pdf-editor' },
+    { name: 'Background Remover', href: '/image-background-changer' },
+    { name: 'All Free Tools', href: '/tools' },
+    { name: 'How-to Guides', href: '/guides' },
   ]
 
   const serviceCategories = [
     {
       title: 'Document Services / दस्तावेज सेवाएं',
+      href: '/services',
       services: ['PAN Card', 'Voter ID Card', 'Ration Card', 'Ration Card Update', 'Passport Services', 'E-Shram Card', 'Digital Signature Certificate'],
     },
     {
       title: 'Certificates / प्रमाण पत्र',
+      href: '/services',
       services: ['Birth Certificate', 'Birth Certificate Correction', 'Death Certificate', 'Death Certificate Correction', 'Marriage Certificate', 'Income Certificate', 'Caste Certificate', 'Domicile Certificate'],
     },
     {
       title: 'IT & Software Services / आईटी सेवाएं',
-      services: ['Website Development', 'Mobile App Development', 'Game Development', 'Graphic Design', 'Custom Software'],
+      href: '/digital-services',
+      services: ['Website Development', 'Mobile App Development', 'Game Development', 'Logo & Graphic Design', 'Video Editing', 'Custom Software', 'SEO & Digital Marketing'],
     },
     {
       title: 'Government Schemes / सरकारी योजनाएं',
+      href: '/services',
       services: ['PM Awas Yojana', 'Ujjwala Yojana', 'PM Kisan Registration', 'Kisan Credit Card', 'PM Mudra Loan', 'Scholarship Applications'],
     },
     {
       title: 'Utility & Pension / बिल और पेंशन',
+      href: '/services',
       services: ['Electricity Bill Payment', 'Light Connection (Jhatpat)', 'Old Age Pension', 'Widow Pension', 'Disability Pension', 'Payment Withdrawal (AEPS)'],
     },
   ]
@@ -87,7 +121,7 @@ export default async function HTMLSitemapPage() {
                   Website Sitemap
                 </h1>
                 <p className="text-base sm:text-lg md:text-xl text-gray-600 max-w-2xl mx-auto">
-                  हमारी सभी सेवाओं, महत्वपूर्ण लिंक्स और शहर-वार साइटमैप को आसानी से एक्सेस करने के लिए नीचे दिए गए लिंक्स का उपयोग करें।
+                  Website, software, government services aur saari important pages — ek jagah se access karein. Google indexing ke liye XML sitemap bhi available hai.
                 </p>
               </div>
 
@@ -98,25 +132,36 @@ export default async function HTMLSitemapPage() {
                 </h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   <Link 
-                    href="/sitemap" 
-                    className="flex items-center justify-between p-4 rounded-xl bg-blue-50/60 border border-blue-100 hover:bg-blue-50 hover:border-blue-300 transition group"
+                    href="/website-sitemap" 
+                    className="flex items-center justify-between p-4 rounded-xl bg-indigo-50/60 border border-indigo-100 hover:bg-indigo-50 hover:border-indigo-300 transition group"
                   >
                     <div>
-                      <span className="font-bold text-blue-900 text-sm sm:text-base block">HTML Sitemap</span>
-                      <span className="text-xs text-blue-600">All pages & services index</span>
+                      <span className="font-bold text-indigo-900 text-sm sm:text-base block">All India Website Map</span>
+                      <span className="text-xs text-indigo-600">{WEBSITE_SITEMAP_STATS.states} states · {WEBSITE_SITEMAP_STATS.districts}+ districts</span>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition" />
+                    <ArrowRight className="w-4 h-4 text-indigo-600 group-hover:translate-x-1 transition" />
+                  </Link>
+
+                  <Link 
+                    href="/digital-services" 
+                    className="flex items-center justify-between p-4 rounded-xl bg-violet-50/60 border border-violet-100 hover:bg-violet-50 hover:border-violet-300 transition group"
+                  >
+                    <div>
+                      <span className="font-bold text-violet-900 text-sm sm:text-base block">Digital Services</span>
+                      <span className="text-xs text-violet-600">Website, software, app, SEO</span>
+                    </div>
+                    <ArrowRight className="w-4 h-4 text-violet-600 group-hover:translate-x-1 transition" />
                   </Link>
 
                   <Link 
                     href="/state-sitemap" 
-                    className="flex items-center justify-between p-4 rounded-xl bg-indigo-50/60 border border-indigo-100 hover:bg-indigo-50 hover:border-indigo-300 transition group"
+                    className="flex items-center justify-between p-4 rounded-xl bg-blue-50/60 border border-blue-100 hover:bg-blue-50 hover:border-blue-300 transition group"
                   >
                     <div>
-                      <span className="font-bold text-indigo-900 text-sm sm:text-base block">State Sitemap</span>
-                      <span className="text-xs text-indigo-600">All 75 UP Districts directory</span>
+                      <span className="font-bold text-blue-900 text-sm sm:text-base block">State Sitemap</span>
+                      <span className="text-xs text-blue-600">All 75 UP Districts directory</span>
                     </div>
-                    <ArrowRight className="w-4 h-4 text-indigo-600 group-hover:translate-x-1 transition" />
+                    <ArrowRight className="w-4 h-4 text-blue-600 group-hover:translate-x-1 transition" />
                   </Link>
 
                   <a 
@@ -159,6 +204,69 @@ export default async function HTMLSitemapPage() {
 
                 {/* Columns 2-3: Services & Admin-Defined Links */}
                 <div className="md:col-span-2 space-y-6 sm:space-y-8">
+
+                  {/* Website & Digital Services — priority section */}
+                  <div className="bg-gradient-to-br from-indigo-600 to-blue-700 rounded-2xl shadow-xl p-6 sm:p-8 text-white">
+                    <h2 className="text-xl font-bold mb-2 flex items-center gap-2">
+                      <Globe className="w-5 h-5" /> Website & Software Services
+                    </h2>
+                    <p className="text-sm text-blue-100 mb-5">
+                      Business website, software, app, logo, video editing — sab digital kaam ke liye yahi page visit karein.
+                    </p>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                      {digitalServiceLinks.map((item, idx) => (
+                        <Link
+                          key={idx}
+                          href={item.href}
+                          className="flex items-center gap-3 rounded-xl bg-white/10 border border-white/20 px-4 py-3 hover:bg-white/20 transition group"
+                        >
+                          <item.icon className="w-4 h-4 text-yellow-300 shrink-0" />
+                          <span className="text-sm font-semibold group-hover:translate-x-0.5 transition">{item.name}</span>
+                        </Link>
+                      ))}
+                    </div>
+                    <div className="mt-5 flex flex-col sm:flex-row flex-wrap gap-3">
+                      <Link
+                        href="/website-sitemap"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-white px-5 py-2.5 text-sm font-black text-indigo-700 hover:bg-blue-50 transition"
+                      >
+                        All India — {WEBSITE_SITEMAP_STATS.districts}+ Districts →
+                      </Link>
+                      <Link
+                        href="/digital-services"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-yellow-400 px-5 py-2.5 text-sm font-black text-slate-900 hover:bg-yellow-300 transition"
+                      >
+                        View All Digital Services →
+                      </Link>
+                      <a
+                        href="https://wa.me/917895094129?text=Hello,%20mujhe%20website%20ya%20software%20banwana%20hai."
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/40 px-5 py-2.5 text-sm font-bold hover:bg-white/10 transition"
+                      >
+                        WhatsApp for Quote
+                      </a>
+                    </div>
+                  </div>
+
+                  {/* Free Tools */}
+                  <div className="bg-white rounded-2xl shadow-xl border border-gray-100 p-6 sm:p-8">
+                    <h2 className="text-xl font-bold text-gray-900 mb-5 pb-3 border-b border-gray-100 flex items-center gap-2">
+                      <FileText className="w-5 h-5 text-blue-600" /> Free Online Tools
+                    </h2>
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                      {toolLinks.map((tool, idx) => (
+                        <Link
+                          key={idx}
+                          href={tool.href}
+                          className="flex items-center gap-2 text-sm font-medium text-gray-700 hover:text-blue-600 hover:translate-x-1 transition"
+                        >
+                          <span className="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                          {tool.name}
+                        </Link>
+                      ))}
+                    </div>
+                  </div>
                   
                   {/* Admin-Created Custom Sitemap Links */}
                   {customSitemaps.length > 0 && (
@@ -213,7 +321,7 @@ export default async function HTMLSitemapPage() {
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 text-xs sm:text-sm">
                             {cat.services.map((service, sIdx) => (
                               <Link 
-                                href="/services" 
+                                href={cat.href} 
                                 key={sIdx}
                                 className="flex items-center gap-2 py-1 text-gray-600 hover:text-blue-600 hover:translate-x-0.5 transition duration-150"
                               >

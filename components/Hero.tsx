@@ -37,7 +37,7 @@ export default function Hero() {
             </div>
             
             {/* Mobile/Tablet Layout - Logo centered */}
-            <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 md:gap-4 mb-0 px-2 lg:hidden">
+            <div className="flex flex-col items-center justify-center gap-2 sm:gap-3 md:gap-4 mb-3 sm:mb-4 px-2 lg:hidden">
               <Image 
                 src="/jan-seva-logo-1.png" 
                 alt="Jan Seva Kendra Logo" 
@@ -46,27 +46,49 @@ export default function Hero() {
                 className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 object-contain"
                 priority
               />
-              <h1 className="text-lg sm:text-xl md:text-2xl font-bold text-center whitespace-normal sm:whitespace-nowrap px-1">
-                Jan Seva Kendra CSC Center Etawah, UP
-              </h1>
             </div>
-            
-            {/* Desktop Layout - Text only (logo in corner) */}
-            <div className="hidden lg:block">
-              <h1 className="text-2xl xl:text-3xl 2xl:text-4xl font-bold text-center whitespace-nowrap px-1">
-                Jan Seva Kendra – Etawah, Bharthana, UP
-              </h1>
-            </div>
-            <p className="text-xl sm:text-2xl md:text-3xl lg:text-3xl xl:text-4xl font-bold text-yellow-300 mb-1 px-2 -mt-2 sm:-mt-1">
-              Arpit Porwal
-            </p>
-          
-            <p className="text-base sm:text-lg md:text-xl lg:text-xl text-blue-100 mb-2 sm:mb-3 px-2">
+
+            {/* Brand title — 3-color mix */}
+            <h1 className="text-center px-2 mb-2 sm:mb-3 max-w-3xl mx-auto">
+              <span
+                className="block text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-black tracking-tight leading-tight"
+                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+              >
+                <span className="text-yellow-300 drop-shadow-sm">Jan</span>{' '}
+                <span className="text-white drop-shadow-md">Seva</span>{' '}
+                <span className="text-emerald-300 drop-shadow-sm">Kendra</span>
+              </span>
+            </h1>
+
+            <p className="text-base sm:text-lg md:text-xl text-blue-50 font-semibold mb-2 sm:mb-3 px-2 max-w-3xl mx-auto leading-snug">
               आपकी सेवा में हमेशा तत्पर
             </p>
-            <p className="text-sm sm:text-base md:text-lg lg:text-lg text-blue-200 mb-4 sm:mb-6 md:mb-8 px-2">
-              All Government & Private Services Under One Roof • Same Day Work • No Agent Required
+
+            {/* Website line — same 3-color style, 3 words */}
+            <p className="text-center px-2 mb-3 sm:mb-4 max-w-3xl mx-auto">
+              <span
+                className="block text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-black tracking-tight leading-tight"
+                style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
+              >
+                <span className="text-yellow-300 drop-shadow-sm">We</span>{' '}
+                <span className="text-white drop-shadow-md">Build</span>{' '}
+                <span className="text-emerald-300 drop-shadow-sm">Websites</span>
+              </span>
             </p>
+
+            <p className="text-xs sm:text-sm md:text-base text-blue-200/90 mb-4 sm:mb-6 md:mb-8 px-2 max-w-3xl mx-auto">
+              All Government & Private Services Under One Roof • Same Day Work • Website, Software & Digital Work
+            </p>
+            <div className="mb-4 sm:mb-6 px-2">
+              <a
+                href="https://wa.me/9193898182?text=Hello,%20mujhe%20website%20ya%20software%20banwana%20hai."
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/15 px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-bold text-white hover:bg-white/25 transition shadow-lg"
+              >
+                Get Your Website Built →
+              </a>
+            </div>
 
             {/* CTA Buttons */}
             <div className="flex flex-wrap gap-2.5 sm:gap-3 md:gap-4 justify-center mb-6 sm:mb-8 md:mb-10 px-2">
