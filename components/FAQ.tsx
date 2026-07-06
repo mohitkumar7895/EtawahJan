@@ -15,8 +15,8 @@ const faqs: FAQItem[] = [
   {
     question: 'What services does Jan Seva Kendra provide?',
     questionHindi: 'जन सेवा केंद्र कौन-कौन सी सेवाएं प्रदान करता है?',
-    answer: 'We provide all government and private services including PAN Card, Voter ID, Ration Card, Certificates (Birth, Death, Marriage, Income, Caste, Domicile), Driving License, Vehicle Registration, Insurance, Government Schemes (PM Awas, Ujjwala, PM Kisan), Bill Payments, Banking Services, and many more.',
-    answerHindi: 'हम सभी सरकारी और निजी सेवाएं प्रदान करते हैं जैसे पैन कार्ड, वोटर आईडी, राशन कार्ड, प्रमाणपत्र (जन्म, मृत्यु, विवाह, आय, जाति, डोमिसाइल), ड्राइविंग लाइसेंस, वाहन पंजीकरण, बीमा, सरकारी योजनाएं (पीएम आवास, उज्ज्वला, पीएम किसान), बिल भुगतान, बैंकिंग सेवाएं और बहुत कुछ।',
+    answer: 'We provide government and private services including PAN Card, Voter ID, Ration Card, Certificates (Birth, Marriage, Caste — plus Death, Income, Domicile at Etawah only), Driving License, Vehicle Registration, Insurance, Government Schemes, Bill Payments. Aadhaar address correction, Banking, Money Transfer — Etawah center only.',
+    answerHindi: 'हम सरकारी और निजी सेवाएं प्रदान करते हैं — पैन, वोटर, राशन, जन्म/विवाह/जाति प्रमाणपत्र। मृत्यु, आय, निवास प्रमाणपत्र और आधार पता सुधार, बैंकिंग — केवल इटावा केंद्र पर।',
     category: 'General',
   },
   {
@@ -101,8 +101,8 @@ const faqs: FAQItem[] = [
   {
     question: 'Income certificate apply near me? Ration card apply? Ayushman card apply?',
     questionHindi: 'आय प्रमाणपत्र नजदीक कहाँ? राशन कार्ड कहाँ बनवाएं? आयुष्मान कार्ड कैसे?',
-    answer: 'Income certificate, ration card apply, and Ayushman card apply—all available at Jan Seva Kendra, Bharthana (Mandi Trihaa, Bidhuna Road). Same day application, official process, fast approval help. No agent required. Call 9193898182, 7895094129 or WhatsApp now. Visit today.',
-    answerHindi: 'आय प्रमाणपत्र, राशन कार्ड और आयुष्मान कार्ड—सब जन सेवा केंद्र भरथाना (मंडी त्रिहा, बिदूना रोड) पर। समान दिन आवेदन, ऑफिशियल प्रोसेस। एजेंट की जरूरत नहीं। कॉल 9193898182, 7895094129 या अभी WhatsApp। आज ही आएं।',
+    answer: 'Income certificate (Aay), ration card, and Ayushman card — income certificate only at Etawah Jan Seva Kendra, Bharthana. Ration and Ayushman available as usual. Call 9193898182, 7895094129.',
+    answerHindi: 'आय प्रमाणपत्र (Aay) केवल इटावा जन सेवा केंद्र पर। राशन कार्ड और आयुष्मान कार्ड सामान्य रूप से उपलब्ध। कॉल 9193898182, 7895094129।',
     category: 'General',
   },
   {

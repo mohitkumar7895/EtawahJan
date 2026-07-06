@@ -15,7 +15,7 @@ export default function LocalSeoContent() {
             Jan Seva Kendra Near Me – CSC Center Etawah, Bharthana | Same Day Service
           </h1>
           <p className="text-base sm:text-lg text-gray-600 text-center mb-8 sm:mb-10 leading-relaxed">
-            आपके इलाके का भरोसेमंद जन सेवा केंद्र। Aadhaar update, PAN card apply, income certificate, birth certificate, ration card, Ayushman card—<strong>same day work</strong>, <strong>official process</strong>, <strong>no agent required</strong>. Etawah, Bharthana, Agra, Kanpur, Lucknow, Firozabad, Ekdil, Auraiya (25 km radius).
+            आपके इलाके का भरोसेमंद जन सेवा केंद्र। Aadhaar address correction (Etawah only), PAN card apply, income/nivas/martu certificates (Etawah only), birth certificate, ration card, Ayushman card—<strong>same day work</strong>, <strong>official process</strong>, <strong>no agent required</strong>. Etawah, Bharthana, Agra, Kanpur, Lucknow, Firozabad, Ekdil, Auraiya (25 km radius).
           </p>
 
           {/* H2: Why choose us / Near me services */}
@@ -23,7 +23,7 @@ export default function LocalSeoContent() {
             Why Visit Jan Seva Kendra Near You? | आपके पास का सीएससी सेंटर
           </h2>
           <p className="text-gray-700 mb-6 leading-relaxed">
-            Agar aap search kar rahe ho &quot;jan seva kendra near me&quot;, &quot;csc center near me&quot;, &quot;aadhar update near me&quot;, ya &quot;pan card apply near me&quot;—hum yahi hain. Mandi Trihaa, Bidhuna Road, Bharthana, Etawah. <strong>Instant service</strong>, <strong>fast approval help</strong>, government authorized center. No middleman, direct official process.
+            Agar aap search kar rahe ho &quot;jan seva kendra near me&quot;, &quot;csc center near me&quot;, &quot;aadhaar address correction etawah&quot;, ya &quot;pan card apply near me&quot;—hum yahi hain. Mandi Trihaa, Bidhuna Road, Bharthana, Etawah.
           </p>
 
           {/* H3: Services we do */}
@@ -33,7 +33,7 @@ export default function LocalSeoContent() {
           <ul className="space-y-2 text-gray-700 mb-6">
             <li className="flex items-start gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <span><strong>Aadhaar update near me</strong> – name, address, photo, mobile update</span>
+              <span><strong>Aadhaar address correction (Etawah only)</strong> – sirf address update, name/photo/mobile nahi</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -41,7 +41,7 @@ export default function LocalSeoContent() {
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
-              <span><strong>Income certificate apply near me</strong> – same day process</span>
+              <span><strong>Income certificate (Etawah only)</strong> – same day process</span>
             </li>
             <li className="flex items-start gap-2">
               <CheckCircle className="w-5 h-5 text-green-600 flex-shrink-0 mt-0.5" />
@@ -78,9 +78,9 @@ export default function LocalSeoContent() {
               </p>
             </div>
             <div>
-              <h3 className="text-lg font-semibold text-gray-900 mb-2">Aadhar update near me same day ho sakta hai?</h3>
+              <h3 className="text-lg font-semibold text-gray-900 mb-2">Aadhaar address correction Etawah par same day ho sakta hai?</h3>
               <p className="text-gray-700 pl-0 sm:pl-2">
-                Haan. Hum yahan Aadhaar update, correction, photo update same day process karte hain. Official process, no agent required. Documents saath lao, hum guide karenge. Call now ya WhatsApp now for slot: 9193898182, 7895094129.
+                Haan, sirf <strong>Aadhaar address correction</strong> Etawah center par same day process hota hai. Name, photo, mobile update yahan nahi hota. Official process, no agent required. Call 9193898182, 7895094129.
               </p>
             </div>
             <div>
@@ -92,7 +92,7 @@ export default function LocalSeoContent() {
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Income certificate apply near me / Caste certificate online?</h3>
               <p className="text-gray-700 pl-0 sm:pl-2">
-                Income certificate aur caste certificate dono yahan apply kar sakte ho. Same day application, official process, fast approval help. Documents lao, hum sab handle karenge. Visit today.
+                Income certificate (Aay), Domicile (Nivas), Death (Martu) certificate — <strong>sirf Etawah center par</strong>. Caste certificate sab jagah. Same day application, official process. Visit today.
               </p>
             </div>
             <div>
@@ -104,7 +104,7 @@ export default function LocalSeoContent() {
             <div>
               <h3 className="text-lg font-semibold text-gray-900 mb-2">Government work online near me – kya kya services milti hain?</h3>
               <p className="text-gray-700 pl-0 sm:pl-2">
-                Saari government work online yahan: Aadhaar, PAN, Voter ID, ration card, birth/death/marriage certificate, income/caste/domicile certificate, driving license, vehicle RC, Ayushman, PM Kisan, Ujjwala, bill payment, banking—sab under one roof. Same day work, instant service.
+                Etawah center par: Aadhaar address correction, PAN, banking, income/nivas/martu certificates. Baaki districts ke liye: PAN, Voter ID, ration card, caste/birth/marriage certificate, driving license, Ayushman, PM Kisan, bill payment—official process.
               </p>
             </div>
           </div>

@@ -4,6 +4,7 @@ import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, FileC
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getVacancies, submitServiceApplication } from '@/lib/api';
+import { AADHAAR_ADDRESS_CORRECTION } from '@/lib/etawah-only-services';
 
 type Vacancy = {
   id?: string;
@@ -19,6 +20,7 @@ type Vacancy = {
 const services = [
   // Documents
   { icon: CreditCard, name: 'PAN Card', category: 'Documents', description: 'PAN card application and correction services' },
+  { icon: FileEdit, name: AADHAAR_ADDRESS_CORRECTION, category: 'Documents', description: 'Aadhaar address correction only — Etawah center', etawahOnly: true },
   { icon: User, name: 'Voter ID Card', category: 'Documents', description: 'Voter ID card application and update services' },
   { icon: FileText, name: 'Ration Card', category: 'Documents', description: 'Ration card application and family member addition' },
   { icon: FileEdit, name: 'Ration Card Update', category: 'Documents', description: 'Ration card update, correction, and family member modification' },
@@ -29,12 +31,12 @@ const services = [
   // Certificates
   { icon: Home, name: 'Birth Certificate', category: 'Certificates', description: 'Birth certificate application and correction' },
   { icon: FileEdit, name: 'Birth Certificate Correction', category: 'Certificates', description: 'Birth certificate correction and update services' },
-  { icon: Home, name: 'Death Certificate', category: 'Certificates', description: 'Death certificate application services' },
-  { icon: FileEdit, name: 'Death Certificate Correction', category: 'Certificates', description: 'Death certificate correction and update' },
+  { icon: Home, name: 'Death Certificate', category: 'Certificates', description: 'Death certificate application services', etawahOnly: true },
+  { icon: FileEdit, name: 'Death Certificate Correction', category: 'Certificates', description: 'Death certificate correction and update', etawahOnly: true },
   { icon: Users, name: 'Marriage Certificate', category: 'Certificates', description: 'Marriage certificate application and registration' },
-  { icon: FileText, name: 'Income Certificate', category: 'Certificates', description: 'Income certificate for various purposes' },
+  { icon: FileText, name: 'Income Certificate', category: 'Certificates', description: 'Income certificate for various purposes', etawahOnly: true },
   { icon: FileText, name: 'Caste Certificate', category: 'Certificates', description: 'Caste certificate application and verification' },
-  { icon: FileText, name: 'Domicile Certificate', category: 'Certificates', description: 'Domicile certificate application' },
+  { icon: FileText, name: 'Domicile Certificate', category: 'Certificates', description: 'Domicile certificate application', etawahOnly: true },
   { icon: FileEdit, name: 'Address Change Services', category: 'Certificates', description: 'Address change in certificates and documents' },
   
   // Employment
@@ -101,9 +103,9 @@ const services = [
   { icon: FileText, name: 'Property Documents', category: 'CSC Services', description: 'Property related document services' },
   
   // CSC Services - Banking & Financial
-  { icon: Wallet, name: 'Banking Services', category: 'CSC Services', description: 'Banking services and transactions' },
-  { icon: Banknote, name: 'Money Transfer', category: 'CSC Services', description: 'Money transfer and remittance services' },
-  { icon: CreditCard, name: 'Aadhaar Enabled Payment', category: 'CSC Services', description: 'AEPS banking services' },
+  { icon: Wallet, name: 'Banking Services', category: 'CSC Services', description: 'Banking services and transactions', etawahOnly: true },
+  { icon: Banknote, name: 'Money Transfer', category: 'CSC Services', description: 'Money transfer and remittance services', etawahOnly: true },
+  { icon: CreditCard, name: 'Aadhaar Enabled Payment', category: 'CSC Services', description: 'AEPS banking services', etawahOnly: true },
   
   // CSC Services - Education & Skills
   { icon: BookOpen, name: 'Exam Form Filling', category: 'CSC Services', description: 'Online exam form filling assistance' },
@@ -144,6 +146,7 @@ const serviceDocuments: Record<string, string[]> = {
   'Passport Services': ['Aadhaar Card', 'Birth Certificate', 'Proof of Address', 'Educational certificates', 'Passport size photos'],
   'E-Shram Card': ['Aadhaar Card', 'Bank account details', 'Mobile number', 'Photo'],
   'Digital Signature Certificate': ['Aadhaar Card', 'PAN Card', 'Email ID', 'Mobile number', 'Photo'],
+  [AADHAAR_ADDRESS_CORRECTION]: ['Aadhaar Card', 'New address proof', 'Old address proof (if any)', 'Passport size photo'],
   'Birth Certificate': ['Hospital discharge slip', 'Parent\'s Aadhaar Card', 'Parent\'s ID proof', 'Marriage certificate'],
   'Birth Certificate Correction': ['Existing Birth Certificate', 'Supporting document for correction', 'Aadhaar Card'],
   'Death Certificate': ['Hospital certificate', 'Aadhaar Card of deceased', 'Proof of relationship', 'ID proof of applicant'],
@@ -583,7 +586,14 @@ export default function ServicesPageComponent() {
                     <div className="bg-blue-100 p-3 sm:p-4 rounded-full mb-3 sm:mb-4">
                       <Icon className="w-6 h-6 sm:w-7 sm:h-7 md:w-8 md:h-8 text-blue-600" />
                     </div>
-                    <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base md:text-lg leading-tight">{service.name}</h3>
+                    <h3 className="font-semibold text-gray-900 mb-2 text-sm sm:text-base md:text-lg leading-tight">
+                      {service.name}
+                      {'etawahOnly' in service && service.etawahOnly && (
+                        <span className="ml-1.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 align-middle">
+                          Etawah only
+                        </span>
+                      )}
+                    </h3>
                     <p className="text-xs sm:text-sm text-gray-600 mb-3 min-h-[40px]">{service.description}</p>
                     <span className="text-xs text-blue-600 bg-blue-50 px-2 sm:px-3 py-1 rounded-full font-medium">
                       {service.category}

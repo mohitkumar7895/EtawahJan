@@ -16,12 +16,14 @@ export default function QuickLeadWidget() {
   const servicesList = [
     '📞 Callback Request / कॉल-बैक अनुरोध',
     '💳 PAN Card / Voter ID / Ration Card',
-    '📜 Income / Caste / Domicile Certificates',
+    '📜 Caste / Birth / Marriage Certificates',
+    '📍 Aadhaar Address Correction (Etawah only)',
+    '📜 Income / Domicile / Death Cert. (Etawah only)',
     '🎓 UP Scholarship & Exam Forms',
     '📌 PM Kisan & Government Schemes',
     '💻 Website & Mobile App Development',
     '🚗 Driving License & Vehicle Services',
-    '💵 AEPS Payment Withdrawal / Banking'
+    '💵 Banking / AEPS (Etawah only)'
   ]
 
   const handleSubmit = async (e: React.FormEvent) => {

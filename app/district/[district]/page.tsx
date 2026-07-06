@@ -1,8 +1,12 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Link from 'next/link'
-import { MapPin, Phone, CheckCircle, Clock, Shield, Award, AlertCircle, ArrowRight, MessageCircle } from 'lucide-react'
+import { MapPin, Phone, CheckCircle, Clock, Shield, Award, ArrowRight, MessageCircle } from 'lucide-react'
 import type { Metadata } from 'next'
+import {
+  AADHAAR_ADDRESS_CORRECTION,
+  isEtawahDistrict,
+} from '@/lib/etawah-only-services'
 
 const UP_DISTRICTS = [
   'Agra', 'Aligarh', 'Ambedkar Nagar', 'Amethi', 'Amroha', 'Auraiya', 'Azamgarh',
@@ -48,13 +52,17 @@ function capitalizeDistrict(district: string): string {
 
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const districtName = capitalizeDistrict(params.district)
+  const isEtawah = isEtawahDistrict(params.district)
+  const aadhaarKeyword = isEtawah ? 'aadhaar address correction' : 'pan card apply'
   return {
     title: `Jan Seva Kendra ${districtName} | CSC Center Near Me in ${districtName}`,
-    description: `Government authorized Jan Seva Kendra and CSC center in ${districtName}, Uttar Pradesh. Apply for PAN card, Aadhaar card, certificates, and government schemes in ${districtName} today.`,
+    description: isEtawah
+      ? `Government authorized Jan Seva Kendra in Etawah, Uttar Pradesh. Aadhaar address correction, PAN card, income/domicile/death certificates, banking — official process.`
+      : `Government authorized Jan Seva Kendra and CSC center in ${districtName}, Uttar Pradesh. PAN card, caste/birth certificates, ration card, and government schemes in ${districtName}.`,
     keywords: [
       `jan seva kendra ${districtName}`,
       `csc center ${districtName}`,
-      `aadhar update ${districtName}`,
+      `${aadhaarKeyword} ${districtName}`,
       `pan card apply ${districtName}`,
       `common service centre ${districtName}`,
       `government office ${districtName}`,
@@ -62,7 +70,9 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
     ],
     openGraph: {
       title: `Jan Seva Kendra ${districtName} | CSC Center UP`,
-      description: `Authorized CSC center and Jan Seva Kendra services in ${districtName}, UP. PAN, certificates, Aadhaar help with same day official process.`,
+      description: isEtawah
+        ? `Authorized CSC center in Etawah. Aadhaar address correction, certificates, banking — same day official process.`
+        : `Authorized CSC center and Jan Seva Kendra services in ${districtName}, UP. PAN, certificates help with official process.`,
       url: `https://www.jan-seva.site/district/${params.district.toLowerCase()}`,
     }
   }
@@ -70,8 +80,34 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
 
 export default function DistrictPage({ params }: PageProps) {
   const districtName = capitalizeDistrict(params.district)
+  const isEtawah = isEtawahDistrict(params.district)
 
-  // JSON-LD dynamic schema
+  const heroDescription = isEtawah
+    ? `${districtName} के सभी निवासियों के लिए सरकारी और निजी ऑनलाइन डिजिटल सेवाएं। Aadhaar address correction, PAN card, income/domicile/death certificates, banking—official process, fast help, no agent required.`
+    : `${districtName} के सभी निवासियों के लिए सरकारी और निजी ऑनलाइन डिजिटल सेवाएं। PAN card, caste/birth certificates, ration card, government schemes—official process, fast help, no agent required. (Aadhaar, banking, income, domicile, death certificates — केवल इटावा केंद्र पर।)`
+
+  const districtServices = isEtawah
+    ? [
+        { title: AADHAAR_ADDRESS_CORRECTION, desc: 'Aadhaar address correction only — name/photo/mobile updates not offered here.' },
+        { title: 'PAN Card Apply & Corrections', desc: 'New PAN card applications, reprints, and name/DOB updates.' },
+        { title: 'Official Certificates', desc: 'Income, domicile (nivas), death (martu), caste, and birth certificates.' },
+        { title: 'Banking & Money Transfer', desc: 'Banking services, AEPS, and remittance at Etawah center.' },
+        { title: 'Ration & Voter Card', desc: 'Family details updating, online registration, and printing.' },
+        { title: 'Government Schemes', desc: 'Scholarships, PM Kisan registration, and Ujjwala applications.' },
+        { title: 'IT & Software Solutions', desc: 'Premium website, app, and custom software development.' },
+      ]
+    : [
+        { title: 'PAN Card Apply & Corrections', desc: 'New PAN card applications, reprints, and name/DOB updates.' },
+        { title: 'Official Certificates', desc: 'Caste certificate, birth certificate, and marriage certificate.' },
+        { title: 'Ration & Voter Card', desc: 'Family details updating, online registration, and printing.' },
+        { title: 'Government Schemes', desc: 'Scholarships, PM Kisan registration, and Ujjwala applications.' },
+        { title: 'IT & Software Solutions', desc: 'Premium website, app, and custom software development.' },
+      ]
+
+  const schemaDescription = isEtawah
+    ? `Government authorized CSC and Jan Seva Kendra in Etawah. Aadhaar address correction, PAN, income/domicile/death certificates, banking.`
+    : `Government authorized CSC and Jan Seva Kendra services in ${districtName}, Uttar Pradesh. PAN card, caste/birth certificates, ration card, schemes.`
+
   const localBusinessSchema = {
     "@context": "https://schema.org",
     "@type": "GovernmentOffice",
@@ -82,7 +118,7 @@ export default function DistrictPage({ params }: PageProps) {
       `CSC Center ${districtName}`,
       `Common Service Centre ${districtName}`
     ],
-    "description": `Government authorized CSC (Common Service Centre) and Jan Seva Kendra services in ${districtName}, Uttar Pradesh. New PAN card, Aadhaar update, income certificate, caste certificate, birth certificate, same-day processing helper.`,
+    "description": schemaDescription,
     "address": {
       "@type": "PostalAddress",
       "addressLocality": districtName,
@@ -112,10 +148,14 @@ export default function DistrictPage({ params }: PageProps) {
       },
       {
         "@type": "Question",
-        "name": `${districtName} mein Aadhaar card / PAN card update kaise karein?`,
+        "name": isEtawah
+          ? `${districtName} mein Aadhaar address correction kaise karein?`
+          : `${districtName} mein PAN card apply kaise karein?`,
         "acceptedAnswer": {
           "@type": "Answer",
-          "text": `${districtName} ke nagrik new PAN card, Aadhaar validation, birth/caste/income certificates ke liye hamare portal ya helpline number 9193898182 par digital document submission dwara aasaani se apply kar sakte hain.`
+          "text": isEtawah
+            ? `Etawah ke nagrik Aadhaar address correction ke liye hamare portal ya helpline 9193898182 par contact kar sakte hain. Sirf address correction — name/photo/mobile update yahan nahi hota.`
+            : `${districtName} ke nagrik PAN card, caste/birth certificates ke liye hamare portal ya helpline 9193898182 par digital document submission dwara apply kar sakte hain. Aadhaar, banking, income, domicile, death certificates keval Etawah center par uplabdh hain.`
         }
       }
     ]
@@ -153,7 +193,7 @@ export default function DistrictPage({ params }: PageProps) {
                   </h1>
                   
                   <p className="text-sm sm:text-base md:text-lg text-gray-600 leading-relaxed mb-6 sm:mb-8 max-w-2xl">
-                    {districtName} के सभी निवासियों के लिए सरकारी और निजी ऑनलाइन डिजिटल सेवाएं। Aadhaar updates, PAN card applications, digital signature certificates, income, caste, birth, and domicile certificates—<strong>official process</strong>, <strong>fast help</strong>, <strong>no agent required</strong>.
+                    {heroDescription}
                   </p>
 
                   <div className="flex flex-col sm:flex-row gap-3">
@@ -207,54 +247,22 @@ export default function DistrictPage({ params }: PageProps) {
                 </h2>
                 
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-2.5">
+                  {districtServices.map((svc) => (
+                    <div key={svc.title} className="flex items-start gap-2.5">
                       <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
                       <div>
-                        <span className="font-semibold text-gray-800 block text-sm sm:text-base">Aadhaar Card Updates</span>
-                        <span className="text-xs sm:text-sm text-gray-500">Aadhaar verification & correct documents validation.</span>
+                        <span className="font-semibold text-gray-800 block text-sm sm:text-base">{svc.title}</span>
+                        <span className="text-xs sm:text-sm text-gray-500">{svc.desc}</span>
                       </div>
                     </div>
-                    <div className="flex items-start gap-2.5">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <span className="font-semibold text-gray-800 block text-sm sm:text-base">PAN Card Apply & Corrections</span>
-                        <span className="text-xs sm:text-sm text-gray-500">New PAN card applications, reprints, and name/DOB updates.</span>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2.5">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <span className="font-semibold text-gray-800 block text-sm sm:text-base">Official Certificates</span>
-                        <span className="text-xs sm:text-sm text-gray-500">Income certificate, Caste certificate, and Domicile application.</span>
-                      </div>
-                    </div>
-                  </div>
-                  
-                  <div className="space-y-3">
-                    <div className="flex items-start gap-2.5">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <span className="font-semibold text-gray-800 block text-sm sm:text-base">Ration & Voter Card</span>
-                        <span className="text-xs sm:text-sm text-gray-500">Family details updating, online registration, and printing.</span>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2.5">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <span className="font-semibold text-gray-800 block text-sm sm:text-base">Government Schemes</span>
-                        <span className="text-xs sm:text-sm text-gray-500">Scholarships, PM Kisan registration, and Ujjwala applications.</span>
-                      </div>
-                    </div>
-                    <div className="flex items-start gap-2.5">
-                      <CheckCircle className="w-5 h-5 text-green-600 mt-0.5 flex-shrink-0" />
-                      <div>
-                        <span className="font-semibold text-gray-800 block text-sm sm:text-base">IT & Software Solutions</span>
-                        <span className="text-xs sm:text-sm text-gray-500">Premium website, app, and custom software development.</span>
-                      </div>
-                    </div>
-                  </div>
+                  ))}
                 </div>
+
+                {!isEtawah && (
+                  <p className="mt-6 text-xs sm:text-sm text-amber-800 bg-amber-50 border border-amber-200 rounded-lg px-4 py-3">
+                    <strong>नोट:</strong> Aadhaar address correction, Banking, Income (Aay), Domicile (Nivas), Death (Martu) certificate — ये सेवाएं केवल <strong>इटावा</strong> जन सेवा केंद्र पर उपलब्ध हैं, {districtName} में नहीं।
+                  </p>
+                )}
 
                 <div className="mt-8 text-center">
                   <Link 
@@ -283,10 +291,14 @@ export default function DistrictPage({ params }: PageProps) {
                   </div>
                   <div>
                     <h3 className="text-base sm:text-lg font-bold text-gray-800 mb-2">
-                      Q2. What documents are needed for Income or Caste certificate in {districtName}?
+                      {isEtawah
+                        ? `Q2. What documents are needed for Income or Domicile certificate in ${districtName}?`
+                        : `Q2. What documents are needed for Caste certificate in ${districtName}?`}
                     </h3>
                     <p className="text-gray-600 text-sm leading-relaxed pl-2 sm:pl-4 border-l-2 border-blue-500">
-                      आय या जाति प्रमाण पत्र के लिए सामान्यतः आधार कार्ड, स्वप्रमाणित घोषणा पत्र, सभासद या प्रधान की संस्तुति और एक पासपोर्ट साइज फोटो की आवश्यकता होती है।
+                      {isEtawah
+                        ? 'आय, निवास (domicile) या मृत्यु प्रमाण पत्र के लिए आधार कार्ड, स्वप्रमाणित घोषणा पत्र, संस्तुति और पासपोर्ट साइज फोटो की आवश्यकता होती है।'
+                        : 'जाति प्रमाण पत्र के लिए आधार कार्ड, पता प्रमाण, माता-पिता का जाति प्रमाणपत्र और स्कूल लीविंग सर्टिफिकेट की आवश्यकता होती है। आय/निवास/मृत्यु प्रमाण पत्र केवल इटावा केंद्र पर बनते हैं।'}
                     </p>
                   </div>
                   <div>

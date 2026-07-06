@@ -4,10 +4,14 @@ import { FileText, CreditCard, User, Home, Briefcase, Car, Heart, Printer, Zap, 
 import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import { getVacancies, type Vacancy, submitServiceApplication } from '@/lib/api';
+import {
+  AADHAAR_ADDRESS_CORRECTION,
+} from '@/lib/etawah-only-services';
 
 const services = [
   // Documents
   { icon: CreditCard, name: 'PAN Card', category: 'Documents' },
+  { icon: FileEdit, name: AADHAAR_ADDRESS_CORRECTION, category: 'Documents', etawahOnly: true },
   { icon: User, name: 'Voter ID Card', category: 'Documents' },
   { icon: FileText, name: 'Ration Card', category: 'Documents' },
   { icon: FileEdit, name: 'Ration Card Update', category: 'Documents' },
@@ -18,12 +22,12 @@ const services = [
   // Certificates
   { icon: Home, name: 'Birth Certificate', category: 'Certificates' },
   { icon: FileEdit, name: 'Birth Certificate Correction', category: 'Certificates' },
-  { icon: Home, name: 'Death Certificate', category: 'Certificates' },
-  { icon: FileEdit, name: 'Death Certificate Correction', category: 'Certificates' },
+  { icon: Home, name: 'Death Certificate', category: 'Certificates', etawahOnly: true },
+  { icon: FileEdit, name: 'Death Certificate Correction', category: 'Certificates', etawahOnly: true },
   { icon: Users, name: 'Marriage Certificate', category: 'Certificates' },
-  { icon: FileText, name: 'Income Certificate', category: 'Certificates' },
+  { icon: FileText, name: 'Income Certificate', category: 'Certificates', etawahOnly: true },
   { icon: FileText, name: 'Caste Certificate', category: 'Certificates' },
-  { icon: FileText, name: 'Domicile Certificate', category: 'Certificates' },
+  { icon: FileText, name: 'Domicile Certificate', category: 'Certificates', etawahOnly: true },
  
   
   // Employment
@@ -90,9 +94,9 @@ const services = [
   { icon: FileText, name: 'Property Documents', category: 'CSC Services' },
   
   // CSC Services - Banking & Financial
-  { icon: Wallet, name: 'Banking Services', category: 'CSC Services' },
-  { icon: Banknote, name: 'Money Transfer', category: 'CSC Services' },
-  { icon: CreditCard, name: 'Aadhaar Enabled Payment', category: 'CSC Services' },
+  { icon: Wallet, name: 'Banking Services', category: 'CSC Services', etawahOnly: true },
+  { icon: Banknote, name: 'Money Transfer', category: 'CSC Services', etawahOnly: true },
+  { icon: CreditCard, name: 'Aadhaar Enabled Payment', category: 'CSC Services', etawahOnly: true },
   
   // CSC Services - Education & Skills
   { icon: BookOpen, name: 'Exam Form Filling', category: 'CSC Services' },
@@ -116,6 +120,7 @@ const serviceDocuments: Record<string, string[]> = {
   'Passport Services': ['Aadhaar Card', 'Birth Certificate', 'Proof of Address', 'Educational certificates', 'Passport size photos'],
   'E-Shram Card': ['Aadhaar Card', 'Bank account details', 'Mobile number', 'Photo'],
   'Digital Signature Certificate': ['Aadhaar Card', 'PAN Card', 'Email ID', 'Mobile number', 'Photo'],
+  [AADHAAR_ADDRESS_CORRECTION]: ['Aadhaar Card', 'New address proof', 'Old address proof (if any)', 'Passport size photo'],
   'Birth Certificate': ['Hospital discharge slip', 'Parent\'s Aadhaar Card', 'Parent\'s ID proof', 'Marriage certificate'],
   'Birth Certificate Correction': ['Existing Birth Certificate', 'Supporting document for correction', 'Aadhaar Card'],
   'Death Certificate': ['Hospital certificate', 'Aadhaar Card of deceased', 'Proof of relationship', 'ID proof of applicant'],
@@ -385,7 +390,14 @@ export default function Services() {
                       <div className="bg-blue-100 p-2 sm:p-3 rounded-full mb-3 sm:mb-4">
                         <Icon className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
                       </div>
-                      <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base leading-tight">{service.name}</h3>
+                      <h3 className="font-semibold text-gray-900 mb-1 text-sm sm:text-base leading-tight">
+                        {service.name}
+                        {'etawahOnly' in service && service.etawahOnly && (
+                          <span className="ml-1.5 inline-block rounded bg-amber-100 px-1.5 py-0.5 text-[10px] font-bold text-amber-800 align-middle">
+                            Etawah only
+                          </span>
+                        )}
+                      </h3>
                       <span className="text-xs text-blue-600 bg-blue-50 px-2 py-1 rounded-full">
                         {service.category}
                       </span>

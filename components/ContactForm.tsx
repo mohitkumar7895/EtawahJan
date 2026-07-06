@@ -3,10 +3,11 @@
 import { useState, FormEvent } from 'react';
 import { Send, CheckCircle, User, Phone, MapPin, FileText, Loader2 } from 'lucide-react';
 import { submitServiceApplication } from '@/lib/api';
+import { AADHAAR_ADDRESS_CORRECTION } from '@/lib/etawah-only-services';
 
 const serviceOptions = [
-  // Documents
-  'Aadhaar Card',
+  // Documents — Aadhaar: address correction only, Etawah
+  AADHAAR_ADDRESS_CORRECTION,
   'PAN Card',
   'Voter ID Card',
   'Ration Card',
@@ -21,9 +22,9 @@ const serviceOptions = [
   'Death Certificate',
   'Death Certificate Correction',
   'Marriage Certificate',
-  'Income Certificate',
+  'Income Certificate (Etawah only)',
   'Caste Certificate',
-  'Domicile Certificate',
+  'Domicile Certificate (Etawah only)',
   
   // Employment
   'Employment Registration',
@@ -96,9 +97,9 @@ const serviceOptions = [
   // CSC Services - Travel & Booking
   
   // CSC Services - Banking & Financial
-  'Banking Services',
-  'Money Transfer',
-  'Aadhaar Enabled Payment',
+  'Banking Services (Etawah only)',
+  'Money Transfer (Etawah only)',
+  'Aadhaar Enabled Payment (Etawah only)',
   
   // CSC Services - Education & Skills
   'Exam Form Filling',
