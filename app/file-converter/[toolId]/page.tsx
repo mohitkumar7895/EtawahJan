@@ -1,4 +1,5 @@
 import { notFound } from 'next/navigation';
+import Link from 'next/link';
 import { CONVERTER_TOOLS, getToolById } from '@/lib/converter/tools';
 import dynamic from 'next/dynamic';
 import ToolPageLoader from '@/components/tools/ToolPageLoader';
@@ -33,9 +34,11 @@ export function generateMetadata({ params }: Props): Metadata {
       tool.name.toLowerCase(),
       `${tool.name.toLowerCase()} free`,
       `${tool.name.toLowerCase()} online`,
-      `${tool.name.toLowerCase()} india`,
+      `${tool.name.toLowerCase()} online free india`,
+      `${tool.name.toLowerCase()} kaise karein`,
       'free file converter',
       'jan seva kendra',
+      'pdf tools free',
     ],
     openGraph: {
       title,
@@ -109,6 +112,23 @@ export default function ToolPage({ params }: Props) {
     <div className="py-6 sm:py-10 px-4 sm:px-6">
       <SubToolJsonLd name={tool.name} description={tool.description} slug={tool.id} />
       <ToolWorkspace tool={tool} />
+      <section className="mx-auto max-w-3xl mt-10 pt-8 border-t border-slate-200 dark:border-slate-800 text-sm text-slate-600 dark:text-slate-400">
+        <h2 className="font-bold text-slate-900 dark:text-white mb-2">
+          {tool.name} — Free Online | Jan Seva Kendra
+        </h2>
+        <p className="leading-relaxed">{tool.description} 100% free, no sign-up, works on mobile and desktop.</p>
+        <p className="mt-3 flex flex-wrap gap-3">
+          <Link href="/file-converter" className="font-semibold text-rose-600 hover:underline">
+            All file converter tools
+          </Link>
+          <Link href="/tools" className="font-semibold text-blue-600 hover:underline">
+            Free tools hub
+          </Link>
+          <Link href="/guides/file-converter" className="font-semibold text-indigo-600 hover:underline">
+            How-to guide
+          </Link>
+        </p>
+      </section>
     </div>
   );
 }

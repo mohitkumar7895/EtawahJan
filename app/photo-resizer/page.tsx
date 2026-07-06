@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import ToolPageLoader from '@/components/tools/ToolPageLoader';
 import ToolJsonLd from '@/components/seo/ToolJsonLd';
+import ToolPageSeoFooter from '@/components/tools/ToolPageSeoFooter';
 import { getSeoToolBySlug, SITE_ORIGIN } from '@/lib/seo/tools-catalog';
 
 const PhotoResizerClient = dynamic(() => import('@/components/photo-resizer/PhotoResizerClient'), {
@@ -37,6 +38,7 @@ export default function PhotoResizerPage() {
     <>
       <ToolJsonLd tool={TOOL} />
       <PhotoResizerClient />
+      <ToolPageSeoFooter slug="photo-resizer" />
     </>
   );
 }

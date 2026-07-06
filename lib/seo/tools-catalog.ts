@@ -61,6 +61,10 @@ export const SEO_TOOLS: SeoTool[] = [
       'cash count receipt pdf',
       'kirana store hisab',
       'jan seva kendra cash counter',
+      'note ginti online',
+      '500 200 100 note counter',
+      'cash counter hindi',
+      'dukan cash hisab tool',
     ],
     audience: ['Shopkeepers', 'CSC operators', 'Bank cashiers', 'Kirana stores', 'Petrol pumps'],
     steps: [
@@ -124,6 +128,11 @@ export const SEO_TOOLS: SeoTool[] = [
       'jpg compressor 20kb',
       'free photo resize online',
       'jan seva photo resize',
+      'photo 20kb kaise karein',
+      'signature 10kb online',
+      'neet photo resize',
+      'ibps photo size',
+      'passport photo compress',
     ],
     audience: ['Sarkari exam aspirants', 'Students', 'Job applicants', 'Banking candidates'],
     steps: [
@@ -435,18 +444,24 @@ export const SEO_TOOLS: SeoTool[] = [
   {
     slug: 'tools',
     path: '/tools',
-    title: 'Free Digital Tools — Photo Resizer, PDF Editor, Cash Counter, File Converter',
+    title: 'Free Online Tools India — Photo Resizer, PDF Editor, Cash Counter, File Converter | Jan Seva',
     description:
-      'Sabhi free online tools ek jagah — photo resize, PDF edit, cash count, file convert, resume build, background change. Jan Seva Kendra Etawah.',
+      '7+ free tools + 21 file converters + 60+ application letters — photo 20KB resize, PDF edit/sign, cash note counter, merge PDF, background remove, resume builder. 100% free, no sign-up. Mobile + desktop.',
     keywords: [
       'free online tools india',
       'jan seva kendra tools',
-      'sarkari tools',
-      'free photo tools',
-      'free pdf tools',
-      'all in one tools',
+      'sarkari photo resizer free',
+      'pdf editor online free india',
+      'cash counter online free',
+      'merge pdf online free',
+      'photo resize 20kb free',
+      'remove background free',
+      'resume builder free india',
+      'application letter maker hindi',
+      'all in one free tools',
       'digital tools etawah',
-      'free utility tools',
+      'csc free tools',
+      'online utility tools hindi',
     ],
     audience: ['Students', 'Office workers', 'Job applicants', 'Shopkeepers', 'CSC operators'],
     steps: [
@@ -457,7 +472,7 @@ export const SEO_TOOLS: SeoTool[] = [
     faqs: [
       {
         q: 'Kitne tools hain?',
-        a: '6 main tools — Photo Resizer, PDF Editor, Cash Counter, File Converter (20+ sub-tools), Background Changer, Resume Builder.',
+        a: '7 main tools — Photo Resizer, PDF Editor, Cash Counter, File Converter (21 sub-tools), Background Changer, Resume Builder, Application Maker (60+ letters). Sab 100% free.',
       },
       {
         q: 'Kya sab free hain?',
@@ -496,3 +511,34 @@ export const FILE_CONVERTER_SUB_TOOLS: SeoSubTool[] = CONVERTER_TOOLS.map((tool)
 export function getSeoToolBySlug(slug: string): SeoTool | undefined {
   return SEO_TOOLS.find((t) => t.slug === slug);
 }
+
+/** Main tool paths for footer / homepage promos (excludes /tools hub). */
+export const MAIN_TOOL_LINKS = SEO_TOOLS.filter((t) => t.slug !== 'tools').map((t) => ({
+  slug: t.slug,
+  path: t.path,
+  label: t.title.split('—')[0].trim(),
+  category: t.category,
+}));
+
+/** High-intent search phrases → tool URL (internal linking + content). */
+export const POPULAR_TOOL_SEARCHES: { query: string; path: string; guide?: string }[] = [
+  { query: 'Photo resize 20KB online free', path: '/photo-resizer', guide: '/guides/photo-resizer' },
+  { query: 'Signature resize 10KB / 50KB', path: '/photo-resizer', guide: '/guides/photo-resizer' },
+  { query: 'SSC / UP Police photo size compressor', path: '/photo-resizer' },
+  { query: 'White background photo maker passport', path: '/image-background-changer', guide: '/guides/image-background-changer' },
+  { query: 'Remove background from photo free', path: '/image-background-changer' },
+  { query: 'PDF to JPG converter online free', path: '/file-converter/pdf-to-jpg' },
+  { query: 'Merge PDF online free India', path: '/file-converter/merge-pdf' },
+  { query: 'Compress PDF online', path: '/file-converter/compress-pdf' },
+  { query: 'JPG to PDF converter', path: '/file-converter/jpg-to-pdf' },
+  { query: 'Edit PDF text online free', path: '/pdf-editor', guide: '/guides/pdf-editor' },
+  { query: 'Add signature to PDF online', path: '/pdf-editor' },
+  { query: 'Cash counter note ginti ₹500 ₹200', path: '/cash-counter', guide: '/guides/cash-counter' },
+  { query: 'Rupee note counter shopkeeper', path: '/cash-counter' },
+  { query: 'Free resume builder PDF India', path: '/resume-builder', guide: '/guides/resume-builder' },
+  { query: 'ATS resume checker free', path: '/resume-builder' },
+  { query: 'Application letter format Hindi', path: '/applications', guide: '/guides/applications' },
+  { query: 'Aavedan patra / leave letter Hindi', path: '/applications' },
+  { query: 'Income certificate application format', path: '/applications/income-certificate' },
+  { query: 'Bijli bill complaint letter format', path: '/applications/electricity-wrong-bill' },
+];

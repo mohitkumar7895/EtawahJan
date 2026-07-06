@@ -6,6 +6,7 @@ import Services from '@/components/Services'
 import Announcements from '@/components/Announcements'
 import Reviews from '@/components/Reviews'
 import HomeJobsFeed from '@/components/HomeJobsFeed'
+import ToolsHomePromo from '@/components/tools/ToolsHomePromo'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -38,6 +39,14 @@ export const metadata: Metadata = {
     'government work online near me',
     'Jan Seva Kendra Bharthana',
     'CSC Center Etawah',
+    'free photo resizer 20kb',
+    'pdf editor online free india',
+    'cash counter online free',
+    'merge pdf online free',
+    'free online tools india',
+    'jan seva free tools',
+    'application letter maker hindi',
+    'resume builder free pdf',
     'जन सेवा केंद्र नजदीक',
     'सीएससी सेंटर इटावा',
     'Best Service Center Etawah',
@@ -62,6 +71,7 @@ export default function Home() {
     <>
       <Header />
       <Hero />
+      <ToolsHomePromo />
       <ITServicesBanner />
       <Announcements />
       <Services />

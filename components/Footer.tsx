@@ -1,6 +1,6 @@
 'use client';
 
-import { MapPin, Phone, Mail, Clock, FileText, Users, Shield, Award, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
+import { MapPin, Phone, Mail, Clock, FileText, Users, Award, Facebook, Twitter, Instagram, Linkedin } from 'lucide-react';
 import Link from 'next/link';
 import Image from 'next/image';
 
@@ -70,6 +70,12 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
+                <Link href="/tools" className="text-xs sm:text-sm text-gray-300 hover:text-amber-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-amber-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>Free Tools</span>
+                </Link>
+              </li>
+              <li>
                 <Link href="/digital-services" className="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition flex items-center py-0.5">
                   <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full mr-1.5 flex-shrink-0"></span>
                   <span>Digital Work</span>
@@ -119,6 +125,18 @@ export default function Footer() {
                 <Link href="/build-website" className="text-xs sm:text-sm text-gray-300 hover:text-indigo-400 transition flex items-center py-0.5">
                   <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-indigo-400 rounded-full mr-1.5 flex-shrink-0"></span>
                   <span>Apni Website Banvaiye</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/tools-sitemap" className="text-xs sm:text-sm text-gray-300 hover:text-amber-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-amber-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>Tools Sitemap</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/guides" className="text-xs sm:text-sm text-gray-300 hover:text-amber-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-amber-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>Tool Guides</span>
                 </Link>
               </li>
               <li>
@@ -198,49 +216,43 @@ export default function Footer() {
             </div>
           </div>
 
-          {/* Services Highlights */}
+          {/* Free Tools */}
           <div className="col-span-1">
             <h3 className="text-sm sm:text-base lg:text-lg font-bold mb-2 sm:mb-3 flex items-center">
-              <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-blue-400 flex-shrink-0" />
-              Services
+              <Award className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-amber-400 flex-shrink-0" />
+              Free Tools
             </h3>
             <ul className="space-y-1 sm:space-y-1.5 text-xs sm:text-sm text-gray-300">
-              <li className="flex items-center">
-                <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 text-green-400 flex-shrink-0" />
-                <span>Aadhaar & PAN</span>
+              <li>
+                <Link href="/photo-resizer" className="hover:text-amber-400 transition">Photo 20KB Resizer</Link>
               </li>
-              <li className="flex items-center">
-                <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 text-green-400 flex-shrink-0" />
-                <span>Voter ID & Ration</span>
+              <li>
+                <Link href="/pdf-editor" className="hover:text-amber-400 transition">PDF Editor</Link>
               </li>
-              <li className="flex items-center">
-                <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 text-green-400 flex-shrink-0" />
-                <span>Certificates</span>
+              <li>
+                <Link href="/cash-counter" className="hover:text-amber-400 transition">Cash Counter</Link>
               </li>
-              <li className="flex items-center">
-                <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 text-green-400 flex-shrink-0" />
-                <span>Banking & Insurance</span>
+              <li>
+                <Link href="/file-converter" className="hover:text-amber-400 transition">File Converter</Link>
               </li>
-              <li className="hidden items-center sm:flex">
-                <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 text-green-400 flex-shrink-0" />
-                <span>Property & Vehicle</span>
+              <li>
+                <Link href="/applications" className="hover:text-amber-400 transition">Application Maker</Link>
               </li>
-              <li className="hidden items-center sm:flex">
-                <Shield className="w-3 h-3 sm:w-3.5 sm:h-3.5 mr-1.5 text-green-400 flex-shrink-0" />
-                <span>And Many More...</span>
+              <li className="hidden sm:block">
+                <Link href="/resume-builder" className="hover:text-amber-400 transition">Resume Builder</Link>
               </li>
             </ul>
             <Link 
-              href="/digital-services" 
-              className="inline-block mt-2 sm:mt-3 bg-indigo-600 hover:bg-indigo-700 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition font-semibold text-xs sm:text-sm w-full sm:w-auto text-center"
+              href="/tools" 
+              className="inline-block mt-2 sm:mt-3 bg-amber-500 hover:bg-amber-600 text-slate-900 px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition font-semibold text-xs sm:text-sm w-full sm:w-auto text-center"
             >
-              Digital Work →
+              All Tools →
             </Link>
             <Link 
               href="/services" 
               className="inline-block mt-2 sm:mt-3 bg-blue-600 hover:bg-blue-700 text-white px-2.5 sm:px-3 py-1 sm:py-1.5 rounded-lg transition font-semibold text-xs sm:text-sm w-full sm:w-auto text-center"
             >
-              View All →
+              CSC Services →
             </Link>
           </div>
         </div>

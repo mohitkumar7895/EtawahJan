@@ -2,6 +2,7 @@ import type { Metadata } from 'next';
 import dynamic from 'next/dynamic';
 import ToolPageLoader from '@/components/tools/ToolPageLoader';
 import ToolJsonLd from '@/components/seo/ToolJsonLd';
+import ToolPageSeoFooter from '@/components/tools/ToolPageSeoFooter';
 import { getSeoToolBySlug, SITE_ORIGIN } from '@/lib/seo/tools-catalog';
 
 const ImageBackgroundClient = dynamic(() => import('@/components/image-background/ImageBackgroundClient'), {
@@ -37,6 +38,7 @@ export default function ImageBackgroundChangerPage() {
     <>
       <ToolJsonLd tool={TOOL} />
       <ImageBackgroundClient />
+      <ToolPageSeoFooter slug="image-background-changer" />
     </>
   );
 }

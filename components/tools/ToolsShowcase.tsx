@@ -2,6 +2,7 @@ import Image from 'next/image';
 import { Sparkles } from 'lucide-react';
 import { DIGITAL_TOOLS } from './toolsData';
 import ToolCard from './ToolCard';
+import ToolsSeoContent from './ToolsSeoContent';
 
 export default function ToolsShowcase() {
   return (
@@ -24,10 +25,11 @@ export default function ToolsShowcase() {
             Arpit Jan Seva Kendra · 100% Free
           </span>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black tracking-tight leading-tight">
-            Jan Seva Kendra Digital Tools
+            Free Online Tools India — Photo, PDF, Cash Counter
           </h1>
-          <p className="text-sm sm:text-base text-blue-100 max-w-xl mx-auto">
-            Card par click — tool turant nayi tab mein khulega.
+          <p className="text-sm sm:text-base text-blue-100 max-w-2xl mx-auto leading-relaxed">
+            Photo 20KB resize · PDF edit & sign · Cash note counter · Merge PDF · Background remove · Resume builder ·
+            60+ Hindi application letters — <strong>100% free</strong>, no login. Card click karo, turant use karo.
           </p>
         </div>
       </section>
@@ -91,6 +93,8 @@ export default function ToolsShowcase() {
           </div>
         </div>
       </section>
+
+      <ToolsSeoContent />
     </div>
   );
 }

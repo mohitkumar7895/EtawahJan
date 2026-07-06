@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ToolJsonLd from '@/components/seo/ToolJsonLd';
+import ToolPageSeoFooter from '@/components/tools/ToolPageSeoFooter';
 import { getSeoToolBySlug, SITE_ORIGIN } from '@/lib/seo/tools-catalog';
 
 const PdfEditorApp = dynamic(() => import('@/components/pdf-editor/PdfEditorApp'), {
@@ -45,6 +46,7 @@ export default function PdfEditorPage() {
       <main className="min-h-screen bg-slate-50">
         <PdfEditorApp />
       </main>
+      <ToolPageSeoFooter slug="pdf-editor" />
       <Footer />
     </>
   );

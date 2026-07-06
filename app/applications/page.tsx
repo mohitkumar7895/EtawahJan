@@ -3,6 +3,7 @@ import dynamic from 'next/dynamic';
 import Header from '@/components/Header';
 import Footer from '@/components/Footer';
 import ToolPageLoader from '@/components/tools/ToolPageLoader';
+import ToolPageSeoFooter from '@/components/tools/ToolPageSeoFooter';
 import { ALL_TEMPLATES, CATEGORY_META, ORDERED_CATEGORIES } from '@/lib/applications/templates';
 import { SITE_ORIGIN } from '@/lib/seo/tools-catalog';
 
@@ -133,6 +134,7 @@ export default function ApplicationsHubPage() {
       <ApplicationsJsonLd />
       <Header />
       <ApplicationsHubClient />
+      <ToolPageSeoFooter slug="applications" />
       <Footer />
     </>
   );

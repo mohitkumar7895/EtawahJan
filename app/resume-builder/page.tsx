@@ -5,6 +5,7 @@ import Footer from '@/components/Footer';
 import { Briefcase, Sparkles, Download, LayoutTemplate, Shield, Zap } from 'lucide-react';
 import { RESUME_TEMPLATES } from '@/lib/resume-builder/templates';
 import ToolJsonLd from '@/components/seo/ToolJsonLd';
+import ToolPageSeoFooter from '@/components/tools/ToolPageSeoFooter';
 import { getSeoToolBySlug, SITE_ORIGIN } from '@/lib/seo/tools-catalog';
 
 const TOOL = getSeoToolBySlug('resume-builder')!;
@@ -100,6 +101,7 @@ export default function ResumeBuilderLandingPage() {
           </p>
         </section>
       </div>
+      <ToolPageSeoFooter slug="resume-builder" />
       <Footer />
     </>
   );
