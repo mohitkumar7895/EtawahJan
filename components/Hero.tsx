@@ -81,12 +81,12 @@ export default function Hero() {
             </p>
             <div className="mb-4 sm:mb-6 px-2">
               <a
-                href="https://wa.me/9193898182?text=Hello,%20mujhe%20website%20ya%20software%20banwana%20hai."
+                href="https://wa.me/917895094129?text=Hello,%20mujhe%20website%20ya%20software%20banwana%20hai."
                 target="_blank"
                 rel="noopener noreferrer"
                 className="inline-flex items-center gap-2 rounded-full border border-white/40 bg-white/15 px-4 sm:px-6 py-2 sm:py-2.5 text-sm sm:text-base font-bold text-white hover:bg-white/25 transition shadow-lg"
               >
-                Get Your Website Built →
+                Get Your Website Built — 7895094129 →
               </a>
             </div>
 
