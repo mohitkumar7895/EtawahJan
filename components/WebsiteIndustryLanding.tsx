@@ -7,6 +7,7 @@ import {
 } from 'lucide-react'
 import type { WebsiteIndustry } from '@/lib/seo/website-industries'
 import type { StateLocation } from '@/lib/seo/india-locations'
+import type { WorldCountry } from '@/lib/seo/world-locations'
 import { WEBSITE_BUILD_SERVICES } from '@/lib/seo/website-build-services'
 
 const WHATSAPP = 'https://wa.me/917895094129'
@@ -14,10 +15,15 @@ const WHATSAPP = 'https://wa.me/917895094129'
 type Props = {
   industry: WebsiteIndustry
   state?: StateLocation
+  country?: WorldCountry
 }
 
-export default function WebsiteIndustryLanding({ industry, state }: Props) {
-  const location = state ? `${state.name}, India` : 'All India'
+export default function WebsiteIndustryLanding({ industry, state, country }: Props) {
+  const location = country
+    ? country.name
+    : state
+      ? `${state.name}, India`
+      : 'All India'
   const waText = encodeURIComponent(
     `Hello, I need ${industry.name} website in ${location}. Please share quote and timeline.`
   )
@@ -31,13 +37,18 @@ export default function WebsiteIndustryLanding({ industry, state }: Props) {
           </p>
           <h1 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight mb-4">
             {industry.name} Website Development
-            {state ? ` in ${state.name}` : ' — All India'}
+            {country ? ` in ${country.name}` : state ? ` in ${state.name}` : ' — All India'}
           </h1>
           <p className="text-lg text-violet-100 mb-2 font-semibold">{industry.tagline}</p>
           <p className="text-base text-slate-300 max-w-3xl mb-8 leading-relaxed">
-            Jan Seva Kendra {industry.name.toLowerCase()} ke liye professional website banata hai —
-            mobile-friendly, WhatsApp leads, Google SEO ready. {state ? `${state.name} ke` : 'Poore India ke'}{' '}
-            business owners ke liye affordable pricing. Aaj hi WhatsApp karein, free quote paaiye.
+            Jan Seva Kendra builds professional {industry.name.toLowerCase()} websites —
+            mobile-friendly, WhatsApp leads, Google SEO ready.{' '}
+            {country
+              ? `Serving ${country.name} & worldwide clients remotely.`
+              : state
+                ? `${state.name} ke business owners ke liye affordable pricing.`
+                : 'Poore India & 55+ countries ke business owners ke liye affordable pricing.'}{' '}
+            WhatsApp today for free quote.
           </p>
           <div className="flex flex-wrap gap-3">
             <a

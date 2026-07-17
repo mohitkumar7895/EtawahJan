@@ -114,7 +114,7 @@ export default function Footer() {
               <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-blue-400 flex-shrink-0" />
               Sitemaps
             </h3>
-            <ul className="space-y-1 sm:space-y-1.5">
+            <ul className="grid grid-cols-2 gap-x-2 sm:gap-x-3 gap-y-1 sm:gap-y-1.5 [&_li]:min-w-0 [&_a]:items-start [&_span:last-child]:break-words [&_span:last-child]:leading-tight">
               <li>
                 <Link href="/sitemap" className="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition flex items-center py-0.5">
                   <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full mr-1.5 flex-shrink-0"></span>
@@ -137,6 +137,24 @@ export default function Footer() {
                 <Link href="/guides" className="text-xs sm:text-sm text-gray-300 hover:text-amber-400 transition flex items-center py-0.5">
                   <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-amber-400 rounded-full mr-1.5 flex-shrink-0"></span>
                   <span>Tool Guides</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/grow" className="text-xs sm:text-sm text-gray-300 hover:text-emerald-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-emerald-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>SEO & Social Guides</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/global-website-sitemap" className="text-xs sm:text-sm text-gray-300 hover:text-violet-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-violet-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>Global Website (USA, Russia…)</span>
+                </Link>
+              </li>
+              <li>
+                <Link href="/website-world" className="text-xs sm:text-sm text-gray-300 hover:text-violet-400 transition flex items-center py-0.5">
+                  <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-violet-400 rounded-full mr-1.5 flex-shrink-0"></span>
+                  <span>Website World Hub</span>
                 </Link>
               </li>
               <li>

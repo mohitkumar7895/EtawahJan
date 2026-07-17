@@ -8,6 +8,7 @@ import {
   getAllWebsiteStateParams,
   getStateBySlug,
 } from '@/lib/seo/india-locations'
+import { indiaStateMeta } from '@/lib/seo/website-seo-copy'
 
 interface PageProps {
   params: { state: string }
@@ -20,29 +21,18 @@ export async function generateStaticParams() {
 export async function generateMetadata({ params }: PageProps): Promise<Metadata> {
   const st = getStateBySlug(params.state)
   const stateName = st?.name || params.state
-  const title = `Website Development ${stateName} | Software Company ${stateName} India`
-  const description = `Best website development & software company in ${stateName}, India. Business website, e-commerce, mobile app, billing software for all districts of ${stateName}. Call 9193898182 | WhatsApp 7895094129.`
+  const meta = indiaStateMeta(stateName)
 
   return {
-    title,
-    description,
-    keywords: [
-      `website development ${stateName}`,
-      `software company ${stateName}`,
-      `website banwana ${stateName}`,
-      `web developer ${stateName}`,
-      `mobile app development ${stateName}`,
-      `business website ${stateName}`,
-      `ecommerce website ${stateName}`,
-      `custom software ${stateName}`,
-      `website developer near me ${stateName}`,
-    ],
+    title: meta.title,
+    description: meta.description,
+    keywords: meta.keywords,
     alternates: {
       canonical: `https://www.jan-seva.site/website/${params.state}`,
     },
     openGraph: {
-      title,
-      description,
+      title: meta.title,
+      description: meta.description,
       url: `https://www.jan-seva.site/website/${params.state}`,
     },
   }

@@ -1,6 +1,7 @@
 import { INDIA_STATES } from '@/lib/seo/india-locations'
 import { WEBSITE_INDUSTRIES } from '@/lib/seo/website-industries'
 import { WEBSITE_BUILD_SERVICES } from '@/lib/seo/website-build-services'
+import { WORLD_COUNTRIES } from '@/lib/seo/world-locations'
 
 export function getWebsiteIndustrySitemapEntries(baseUrl: string) {
   const entries: { url: string; priority: number }[] = []
@@ -13,6 +14,12 @@ export function getWebsiteIndustrySitemapEntries(baseUrl: string) {
       entries.push({
         url: `${baseUrl}/website-for/${ind.slug}/${st.slug}`,
         priority: 0.78,
+      })
+    }
+    for (const c of WORLD_COUNTRIES) {
+      entries.push({
+        url: `${baseUrl}/website-for/${ind.slug}/world/${c.slug}`,
+        priority: 0.77,
       })
     }
   }

@@ -1,6 +1,7 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import WebsiteLeadsHomeSection from '@/components/WebsiteLeadsHomeSection'
+import WebsiteSeoHubContent from '@/components/WebsiteSeoHubContent'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import { WEBSITE_BUILD_SERVICES } from '@/lib/seo/website-build-services'
@@ -8,15 +9,24 @@ import { WEBSITE_INDUSTRIES } from '@/lib/seo/website-industries'
 import { ArrowRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: 'Apni Website Banvaiye — All India | Business Website & Software',
+  title: '#1 Website Banwana India & Worldwide | Business Website, App & Software — Free Quote',
   description:
-    'Apni website banvaiye — business website, e-commerce, billing software, mobile app, SEO. 36 states, 780+ cities. WhatsApp 7895094129 | Call 9193898182. Same day free quote.',
+    'Best website development company — India 780+ cities + USA, Russia, UK, UAE, 65 countries. Business website, e-commerce, mobile app, billing software. Customers badhao, Google rank pao. WhatsApp 7895094129 — free quote 24hrs.',
   keywords: [
     'website banwana',
-    'apni website banvaiye',
+    'website development company',
+    'best web developer India',
+    'website development USA',
+    'website development Russia',
+    'hire web developer affordable',
     'business website India',
-    'website development all India',
-    'software banwana',
+    'ecommerce website banwana',
+    'mobile app development',
+    'custom software development',
+    'website company near me',
+    'apni website banvaiye',
+    'cheap website development',
+    'professional website design',
   ],
   alternates: { canonical: 'https://www.jan-seva.site/build-website' },
   openGraph: {
@@ -62,6 +72,7 @@ export default function BuildWebsiteHubPage() {
           </div>
         </div>
       </div>
+      <WebsiteSeoHubContent />
       <Footer />
     </>
   )

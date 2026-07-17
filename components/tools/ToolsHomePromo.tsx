@@ -39,6 +39,12 @@ export default function ToolsHomePromo() {
             >
               All Tools →
             </Link>
+            <Link
+              href="/build-website"
+              className="inline-flex items-center gap-2 rounded-xl bg-emerald-500 text-white px-5 py-2.5 text-xs sm:text-sm font-black hover:bg-emerald-400 transition"
+            >
+              Website Banwana →
+            </Link>
           </div>
         </div>
       </div>

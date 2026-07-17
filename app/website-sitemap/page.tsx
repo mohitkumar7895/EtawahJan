@@ -111,6 +111,23 @@ export default function WebsiteSitemapPage() {
                   WhatsApp for Free Quote
                 </a>
               </div>
+
+              <div className="mt-10 rounded-2xl bg-gradient-to-r from-violet-800 to-purple-900 p-6 sm:p-8 text-white">
+                <Globe className="w-8 h-8 mb-3 text-yellow-300" />
+                <h3 className="text-xl font-black mb-2">🌍 Worldwide — USA, Russia, UK, UAE & 55+ Countries</h3>
+                <p className="text-sm text-violet-100 mb-4">
+                  Website customers poore duniya se — America, Russia, Europe, Middle East, Asia, Africa.
+                  Har country & city ka SEO page ready hai.
+                </p>
+                <div className="flex flex-wrap gap-3">
+                  <Link href="/website-world" className="rounded-xl bg-yellow-400 text-slate-900 font-black px-5 py-2.5 text-sm hover:bg-yellow-300">
+                    Website World Hub →
+                  </Link>
+                  <Link href="/global-website-sitemap" className="rounded-xl border border-white/30 font-bold px-5 py-2.5 text-sm hover:bg-white/10">
+                    Global Sitemap (400+ cities)
+                  </Link>
+                </div>
+              </div>
             </div>
           </div>
         </section>

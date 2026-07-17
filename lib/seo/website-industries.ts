@@ -224,3 +224,13 @@ export function getAllIndustryStateParams(states: { slug: string }[]) {
   }
   return params
 }
+
+export function getAllIndustryWorldParams(countries: { slug: string }[]) {
+  const params: { industry: string; country: string }[] = []
+  for (const ind of WEBSITE_INDUSTRIES) {
+    for (const c of countries) {
+      params.push({ industry: ind.slug, country: c.slug })
+    }
+  }
+  return params
+}

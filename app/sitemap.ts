@@ -5,7 +5,9 @@ import SitemapLink from '@/models/SitemapLink'
 import { SEO_TOOLS, FILE_CONVERTER_SUB_TOOLS } from '@/lib/seo/tools-catalog'
 import { ALL_TEMPLATES } from '@/lib/applications/templates'
 import { getWebsiteSitemapEntries } from '@/lib/seo/india-locations'
+import { getGlobalWebsiteSitemapEntries } from '@/lib/seo/world-locations'
 import { getWebsiteIndustrySitemapEntries } from '@/lib/seo/website-sitemap-entries'
+import { GROWTH_GUIDES } from '@/lib/seo/growth-guides'
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const baseUrl = 'https://www.jan-seva.site'
@@ -52,6 +54,21 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     },
     ...SEO_TOOLS.map((t) => ({
       url: `${baseUrl}/guides/${t.slug}`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly' as const,
+      priority: 0.8,
+    })),
+  ]
+
+  const growthGuidePages: MetadataRoute.Sitemap = [
+    {
+      url: `${baseUrl}/grow`,
+      lastModified: new Date(),
+      changeFrequency: 'monthly',
+      priority: 0.82,
+    },
+    ...GROWTH_GUIDES.map((g) => ({
+      url: `${baseUrl}/grow/${g.slug}`,
       lastModified: new Date(),
       changeFrequency: 'monthly' as const,
       priority: 0.8,
@@ -203,9 +220,30 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       changeFrequency: 'weekly',
       priority: 0.9,
     },
+    {
+      url: `${baseUrl}/website-world`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.92,
+    },
+    {
+      url: `${baseUrl}/global-website-sitemap`,
+      lastModified: new Date(),
+      changeFrequency: 'weekly',
+      priority: 0.9,
+    },
   ]
 
   const websiteLocationPages: MetadataRoute.Sitemap = getWebsiteSitemapEntries(baseUrl).map(
+    (entry) => ({
+      url: entry.url,
+      lastModified: new Date(),
+      changeFrequency: 'weekly' as const,
+      priority: entry.priority,
+    })
+  )
+
+  const globalWebsitePages: MetadataRoute.Sitemap = getGlobalWebsiteSitemapEntries(baseUrl).map(
     (entry) => ({
       url: entry.url,
       lastModified: new Date(),
@@ -299,11 +337,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
       return [
         ...staticPages,
         ...websiteLocationPages,
+        ...globalWebsitePages,
         ...websiteIndustryPages,
         ...toolPages,
         ...subToolPages,
         ...applicationPages,
         ...guidePages,
+        ...growthGuidePages,
         ...blogPages,
         ...customPages,
         ...districtPages,
@@ -318,11 +358,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   return [
     ...staticPages,
     ...websiteLocationPages,
+    ...globalWebsitePages,
     ...websiteIndustryPages,
     ...toolPages,
     ...subToolPages,
     ...applicationPages,
     ...guidePages,
+    ...growthGuidePages,
     ...districtPages,
   ]
 }

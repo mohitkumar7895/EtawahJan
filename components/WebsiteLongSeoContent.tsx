@@ -1,7 +1,14 @@
 import Link from 'next/link'
-import { MessageCircle, Phone } from 'lucide-react'
+import { MessageCircle, Phone, CheckCircle, TrendingUp } from 'lucide-react'
 import { WEBSITE_INDUSTRIES } from '@/lib/seo/website-industries'
 import { WEBSITE_BUILD_SERVICES } from '@/lib/seo/website-build-services'
+import {
+  getIndiaFaqs,
+  GLOBAL_PROCESS_STEPS,
+  PHONE,
+  WHATSAPP,
+  WHATSAPP_LINK,
+} from '@/lib/seo/website-seo-copy'
 
 type Props = {
   stateName: string
@@ -17,85 +24,104 @@ export default function WebsiteLongSeoContent({
   districtSlug,
 }: Props) {
   const location = districtName ? `${districtName}, ${stateName}` : stateName
-  const wa = `https://wa.me/917895094129?text=${encodeURIComponent(
-    `Hello, I want website/software in ${location}. Please call me with quote.`
+  const wa = `${WHATSAPP_LINK}?text=${encodeURIComponent(
+    `Hello, mujhe ${location} ke liye website/software chahiye. Free quote bhejein.`
   )}`
 
-  const longFaqs = [
-    {
-      q: `${location} me website banwane ki cost kitni hai?`,
-      a: `Basic business website se lekar e-commerce tak packages alag hain. WhatsApp par 7895094129 par apna business type aur budget batayein — hum ${location} ke liye customized free quote denge. Chhoti dukan se lekar bade company tak sab ke liye affordable options hain.`,
-    },
-    {
-      q: `Kya ${location} se bahar bhi kaam karoge?`,
-      a: `Haan — hum all India delivery karte hain. ${location} ka customer ho ya India ka koi bhi city — video call, WhatsApp aur phone par poora project manage hota hai. Face-to-face zaroori nahi.`,
-    },
-    {
-      q: `Website banne ke baad Google par kaise dikhega?`,
-      a: `Har website me basic SEO setup hota hai: page titles, descriptions, mobile speed, sitemap. ${location} ke local keywords jaise "website development ${districtName || stateName}" target kiye jaate hain. Extra SEO package bhi available hai.`,
-    },
-    {
-      q: `Software aur website dono ek saath ban sakte hain?`,
-      a: `Haan — billing software + company website, school website + management software, shop website + inventory system — combo packages me discount milta hai.`,
-    },
-    {
-      q: `Kitne din me website ready ho jayegi?`,
-      a: `Simple 5-page business website: 5-10 din. E-commerce ya custom software: 2-6 hafte. Urgent project ke liye WhatsApp par "urgent" likh kar priority quote lein.`,
-    },
-    {
-      q: `Payment kaise hogi?`,
-      a: `Usually 50% advance se kaam start, baaki delivery par. UPI, bank transfer — flexible options. Proper bill/invoice milega.`,
-    },
-  ]
+  const longFaqs = getIndiaFaqs(location, stateName)
+
+  const faqSchema = {
+    '@context': 'https://schema.org',
+    '@type': 'FAQPage',
+    mainEntity: longFaqs.map((f) => ({
+      '@type': 'Question',
+      name: f.q,
+      acceptedAnswer: { '@type': 'Answer', text: f.a },
+    })),
+  }
 
   return (
-    <section className="py-12 bg-slate-50 border-t border-slate-200">
-      <div className="container mx-auto px-4 max-w-5xl">
-        <article className="prose prose-slate max-w-none">
-          <h2 className="text-2xl sm:text-3xl font-black text-slate-900 not-prose mb-6">
-            {location} — Website Banwana, Software Banwana (Complete Guide)
-          </h2>
+    <>
+      <script type="application/ld+json" dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }} />
+      <section className="py-12 bg-slate-50 border-t border-slate-200">
+        <div className="container mx-auto px-4 max-w-5xl">
+          <article className="prose prose-slate max-w-none">
+            <h2 className="text-2xl sm:text-3xl font-black text-slate-900 not-prose mb-6">
+              {location} Me #1 Website Banwana & Software Company — Poori Guide
+            </h2>
 
-          <div className="text-slate-700 leading-relaxed space-y-4 text-sm sm:text-base">
-            <p>
-              Agar aap <strong>{location}</strong> me rehte hain aur apne business ke liye website ya software
-              dhundh rahe hain, to Jan Seva Kendra aapke liye all-in-one digital partner hai. Hum sirf ek page nahi —
-              poora online business setup karte hain: website design, mobile app, billing software, logo, video editing,
-              Google SEO, aur WhatsApp lead system.
-            </p>
-            <p>
-              <strong>{districtName || stateName}</strong> ke local businesses — coaching institutes, schools, clinics,
-              restaurants, retail shops, real estate dealers, manufacturers — sab ko aaj digital presence chahiye.
-              Customers pehle Google par &quot;near me&quot; search karte hain. Bina website aap invisible ho jaate hain.
-            </p>
-            <p>
-              Humari team {location} ke keywords ke liye dedicated SEO pages banati hai (jaise yahi page) taaki jab koi
-              search kare &quot;website development {districtName || stateName}&quot; ya &quot;software company {stateName}&quot; —
-              aapko hum milen aur seedha WhatsApp par lead aaye.
-            </p>
-            <h3 className="text-xl font-bold text-slate-900 mt-8 mb-3">
-              {location} businesses ke liye popular solutions
-            </h3>
-            <ul className="list-disc pl-6 space-y-2">
-              <li>5-15 page business website with WhatsApp button</li>
-              <li>E-commerce store with Razorpay / UPI payment</li>
-              <li>Coaching / school website with admission form</li>
-              <li>Clinic website with appointment booking</li>
-              <li>Billing & GST invoice software for shops</li>
-              <li>Android app for delivery, booking, or services</li>
-              <li>Google ranking & local SEO for {stateName}</li>
-            </ul>
-            <p>
-              <strong>Free consultation:</strong> WhatsApp 7895094129 ya call 9193898182. Apna business name, kya
-              banwana hai, aur approximate budget likh kar bhejein — hum 24 ghante ke andar jawab denge.
-            </p>
-          </div>
+            <div className="text-slate-700 leading-relaxed space-y-4 text-sm sm:text-base not-prose">
+              <p>
+                Kya aap <strong>{location}</strong> me rehte hain aur apne business ke liye <strong>website banwana</strong>{' '}
+                chahte hain? Jan Seva Kendra aapke liye best digital partner hai — professional website design, mobile
+                app, billing software, e-commerce store aur Google SEO. Hum sirf ek page nahi banate; poora online
+                business setup karte hain taaki aapke <strong>customers badhein</strong> aur Google par top par aayein.
+              </p>
+              <p>
+                <strong>{districtName || stateName}</strong> ke coaching institutes, schools, clinics, restaurants,
+                shops, real estate dealers, manufacturers — sab ko aaj website chahiye. Customer pehle Google par
+                &quot;website development {districtName || stateName} near me&quot; search karta hai. Bina website aap
+                invisible ho jaate hain — roz leads haath se jaati hain.
+              </p>
+              <p>
+                <strong>Kyun Jan Seva Kendra?</strong> Affordable price, fast delivery (5–10 din me basic website),
+                WhatsApp lead button har site par, mobile-friendly design, aur local SEO jo &quot;website banwana{' '}
+                {location}&quot; search me rank karaye. India ke 780+ cities aur USA, Russia, UK me bhi clients hain.
+              </p>
 
-          <div className="not-prose mt-10">
-            <h3 className="text-xl font-black text-slate-900 mb-4">
-              {location} — Frequently Asked Questions (Website & Software)
+              <h3 className="text-xl font-bold text-slate-900 mt-8 mb-3">
+                {location} ke liye popular services
+              </h3>
+              <ul className="list-disc pl-6 space-y-2">
+                <li>Business website — 5–15 pages, WhatsApp button, contact form</li>
+                <li>E-commerce — online dukan, Razorpay/UPI, product catalog</li>
+                <li>Coaching / school website — admission form, courses, results</li>
+                <li>Clinic website — doctor profile, appointment booking</li>
+                <li>Billing & GST software — dukan, warehouse, office ke liye</li>
+                <li>Android/iOS mobile app — delivery, booking, services</li>
+                <li>Google SEO — {stateName} local keywords target</li>
+              </ul>
+
+              <h3 className="text-xl font-bold text-slate-900 mt-8 mb-3 flex items-center gap-2">
+                <TrendingUp className="h-5 w-5 text-indigo-600" />
+                Website banne ka process — 5 steps
+              </h3>
+              <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-3">
+                {GLOBAL_PROCESS_STEPS.map((s) => (
+                  <div key={s.step} className="rounded-xl bg-white border p-4">
+                    <span className="font-black text-indigo-600">{s.step}.</span>
+                    <p className="font-bold text-slate-900 text-sm mt-1">{s.title}</p>
+                    <p className="text-xs text-slate-600 mt-1">{s.text}</p>
+                  </div>
+                ))}
+              </div>
+
+              <div className="mt-6 space-y-2">
+                {[
+                  '780+ India cities + 65 countries worldwide delivery',
+                  'Same day free quote on WhatsApp',
+                  '50% advance, 50% delivery — transparent pricing',
+                  'Video call support — face-to-face meeting not required',
+                  '1000+ websites & software projects delivered',
+                ].map((p) => (
+                  <div key={p} className="flex gap-2 text-sm">
+                    <CheckCircle className="h-4 w-4 text-green-600 shrink-0 mt-0.5" />
+                    {p}
+                  </div>
+                ))}
+              </div>
+
+              <p className="mt-6 p-4 rounded-xl bg-green-50 border border-green-100 text-sm">
+                <strong>Aaj hi shuru karein:</strong> WhatsApp <strong>{WHATSAPP}</strong> par likhein — business name,
+                kya banwana hai (website/app/software), location ({location}). 24 ghante me jawab. Call{' '}
+                <strong>{PHONE}</strong>.
+              </p>
+            </div>
+
+            <h3 className="text-xl font-black text-slate-900 mt-10 mb-4 not-prose">
+              {location} — Website & Software FAQs
             </h3>
-            <div className="space-y-4">
+            <div className="space-y-4 not-prose">
               {longFaqs.map((faq) => (
                 <div key={faq.q} className="rounded-xl bg-white border border-slate-200 p-5 shadow-sm">
                   <h4 className="font-bold text-slate-900 mb-2 text-sm sm:text-base">{faq.q}</h4>
@@ -103,64 +129,53 @@ export default function WebsiteLongSeoContent({
                 </div>
               ))}
             </div>
-          </div>
 
-          <div className="not-prose mt-10 grid sm:grid-cols-2 gap-6">
-            <div>
-              <h3 className="font-black text-slate-900 mb-3">Industry pages</h3>
-              <div className="flex flex-wrap gap-2">
-                {WEBSITE_INDUSTRIES.map((ind) => (
-                  <Link
-                    key={ind.slug}
-                    href={
-                      districtSlug
-                        ? `/website-for/${ind.slug}/${stateSlug}`
-                        : `/website-for/${ind.slug}`
-                    }
-                    className="rounded-lg bg-white border px-2.5 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-50"
-                  >
-                    {ind.name}
-                  </Link>
-                ))}
+            <div className="not-prose mt-10 grid sm:grid-cols-2 gap-6">
+              <div>
+                <h3 className="font-black text-slate-900 mb-3">Industry pages — {stateName}</h3>
+                <div className="flex flex-wrap gap-2">
+                  {WEBSITE_INDUSTRIES.map((ind) => (
+                    <Link
+                      key={ind.slug}
+                      href={districtSlug ? `/website-for/${ind.slug}/${stateSlug}` : `/website-for/${ind.slug}`}
+                      className="rounded-lg bg-white border px-2.5 py-1 text-xs font-bold text-indigo-700 hover:bg-indigo-50"
+                    >
+                      {ind.name}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+              <div>
+                <h3 className="font-black text-slate-900 mb-3">Service pages</h3>
+                <div className="flex flex-wrap gap-2">
+                  {WEBSITE_BUILD_SERVICES.map((svc) => (
+                    <Link
+                      key={svc.slug}
+                      href={`/build-website/${svc.slug}`}
+                      className="rounded-lg bg-white border px-2.5 py-1 text-xs font-bold text-blue-700 hover:bg-blue-50"
+                    >
+                      {svc.name}
+                    </Link>
+                  ))}
+                </div>
               </div>
             </div>
-            <div>
-              <h3 className="font-black text-slate-900 mb-3">Service pages</h3>
-              <div className="flex flex-wrap gap-2">
-                {WEBSITE_BUILD_SERVICES.map((svc) => (
-                  <Link
-                    key={svc.slug}
-                    href={`/build-website/${svc.slug}`}
-                    className="rounded-lg bg-white border px-2.5 py-1 text-xs font-bold text-blue-700 hover:bg-blue-50"
-                  >
-                    {svc.name}
-                  </Link>
-                ))}
-              </div>
-            </div>
-          </div>
 
-          <div className="not-prose mt-10 flex flex-col sm:flex-row gap-3 justify-center p-6 rounded-2xl bg-indigo-600 text-white text-center">
-            <p className="font-black text-lg flex-1">{location} — aaj hi shuru karein</p>
-            <a
-              href={wa}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-6 py-3 font-black hover:bg-green-600"
-            >
-              <MessageCircle className="h-5 w-5" />
-              WhatsApp Now
-            </a>
-            <a
-              href="tel:9193898182"
-              className="inline-flex items-center justify-center gap-2 rounded-xl bg-yellow-400 px-6 py-3 font-black text-slate-900"
-            >
-              <Phone className="h-5 w-5" />
-              Call
-            </a>
-          </div>
-        </article>
-      </div>
-    </section>
+            <div className="not-prose mt-10 flex flex-col sm:flex-row gap-3 justify-center p-8 rounded-2xl bg-indigo-600 text-white text-center">
+              <div className="flex-1">
+                <p className="font-black text-lg">{location} — Customers Badhao, Aaj Hi WhatsApp Karein</p>
+                <p className="text-indigo-200 text-sm mt-1">Free quote · Professional website · Google SEO</p>
+              </div>
+              <a href={wa} target="_blank" rel="noopener noreferrer" className="inline-flex items-center justify-center gap-2 rounded-xl bg-green-500 px-6 py-3 font-black hover:bg-green-600">
+                <MessageCircle className="h-5 w-5" /> WhatsApp {WHATSAPP}
+              </a>
+              <a href={`tel:${PHONE}`} className="inline-flex items-center justify-center gap-2 rounded-xl bg-yellow-400 px-6 py-3 font-black text-slate-900">
+                <Phone className="h-5 w-5" /> Call
+              </a>
+            </div>
+          </article>
+        </div>
+      </section>
+    </>
   )
 }

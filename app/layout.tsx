@@ -12,10 +12,10 @@ import QuickLeadWidget from '@/components/QuickLeadWidget'
 export const metadata: Metadata = {
   metadataBase: new URL('https://www.jan-seva.site/'),
   title: {
-    default: 'Jan Seva Kendra Near Me | CSC Center Etawah Bharthana | Website & App Development',
-    template: '%s | Jan Seva Kendra - CSC Center UP'
+    default: '#1 Website Development India & Worldwide | Jan Seva Kendra — Web Design, Apps & Software',
+    template: '%s | Jan Seva Kendra'
   },
-  description: 'Jan Seva Kendra & CSC Center near me — Etawah, Bharthana. PAN card apply, income certificate, ration card. We also provide premium IT services: Website Development, Mobile App Development, Game Development, and Custom Software to grow your business. Call: 9193898182 | WhatsApp: 7895094129. Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP 206241.',
+  description: 'Top website development company — India 780+ cities + USA, Russia, UK, UAE, 65 countries. Business website, e-commerce, mobile app, custom software. CSC Etawah + premium IT. WhatsApp 7895094129 — free quote in 24hrs. Customers badhao!',
   keywords: [
     // PRIMARY — HIGH VOLUME
     'jan seva kendra near me',

@@ -39,18 +39,18 @@ export default function WebsiteLeadsHomeSection() {
         <div className="text-center mb-10">
           <span className="inline-flex items-center gap-2 rounded-full border border-yellow-400/40 bg-yellow-400/10 px-4 py-1.5 text-xs font-bold text-yellow-300 mb-4">
             <Sparkles className="h-4 w-4" />
-            All India Website & Software — Get More Customers Online
+            All India + Worldwide Website & Software — Get More Customers
           </span>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black leading-tight mb-4">
-            Apni Website Banvaiye —{' '}
+            #1 Website Banvaiye —{' '}
             <span className="text-transparent bg-clip-text bg-gradient-to-r from-yellow-300 to-emerald-300">
-              Customers Badhao
+              Customers Badhao, Google Top Par Aao
             </span>
           </h2>
           <p className="text-base sm:text-lg text-blue-100 max-w-3xl mx-auto leading-relaxed">
-            Chahe aap {INDIA_STATES.length} states me se kahi bhi hon — hum business website, e-commerce store,
-            billing software, mobile app aur SEO banate hain. WhatsApp par requirement bhejein, same day free quote.
-            Koi form nahi — seedha baat, seedha kaam.
+            India ({INDIA_STATES.length} states, 780+ cities) + USA, Russia, UK, UAE & 65 countries — business website,
+            e-commerce, billing software, mobile app, SEO. WhatsApp par requirement bhejein, free quote same day.
+            Affordable · Professional · Google-ready.
           </p>
         </div>
 
@@ -71,6 +71,13 @@ export default function WebsiteLeadsHomeSection() {
             <Phone className="h-5 w-5" />
             Call 9193898182
           </a>
+          <Link
+            href="/website-world"
+            className="inline-flex items-center justify-center gap-2 rounded-xl border border-violet-400/50 bg-violet-500/20 px-8 py-4 font-bold hover:bg-violet-500/30 transition"
+          >
+            <Globe2 className="h-5 w-5" />
+            USA · Russia · UK — 65 Countries
+          </Link>
           <Link
             href="/website-sitemap"
             className="inline-flex items-center justify-center gap-2 rounded-xl border border-white/30 px-8 py-4 font-bold hover:bg-white/10 transition"

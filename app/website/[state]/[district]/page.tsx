@@ -6,6 +6,7 @@ import {
   getAllWebsiteDistrictParams,
   getDistrictBySlug,
 } from '@/lib/seo/india-locations'
+import { indiaDistrictMeta } from '@/lib/seo/website-seo-copy'
 
 interface PageProps {
   params: { state: string; district: string }
@@ -19,30 +20,18 @@ export async function generateMetadata({ params }: PageProps): Promise<Metadata>
   const loc = getDistrictBySlug(params.state, params.district)
   const districtName = loc?.district.name || params.district
   const stateName = loc?.state.name || params.state
-  const label = `${districtName}, ${stateName}`
-
-  const title = `Website Development ${label} | Software ${districtName}`
-  const description = `Website & software development in ${label}, India. Business website, e-commerce, mobile app, billing software for ${districtName}. Affordable pricing. WhatsApp 7895094129 | Call 9193898182.`
+  const meta = indiaDistrictMeta(districtName, stateName)
 
   return {
-    title,
-    description,
-    keywords: [
-      `website development ${districtName}`,
-      `website banwana ${districtName}`,
-      `software company ${districtName}`,
-      `web developer ${districtName} ${stateName}`,
-      `business website ${districtName}`,
-      `mobile app ${districtName}`,
-      `website developer near me ${districtName}`,
-      `custom software ${districtName}`,
-    ],
+    title: meta.title,
+    description: meta.description,
+    keywords: meta.keywords,
     alternates: {
       canonical: `https://www.jan-seva.site/website/${params.state}/${params.district}`,
     },
     openGraph: {
-      title,
-      description,
+      title: meta.title,
+      description: meta.description,
       url: `https://www.jan-seva.site/website/${params.state}/${params.district}`,
     },
   }
