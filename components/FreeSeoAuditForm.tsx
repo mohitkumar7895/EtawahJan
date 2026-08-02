@@ -74,7 +74,7 @@ export default function FreeSeoAuditForm({ isOpen, onClose }: { isOpen?: boolean
               Get a <span className="text-transparent bg-clip-text bg-gradient-to-r from-indigo-400 to-cyan-400">FREE SEO Audit</span> Report
             </h2>
             <p className="text-slate-400 text-lg mb-8 leading-relaxed max-w-lg mx-auto lg:mx-0">
-              Enter your website URL below to find out why your competitors are ranking higher on Google. We'll identify critical errors blocking your sales.
+              Enter your website URL below to find out why your competitors are ranking higher on Google. We&apos;ll identify critical errors blocking your sales.
             </p>
             
             <div className="hidden lg:flex flex-col gap-4">

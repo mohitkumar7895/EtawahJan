@@ -54,7 +54,7 @@ export default function ExitIntentPopup() {
 
           <div className="relative z-10">
             <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-red-500/20 text-red-300 text-xs font-bold uppercase tracking-wider mb-6 border border-red-500/30">
-              Wait! Don't leave yet
+              Wait! Don&apos;t leave yet
             </div>
             
             <h2 className="text-3xl sm:text-4xl font-black mb-4 leading-tight">
@@ -93,7 +93,7 @@ export default function ExitIntentPopup() {
         <div className="w-full md:w-7/12 p-6 sm:p-10 bg-slate-50 flex flex-col justify-center">
           <div className="text-center mb-6">
             <h3 className="text-xl font-bold text-slate-800">Or Request a Callback</h3>
-            <p className="text-sm text-slate-500">Fill the form below and we'll call you in 5 mins.</p>
+            <p className="text-sm text-slate-500">Fill the form below and we&apos;ll call you in 5 mins.</p>
           </div>
           <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-100">
             <ContactForm embedded />

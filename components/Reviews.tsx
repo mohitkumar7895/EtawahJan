@@ -88,7 +88,7 @@ function ReviewCard({ review }: { review: any }) {
       </div>
       
       <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-medium">
-        "{review.text}"
+        &quot;{review.text}&quot;
       </p>
     </div>
   );
@@ -108,7 +108,7 @@ export default function Reviews() {
             Client Success Stories
           </div>
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
-            Don't Just Take <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Our Word</span> For It
+            Don&apos;t Just Take <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Our Word</span> For It
           </h2>
           <p className="text-slate-600 text-lg font-medium">
             Hear from founders, directors, and CEOs who trusted us to build their digital products and scale their businesses.

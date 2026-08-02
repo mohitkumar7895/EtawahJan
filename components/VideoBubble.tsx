@@ -145,7 +145,7 @@ export default function VideoBubble() {
             
             {/* Bottom CTA */}
             <div className="p-4 bg-white">
-              <h3 className="text-slate-900 font-black text-lg mb-1">Let's Grow Together!</h3>
+              <h3 className="text-slate-900 font-black text-lg mb-1">Let&apos;s Grow Together!</h3>
               <p className="text-slate-500 text-xs mb-4">We build premium websites & apps to scale your business.</p>
               <a 
                 href="https://wa.me/917895094129?text=Hello,%20I%20heard%20your%20welcome%20message.%20I%20want%20to%20discuss%20a%20project."
