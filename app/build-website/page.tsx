@@ -9,23 +9,26 @@ import { WEBSITE_INDUSTRIES } from '@/lib/seo/website-industries'
 import { ArrowRight } from 'lucide-react'
 
 export const metadata: Metadata = {
-  title: '#1 Website Banwana India & Worldwide | Business Website, App & Software — Free Quote',
-  description:
-    'Best website development company — India 780+ cities + USA, Russia, UK, UAE, 65 countries. Business website, e-commerce, mobile app, billing software. Customers badhao, Google rank pao. WhatsApp 7895094129 — free quote 24hrs.',
+  title: '#1 Website Development India & Worldwide | Business Website, App & Software — Free Quote',
+  description: 'Need a website, e-commerce store, mobile app, or billing software? Jan Seva Kendra provides premium IT services in 780+ India cities + 65 countries. Call 7895094129 for a free quote.',
   keywords: [
-    'website banwana',
+    'create website',
+    'business website builder',
+    'ecommerce website development',
+    'software development company near me',
+    'app developer india',
+    'IT services etawah',
+    'cheap website builder',
+    'create ecommerce website',
     'website development company',
     'best web developer India',
     'website development USA',
     'website development Russia',
     'hire web developer affordable',
     'business website India',
-    'ecommerce website banwana',
     'mobile app development',
     'custom software development',
     'website company near me',
-    'apni website banvaiye',
-    'cheap website development',
     'professional website design',
   ],
   alternates: { canonical: 'https://www.jan-seva.site/build-website' },

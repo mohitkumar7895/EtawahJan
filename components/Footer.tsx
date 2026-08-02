@@ -96,7 +96,7 @@ export default function Footer() {
               <li>
                 <Link href="/build-website" className="text-xs sm:text-sm text-gray-300 hover:text-indigo-400 transition flex items-center py-0.5">
                   <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-indigo-400 rounded-full mr-1.5 flex-shrink-0"></span>
-                  <span>Apni Website Banvaiye</span>
+                  <span>Website Banwana</span>
                 </Link>
               </li>
               <li>
@@ -124,7 +124,7 @@ export default function Footer() {
               <li>
                 <Link href="/build-website" className="text-xs sm:text-sm text-gray-300 hover:text-indigo-400 transition flex items-center py-0.5">
                   <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-indigo-400 rounded-full mr-1.5 flex-shrink-0"></span>
-                  <span>Apni Website Banvaiye</span>
+                  <span>Website Banwana</span>
                 </Link>
               </li>
               <li>

@@ -4,6 +4,9 @@ import ChatSupport from '@/components/ChatSupport'
 import VisitorTracker from '@/components/VisitorTracker'
 import SarkariTicker from '@/components/SarkariTicker'
 import QuickLeadWidget from '@/components/QuickLeadWidget'
+import TopOfferBanner from '@/components/TopOfferBanner'
+import FloatingWhatsApp from '@/components/FloatingWhatsApp'
+import ExitIntentPopup from '@/components/ExitIntentPopup'
 
 // ============================================================
 // ALL 75 UP DISTRICTS COVERED — MAX SEO POWER
@@ -45,8 +48,8 @@ export const metadata: Metadata = {
     'website developer near me',
     'ecommerce website design',
     'mobile app maker Etawah',
-    'software banwane ke liye',
-    'website banwane ke liye',
+    'software development services',
+    'website development services',
     'business website builder',
     'game developer in UP',
     'IT agency Etawah',
@@ -77,10 +80,10 @@ export const metadata: Metadata = {
     'website maker Ayodhya',
     'app developer Shahjahanpur',
     'software company Muzaffarnagar',
-    'website banwane wali company UP',
-    'app banwane wali company UP',
-    'software banwane wali company UP',
-    'game banwane wali company UP',
+    'website development company UP',
+    'app development company UP',
+    'software development company UP',
+    'game development company UP',
     'online business website UP',
     'startup app developer UP',
     'top IT company in Uttar Pradesh',
@@ -132,6 +135,21 @@ export const metadata: Metadata = {
     'pharmacy billing software UP',
     'custom CRM software developer',
     'business ERP software India',
+    
+    // HIGH-INTENT / CONVERSION KEYWORDS (NEW ADDITIONS TO GET MORE CLIENTS)
+    'affordable ecommerce website developers',
+    'shopify experts in india',
+    'wordpress developers near me',
+    'best software development agency for startups',
+    'hire nextjs developers india',
+    'cheap app development company',
+    'SEO services for small business',
+    'digital marketing agency in UP',
+    'billing software for retail shop',
+    'lead generation website design',
+    'website redesign services',
+    'B2B web development company',
+    'portfolio website builder',
 
     // SERVICES — HIGH SEARCH
     'pan card apply near me',
@@ -348,6 +366,11 @@ export const metadata: Metadata = {
   },
   verification: {
     google: '2rT4H0NwQhMpGMYTHC_rnHNs7Cpatm4pSUhvhtfaRPw',
+    yandex: 'yandex_verification_placeholder', // placeholder for future
+    yahoo: 'yahoo_verification_placeholder',
+    other: {
+      me: ['arpitcsc1707@gmail.com'],
+    },
   },
   other: {
     'google-site-verification': '2rT4H0NwQhMpGMYTHC_rnHNs7Cpatm4pSUhvhtfaRPw',
@@ -368,6 +391,8 @@ export const metadata: Metadata = {
     'DC.language': 'hi',
     'msapplication-TileColor': '#1a56db',
     'theme-color': '#1a56db',
+    'msvalidate.01': 'BING_VERIFICATION_PLACEHOLDER', // Add Bing Master Tag here later
+    'y_key': 'YAHOO_VERIFICATION_PLACEHOLDER',
   },
 }
 
@@ -727,6 +752,37 @@ const faqSchema = {
   ]
 }
 
+const itCompanySchema = {
+  "@context": "https://schema.org",
+  "@type": "ProfessionalService",
+  "@id": "https://www.jan-seva.site/#itcompany",
+  "name": "Jan Seva Kendra - IT & Web Solutions",
+  "image": "https://www.jan-seva.site/jan-seva-logo-1.png",
+  "description": "Premium Website Development, Custom Software, and Mobile App Development company serving clients across India and globally. We build e-commerce stores, CRMs, School Management Systems, and business websites to help you get more customers.",
+  "address": {
+    "@type": "PostalAddress",
+    "streetAddress": "Mandi Trihaa, Bidhuna Road",
+    "addressLocality": "Bharthana",
+    "addressRegion": "Uttar Pradesh",
+    "postalCode": "206241",
+    "addressCountry": "IN"
+  },
+  "telephone": ["+919193898182", "+917895094129"],
+  "email": "arpitcsc1707@gmail.com",
+  "priceRange": "₹₹",
+  "areaServed": [
+    { "@type": "Country", "name": "India" },
+    { "@type": "Country", "name": "United States" },
+    { "@type": "Country", "name": "United Kingdom" },
+    { "@type": "Country", "name": "United Arab Emirates" },
+    { "@type": "Country", "name": "Russia" },
+    { "@type": "Country", "name": "Canada" },
+    { "@type": "Country", "name": "Australia" }
+  ],
+  "knowsAbout": ["Web Development", "Mobile App Development", "E-commerce Development", "Custom Software", "Digital Marketing", "SEO"],
+  "url": "https://www.jan-seva.site/"
+}
+
 const breadcrumbSchema = {
   "@context": "https://schema.org",
   "@type": "BreadcrumbList",
@@ -820,6 +876,10 @@ export default function RootLayout({
         />
         <script
           type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itCompanySchema) }}
+        />
+        <script
+          type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(faqSchema) }}
         />
         <script
@@ -831,12 +891,15 @@ export default function RootLayout({
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
       </head>
-      <body className="min-h-screen bg-white text-zinc-900 antialiased">
+      <body className="min-h-screen bg-white text-zinc-900 antialiased relative">
+        <TopOfferBanner />
         <SarkariTicker />
         {children}
         <ChatSupport />
-        <VisitorTracker />
         <QuickLeadWidget />
+        <FloatingWhatsApp />
+        <VisitorTracker />
+        <ExitIntentPopup />
       </body>
     </html>
   )

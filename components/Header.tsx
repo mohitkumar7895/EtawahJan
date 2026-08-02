@@ -23,7 +23,6 @@ export default function Header() {
     { path: '/about', label: 'About' },
     { path: '/services', label: 'Services' },
     { path: '/digital-services', label: 'Digital Work' },
-    { path: '/build-website', label: 'Website Banwana' },
     { path: '/tools', label: 'Tools' },
     { path: '/vacancies', label: 'Vacancies' },
     { path: '/announcements', label: 'Announcements' },
