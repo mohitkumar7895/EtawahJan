@@ -69,7 +69,7 @@ export default function QuickLeadWidget() {
   }
 
   return (
-    <div className="fixed bottom-6 left-6 z-[9990] flex flex-col items-start gap-3 pointer-events-none">
+    <div className="fixed bottom-[160px] sm:bottom-44 right-4 sm:right-6 z-[9990] flex flex-col items-end gap-3 pointer-events-none">
       
       {/* 10-Second Callback Form Card */}
       {isOpen && (
@@ -199,28 +199,35 @@ export default function QuickLeadWidget() {
         </div>
       )}
 
-      {/* Floating Callback Button (Only Callback, no WhatsApp overlap) */}
-      <div className="flex gap-3 pointer-events-auto">
+      {/* Floating Callback Button (Red Circular Pulse) */}
+      <div className="relative pointer-events-auto flex items-center justify-center group">
+        {!isOpen && (
+          <div className="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-75"></div>
+        )}
+        
         <button
           onClick={() => setIsOpen(!isOpen)}
-          className={`h-12 sm:h-14 px-4 sm:px-5 rounded-full flex items-center gap-2 text-white font-bold text-xs sm:text-sm shadow-2xl transition duration-300 transform hover:scale-105 active:scale-95 ${
+          aria-label="Request Callback"
+          className={`relative p-3.5 sm:p-4 rounded-full shadow-2xl transition-transform duration-300 transform hover:scale-110 active:scale-95 flex items-center justify-center text-white ${
             isOpen 
               ? 'bg-zinc-800 hover:bg-zinc-950' 
-              : 'bg-gradient-to-r from-red-600 to-rose-600 hover:from-red-700 hover:to-rose-700'
+              : 'bg-gradient-to-tr from-red-600 to-red-500 hover:from-red-500 hover:to-red-400'
           }`}
         >
           {isOpen ? (
-            <>
-              <X className="w-5 h-5 flex-shrink-0" />
-              <span>Close / बंद</span>
-            </>
+            <X className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0" />
           ) : (
-            <>
-              <PhoneCall className="w-5 h-5 flex-shrink-0" />
-              <span>Callback / कॉल-बैक</span>
-            </>
+            <PhoneCall className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0" />
           )}
         </button>
+
+        {/* Tooltip */}
+        {!isOpen && (
+          <div className="absolute right-full mr-4 bg-white text-gray-900 text-xs font-bold py-1.5 px-3 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-gray-100 hidden sm:block">
+            Request Callback
+            <div className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-2 bg-white rotate-45 border-r border-t border-gray-100"></div>
+          </div>
+        )}
       </div>
 
       <style jsx global>{`

@@ -7,6 +7,9 @@ import Announcements from '@/components/Announcements'
 import Reviews from '@/components/Reviews'
 import HomeJobsFeed from '@/components/HomeJobsFeed'
 import ToolsHomePromo from '@/components/tools/ToolsHomePromo'
+import AnimatedCounters from '@/components/AnimatedCounters'
+
+import VisualPriceQuiz from '@/components/VisualPriceQuiz'
 import PortfolioSection from '@/components/PortfolioSection'
 import type { Metadata } from 'next'
 
@@ -49,7 +52,7 @@ export const metadata: Metadata = {
     'जन सेवा केंद्र नजदीक',
     'सीएससी सेंटर इटावा',
     'Best Service Center Etawah',
-    
+
     // NEW HIGH-INTENT WEB DEV KEYWORDS TO GET CLIENTS
     'web development agency for small business',
     'shopify website designers near me',
@@ -65,7 +68,7 @@ export const metadata: Metadata = {
     'business growth solutions UP',
     'affordable app development for local business',
     'B2B software solutions India',
-    
+
     // EXTREME LONG-TAIL & CONVERSATIONAL KEYWORDS (HINGLISH + ENGLISH) - MAXIMUM INTENT
     'build a website for my business',
     'how to make an app for a shop',
@@ -105,19 +108,19 @@ function SeoBottomBlock() {
       <div className="container mx-auto px-4 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-7xl">
         <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-3">#1 Website Development & IT Services Company in India</h2>
         <p className="mb-4">
-          Welcome to Jan Seva Kendra IT Solutions, your trusted partner for premium, affordable <strong>Website Development</strong>, <strong>Mobile App Development</strong>, and <strong>Custom Software Solutions</strong>. We specialize in building responsive, SEO-optimized business websites, e-commerce stores, and billing software for small and medium businesses across all 780+ cities in India (including UP, Etawah, Agra, Lucknow, Kanpur, and Noida). We also serve international clients globally in the USA, UK, UAE, Canada, Australia, and Russia. 
+          Welcome to Jan Seva Kendra IT Solutions, your trusted partner for premium, affordable <strong>Website Development</strong>, <strong>Mobile App Development</strong>, and <strong>Custom Software Solutions</strong>. We specialize in building responsive, SEO-optimized business websites, e-commerce stores, and billing software for small and medium businesses across all 780+ cities in India (including UP, Etawah, Agra, Lucknow, Kanpur, and Noida). We also serve international clients globally in the USA, UK, UAE, Canada, Australia, and Russia.
         </p>
-        
+
         <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">Grow Your Business — Create a Website Today</h3>
         <p className="mb-4">
           If you are looking to <em>build a website for your business</em>, you need a digital agency that understands growth. We build fast, beautiful websites that rank on top of Google. Whether you need a simple portfolio, a complex <strong>school management system</strong>, hospital CRM, real-estate portal, or a robust <strong>e-commerce app</strong>, our team of expert React & Next.js developers delivers the best results to help you get more customers.
         </p>
-        
+
         <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">Local CSC & Document Services (Jan Seva Kendra Etawah)</h3>
         <p className="mb-4">
           Apart from premium IT services, we operate as a highly trusted <strong>CSC Center in Etawah</strong> (Bharthana). We provide urgent PAN Card applications, Income Certificates (Aay Praman Patra), Caste Certificates, Birth Certificates, Ration Card corrections, e-Shram cards, and Ayushman Cards on the exact same day.
         </p>
-        
+
         <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-100 mt-6">
           <p className="font-bold text-slate-800 text-sm sm:text-base text-center">
             🚀 Ready to grow? Contact us today via WhatsApp at <a href="https://wa.me/917895094129" className="text-blue-600 hover:underline">7895094129</a> for a free quote on website development, or visit our office at Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP!
@@ -195,14 +198,16 @@ export default function Home() {
       />
       <Header />
       <Hero />
+      <VisualPriceQuiz />
       <ToolsHomePromo />
       <ITServicesBanner />
-      <PortfolioSection />
       <Announcements />
       <Services />
       <HomeJobsFeed />
+      <PortfolioSection />
       <Reviews />
       <SeoBottomBlock />
+      <AnimatedCounters />
       <Footer />
     </>
   )

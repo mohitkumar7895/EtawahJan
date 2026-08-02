@@ -3,9 +3,11 @@
 import { MonitorSmartphone, Code2, Gamepad2, Rocket, PhoneCall, ArrowRight, CheckCircle2, Sparkles, X, FileText } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ContactForm from './ContactForm';
+import FreeSeoAuditForm from './FreeSeoAuditForm';
 
 export default function ITServicesBanner() {
   const [showModal, setShowModal] = useState(false);
+  const [showAuditModal, setShowAuditModal] = useState(false);
 
   useEffect(() => {
     if (!showModal) return;
@@ -39,9 +41,17 @@ export default function ITServicesBanner() {
               </span>
             </h2>
             
-            <p className="text-base md:text-lg text-slate-600 mb-10 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
+            <p className="text-base md:text-lg text-slate-600 mb-8 max-w-2xl mx-auto lg:mx-0 leading-relaxed font-medium">
               Take your business to the next level. We specialize in building high-quality websites, robust mobile applications, engaging games, and custom software tailored to boost your revenue and growth.
             </p>
+
+            <button
+              onClick={() => setShowAuditModal(true)}
+              className="inline-flex items-center gap-2 bg-slate-900 hover:bg-blue-600 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-1 active:scale-95 mb-10 mx-auto lg:mx-0"
+            >
+              <Sparkles className="w-5 h-5 text-yellow-400" />
+              Scan Your Website For Errors (Free)
+            </button>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-8">
               {[
@@ -164,6 +174,9 @@ export default function ITServicesBanner() {
           </div>
         </div>
       )}
+
+      {/* SEO Audit Modal */}
+      <FreeSeoAuditForm isOpen={showAuditModal} onClose={() => setShowAuditModal(false)} />
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes wiggle {

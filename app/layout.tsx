@@ -7,6 +7,8 @@ import QuickLeadWidget from '@/components/QuickLeadWidget'
 import TopOfferBanner from '@/components/TopOfferBanner'
 import FloatingWhatsApp from '@/components/FloatingWhatsApp'
 import ExitIntentPopup from '@/components/ExitIntentPopup'
+import SocialProofPopup from '@/components/SocialProofPopup'
+import VideoBubble from '@/components/VideoBubble'
 
 // ============================================================
 // ALL 75 UP DISTRICTS COVERED — MAX SEO POWER
@@ -900,6 +902,8 @@ export default function RootLayout({
         <FloatingWhatsApp />
         <VisitorTracker />
         <ExitIntentPopup />
+        <SocialProofPopup />
+        <VideoBubble />
       </body>
     </html>
   )

@@ -31,7 +31,7 @@ export default function Hero() {
                 alt="Jan Seva Kendra Logo" 
                 width={176}
                 height={176}
-                className="w-32 h-32 xl:w-40 xl:h-40 2xl:w-44 2xl:h-44 object-contain"
+                className="w-32 h-32 xl:w-40 xl:h-40 2xl:w-44 2xl:h-44 object-contain animate-fade-in-up"
                 priority
               />
             </div>
@@ -43,13 +43,13 @@ export default function Hero() {
                 alt="Jan Seva Kendra Logo" 
                 width={144}
                 height={144}
-                className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 object-contain"
+                className="w-28 h-28 sm:w-32 sm:h-32 md:w-36 md:h-36 object-contain animate-fade-in-up"
                 priority
               />
             </div>
 
             {/* Brand title — 3-color mix */}
-            <h1 className="text-center px-2 mb-2 sm:mb-3 max-w-3xl mx-auto">
+            <h1 className="text-center px-2 mb-2 sm:mb-3 max-w-3xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.1s' }}>
               <span
                 className="block text-3xl sm:text-4xl md:text-5xl lg:text-5xl xl:text-6xl font-black tracking-tight leading-tight"
                 style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
@@ -60,12 +60,12 @@ export default function Hero() {
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-blue-50 font-semibold mb-2 sm:mb-3 px-2 max-w-3xl mx-auto leading-snug">
+            <p className="text-base sm:text-lg md:text-xl text-blue-50 font-semibold mb-2 sm:mb-3 px-2 max-w-3xl mx-auto leading-snug animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               आपकी सेवा में हमेशा तत्पर
             </p>
 
             {/* Website line — same 3-color style, 3 words */}
-            <p className="text-center px-2 mb-3 sm:mb-4 max-w-3xl mx-auto">
+            <p className="text-center px-2 mb-3 sm:mb-4 max-w-3xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.3s' }}>
               <span
                 className="block text-2xl sm:text-3xl md:text-4xl lg:text-4xl xl:text-5xl font-black tracking-tight leading-tight"
                 style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}
@@ -76,10 +76,10 @@ export default function Hero() {
               </span>
             </p>
 
-            <p className="text-xs sm:text-sm md:text-base text-blue-200/90 mb-4 sm:mb-6 md:mb-8 px-2 max-w-3xl mx-auto">
+            <p className="text-xs sm:text-sm md:text-base text-blue-200/90 mb-4 sm:mb-6 md:mb-8 px-2 max-w-3xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.4s' }}>
               All Government & Private Services Under One Roof • Same Day Work • Website, Software & Digital Work
             </p>
-            <div className="mb-4 sm:mb-6 px-2">
+            <div className="mb-4 sm:mb-6 px-2 animate-fade-in-up" style={{ animationDelay: '0.5s' }}>
               <a
                 href="https://wa.me/917895094129?text=Hello,%20mujhe%20website%20ya%20software%20banwana%20hai."
                 target="_blank"
@@ -91,7 +91,7 @@ export default function Hero() {
             </div>
 
             {/* CTA Buttons */}
-            <div className="flex flex-wrap gap-2.5 sm:gap-3 md:gap-4 justify-center mb-6 sm:mb-8 md:mb-10 px-2">
+            <div className="flex flex-wrap gap-2.5 sm:gap-3 md:gap-4 justify-center mb-6 sm:mb-8 md:mb-10 px-2 animate-fade-in-up" style={{ animationDelay: '0.6s' }}>
               <button
                 onClick={() => setShowModal(true)}
                 className="bg-yellow-400 hover:bg-yellow-500 active:bg-yellow-600 text-gray-900 px-4 sm:px-6 md:px-8 py-2 sm:py-2.5 md:py-3 rounded-lg font-semibold text-sm sm:text-base md:text-lg shadow-lg hover:shadow-xl active:scale-95 transition transform hover:scale-105 flex items-center justify-center space-x-2 w-full sm:w-auto"
