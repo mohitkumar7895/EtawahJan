@@ -1,6 +1,6 @@
 'use client';
 
-import { MapPin, Phone, Mail, X, ArrowRight } from 'lucide-react';
+import { MapPin, Phone, Mail, X, ArrowRight, Star } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
@@ -19,8 +19,9 @@ export default function Hero() {
   }, [showModal]);
 
   return (
-    <section id="home" className="bg-gradient-to-br from-blue-400 to-blue-800 text-white py-6 sm:py-8 md:py-12 lg:py-16">
-      <div className="container mx-auto px-3 sm:px-4 md:px-6">
+    <section id="home" className="bg-gradient-to-br from-blue-400 to-blue-800 text-white py-6 sm:py-8 md:py-12 lg:py-16 relative overflow-hidden">
+      
+      <div className="container mx-auto px-3 sm:px-4 md:px-6 relative z-10">
         <div className="max-w-5xl mx-auto">
           {/* Main Content */}
           <div className="text-center mb-6 sm:mb-8 md:mb-10 relative">
@@ -60,9 +61,53 @@ export default function Hero() {
               </span>
             </h1>
 
-            <p className="text-base sm:text-lg md:text-xl text-blue-50 font-semibold mb-2 sm:mb-3 px-2 max-w-3xl mx-auto leading-snug animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
+            <p className="text-base sm:text-lg md:text-xl text-blue-50 font-semibold mb-6 sm:mb-8 px-2 max-w-3xl mx-auto leading-snug animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               आपकी सेवा में हमेशा तत्पर
             </p>
+
+            {/* Star/Seal FOMO Badge (Mobile - In Flow) */}
+            <div className="flex justify-center md:hidden mb-6 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
+              <div className="relative w-24 h-24 flex items-center justify-center group">
+                <div className="absolute inset-0 text-yellow-400 drop-shadow-xl animate-[spin_12s_linear_infinite]">
+                  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                    <path fill="currentColor" d="M100,5 119,25 147,18 156,45 182,53 176,80 196,100 176,120 182,147 156,155 147,182 119,175 100,195 81,175 53,182 44,155 18,147 24,120 4,100 24,80 18,53 44,45 53,18 81,25 Z"/>
+                  </svg>
+                </div>
+                <div className="relative z-10 w-[72px] h-[72px] bg-slate-900 rounded-full border border-yellow-300 flex flex-col items-center justify-center text-center shadow-inner">
+                  <span className="text-yellow-400 font-black text-[8px] leading-none uppercase mb-0.5 tracking-widest">Only</span>
+                  <span className="text-red-500 font-black text-xl leading-none mb-0.5 animate-pulse drop-shadow-sm">1</span>
+                  <span className="text-white font-bold text-[8px] leading-none uppercase tracking-wider">Slot Left</span>
+                </div>
+              </div>
+            </div>
+
+            {/* Star/Seal FOMO Badge (Desktop - Right Side next to text) */}
+            <div className="hidden md:block absolute top-6 right-2 lg:right-12 xl:right-20 z-20 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
+              <div className="relative w-32 h-32 flex items-center justify-center group cursor-pointer">
+                
+                {/* Outer Glow */}
+                <div className="absolute -inset-2 bg-yellow-500/20 rounded-full blur-xl group-hover:bg-yellow-500/40 transition-colors duration-500"></div>
+
+                {/* Spinning Golden Starburst SVG */}
+                <div className="absolute inset-0 text-yellow-400 drop-shadow-2xl animate-[spin_12s_linear_infinite] group-hover:scale-110 transition-transform duration-300">
+                  <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
+                    <path fill="currentColor" d="M100,5 119,25 147,18 156,45 182,53 176,80 196,100 176,120 182,147 156,155 147,182 119,175 100,195 81,175 53,182 44,155 18,147 24,120 4,100 24,80 18,53 44,45 53,18 81,25 Z"/>
+                  </svg>
+                </div>
+                
+                {/* Inner Dark Circle */}
+                <div className="relative z-10 w-24 h-24 bg-slate-900 rounded-full border-2 border-yellow-300 flex flex-col items-center justify-center text-center shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)] group-hover:scale-110 transition-transform duration-300">
+                  <span className="text-yellow-400 font-black text-[10px] leading-none uppercase mb-1 tracking-widest">Only</span>
+                  <span className="text-red-500 font-black text-3xl leading-none mb-1 animate-pulse drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">1</span>
+                  <span className="text-white font-bold text-[10px] leading-none uppercase tracking-wider">Slot Left</span>
+                </div>
+                
+                {/* Hover Tooltip (Optional, for more context) */}
+                <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs py-1.5 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl border border-slate-700">
+                  We take only 5 premium projects/month
+                </div>
+              </div>
+            </div>
 
             {/* Website line — same 3-color style, 3 words */}
             <p className="text-center px-2 mb-3 sm:mb-4 max-w-3xl mx-auto animate-fade-in-up" style={{ animationDelay: '0.3s' }}>

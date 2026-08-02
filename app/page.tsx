@@ -10,7 +10,6 @@ import ToolsHomePromo from '@/components/tools/ToolsHomePromo'
 import AnimatedCounters from '@/components/AnimatedCounters'
 
 import VisualPriceQuiz from '@/components/VisualPriceQuiz'
-import PortfolioSection from '@/components/PortfolioSection'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -204,7 +203,6 @@ export default function Home() {
       <Announcements />
       <Services />
       <HomeJobsFeed />
-      <PortfolioSection />
       <Reviews />
       <SeoBottomBlock />
       <AnimatedCounters />
