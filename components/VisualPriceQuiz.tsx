@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { MonitorPlay, Smartphone, ShoppingCart, TrendingUp, Clock, CalendarDays, Infinity, ArrowRight, CheckCircle2, ChevronLeft, Loader2 } from 'lucide-react';
+import { submitServiceApplication } from '@/lib/api';
 
 type QuizState = {
   step: number;
@@ -43,6 +44,15 @@ export default function VisualPriceQuiz() {
     if (!state.phone || state.phone.length < 10) return;
     
     setState(s => ({ ...s, isSubmitting: true }));
+    
+    // Submit lead to admin
+    submitServiceApplication({
+      name: 'Price Quiz Lead',
+      mobile: state.phone.trim(),
+      service_type: `Website/App Quiz: ${state.projectType}`,
+      address: `Timeline: ${state.timeline}`,
+      email: ''
+    }).catch(console.error);
     
     // Simulate API call
     setTimeout(() => {

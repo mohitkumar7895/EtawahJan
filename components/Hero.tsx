@@ -5,6 +5,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import ContactForm from './ContactForm';
+import { Gift } from 'lucide-react';
 
 export default function Hero() {
   const [showModal, setShowModal] = useState(false);
@@ -79,6 +80,13 @@ export default function Hero() {
                   <span className="text-white font-bold text-[8px] leading-none uppercase tracking-wider">Slot Left</span>
                 </div>
               </div>
+              {/* Mobile Spin Wheel Button */}
+              <button 
+                onClick={() => window.dispatchEvent(new Event('openSpinWheel'))}
+                className="absolute top-[175%] right-0 z-40 bg-gradient-to-r from-pink-500 to-rose-500 text-white p-3 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.6)] hover:scale-110 transition-transform flex items-center justify-center animate-bounce"
+              >
+                <Gift className="w-6 h-6" />
+              </button>
             </div>
 
             {/* Star/Seal FOMO Badge (Desktop - Right Side next to text) */}
@@ -107,6 +115,17 @@ export default function Hero() {
                   We take only 5 premium projects/month
                 </div>
               </div>
+              {/* Desktop Spin Wheel Button Placed right under Slot Left */}
+              <button 
+                onClick={() => window.dispatchEvent(new Event('openSpinWheel'))}
+                className="absolute top-[175%] right-4 sm:right-10 z-[40] bg-gradient-to-r from-pink-500 to-rose-500 text-white p-4 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.6)] hover:scale-110 transition-transform flex items-center justify-center animate-bounce"
+              >
+                <Gift className="w-8 h-8" />
+                <span className="absolute -top-2 -right-2 flex h-5 w-5">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-yellow-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-5 w-5 bg-yellow-500 text-[10px] font-bold flex items-center justify-center text-slate-900">1</span>
+                </span>
+              </button>
             </div>
 
             {/* Website line — same 3-color style, 3 words */}

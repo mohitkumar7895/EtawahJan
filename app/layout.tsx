@@ -9,6 +9,7 @@ import FloatingWhatsApp from '@/components/FloatingWhatsApp'
 import ExitIntentPopup from '@/components/ExitIntentPopup'
 import SocialProofPopup from '@/components/SocialProofPopup'
 import VideoBubble from '@/components/VideoBubble'
+import SpinWheelWidget from '@/components/SpinWheelWidget'
 
 // ============================================================
 // ALL 75 UP DISTRICTS COVERED — MAX SEO POWER
@@ -904,6 +905,7 @@ export default function RootLayout({
         <ExitIntentPopup />
         <SocialProofPopup />
         <VideoBubble />
+        <SpinWheelWidget />
       </body>
     </html>
   )

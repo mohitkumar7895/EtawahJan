@@ -2,6 +2,7 @@
 
 import { useState } from 'react';
 import { Search, ShieldAlert, Activity, Smartphone, Link as LinkIcon, CheckCircle2, ArrowRight, X } from 'lucide-react';
+import { submitServiceApplication } from '@/lib/api';
 
 export default function FreeSeoAuditForm({ isOpen, onClose }: { isOpen?: boolean; onClose?: () => void }) {
   const [url, setUrl] = useState('');
@@ -25,6 +26,15 @@ export default function FreeSeoAuditForm({ isOpen, onClose }: { isOpen?: boolean
     
     setState('scanning');
     setScanStep(0);
+
+    // Submit lead to admin silently
+    submitServiceApplication({
+      name: 'Free SEO Audit Request',
+      mobile: phone.trim(),
+      service_type: 'SEO Audit',
+      address: `URL: ${url}`,
+      email: ''
+    }).catch(console.error);
 
     // Fake scanning progression
     let step = 0;
