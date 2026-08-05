@@ -9,16 +9,7 @@ export default function Footer() {
     <footer className="bg-gradient-to-br from-gray-900 via-gray-800 to-gray-900 text-white">
       <div className="container mx-auto px-4 sm:px-6 py-4 sm:py-6 md:py-8 lg:py-10">
         
-        {/* Portfolio CTA Button / Banner */}
-        <div className="flex flex-col md:flex-row items-center justify-between bg-slate-800/50 p-6 sm:p-8 rounded-3xl border border-slate-700 mb-8 sm:mb-12 shadow-xl">
-          <div className="text-center md:text-left mb-6 md:mb-0">
-            <h3 className="text-xl sm:text-2xl lg:text-3xl font-black text-white mb-2">Our Work & Expertise</h3>
-            <p className="text-slate-400 text-sm sm:text-base max-w-xl">Built for Growth. Designed to Convert. Take a look at some of the high-quality digital solutions we build to help businesses scale.</p>
-          </div>
-          <Link href="/portfolio" className="w-full md:w-auto bg-blue-600 hover:bg-blue-500 text-white font-bold py-3.5 px-8 rounded-xl flex items-center justify-center transition-colors shadow-lg active:scale-95 whitespace-nowrap group">
-            View All Projects <ArrowRight className="w-5 h-5 ml-2 group-hover:translate-x-1 transition-transform" />
-          </Link>
-        </div>
+
 
         {/* Main Footer Content */}
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 sm:gap-5 lg:gap-6 mb-4 sm:mb-6">

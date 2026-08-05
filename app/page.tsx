@@ -102,6 +102,17 @@ export const metadata: Metadata = {
     'low cost high quality web design agency',
     'freelance web development agency global',
     'best IT outsourcing company in India',
+
+    // DIGITAL MARKETING, GMB, & ADS KEYWORDS
+    'GMB profile creation service',
+    'google my business setup expert',
+    'google maps business listing service',
+    'local seo and gmb optimization',
+    'google ads management agency',
+    'facebook ads expert near me',
+    'digital marketing agency in Etawah',
+    'lead generation services India',
+    'social media marketing agency UP',
   ],
   openGraph: {
     title: 'Get More Customers! #1 Website & Software Agency | Jan Seva Kendra',
@@ -130,6 +141,11 @@ function SeoBottomBlock() {
         <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">Grow Your Business — Create a Website Today</h3>
         <p className="mb-4">
           If you are looking to <em>build a website for your business</em>, you need a digital agency that understands growth. We build fast, beautiful websites that rank on top of Google. Whether you need a simple portfolio, a complex <strong>school management system</strong>, hospital CRM, real-estate portal, or a robust <strong>e-commerce app</strong>, our team of expert React & Next.js developers delivers the best results to help you get more customers.
+        </p>
+
+        <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">🚀 Digital Marketing, Google Ads & GMB Optimization</h3>
+        <p className="mb-4">
+          Struggling to get local customers? We provide premium <strong>Google My Business (GMB) Profile Creation</strong> and Local SEO services to rank your shop or clinic #1 on Google Maps. We also run highly profitable <strong>Google Ads and Facebook Ads</strong> campaigns to generate high-quality leads for your business. Let us handle your digital marketing while you focus on sales!
         </p>
 
         <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">🌐 Offshore Web Development & IT Outsourcing (USA, UK, UAE, Global)</h3>
