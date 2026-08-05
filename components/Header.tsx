@@ -57,7 +57,7 @@ export default function Header() {
               <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight truncate">
                  Jan Seva Kendra
               </h1>
-              <p className="text-xs sm:text-sm text-blue-100 hidden xs:block">सेवा ही धर्म है</p>
+              <p className="text-xs sm:text-sm text-blue-100 hidden sm:block">सेवा ही धर्म है</p>
             </div>
           </Link>
 

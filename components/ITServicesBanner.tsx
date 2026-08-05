@@ -1,13 +1,15 @@
 'use client';
 
-import { MonitorSmartphone, Code2, Gamepad2, Rocket, PhoneCall, ArrowRight, CheckCircle2, Sparkles, X, FileText } from 'lucide-react';
+import { MonitorSmartphone, Code2, Gamepad2, Rocket, PhoneCall, ArrowRight, CheckCircle2, Sparkles, X, FileText, IndianRupee, Calculator } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import ContactForm from './ContactForm';
 import FreeSeoAuditForm from './FreeSeoAuditForm';
+import CostEstimatorModal from './CostEstimatorModal';
 
 export default function ITServicesBanner() {
   const [showModal, setShowModal] = useState(false);
   const [showAuditModal, setShowAuditModal] = useState(false);
+  const [showEstimatorModal, setShowEstimatorModal] = useState(false);
 
   useEffect(() => {
     if (!showModal) return;
@@ -45,13 +47,15 @@ export default function ITServicesBanner() {
               Take your business to the next level. We specialize in building high-quality websites, robust mobile applications, engaging games, and custom software tailored to boost your revenue and growth.
             </p>
 
-            <button
-              onClick={() => setShowAuditModal(true)}
-              className="inline-flex items-center gap-2 bg-slate-900 hover:bg-blue-600 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg shadow-blue-500/20 transition-all hover:-translate-y-1 active:scale-95 mb-10 mx-auto lg:mx-0"
-            >
-              <Sparkles className="w-5 h-5 text-yellow-400" />
-              Scan Your Website For Errors (Free)
-            </button>
+            <div className="flex flex-col sm:flex-row items-center gap-4 mb-10 mx-auto lg:mx-0 w-full sm:w-auto">
+              <button
+                onClick={() => setShowAuditModal(true)}
+                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-1 active:scale-95"
+              >
+                <Sparkles className="w-5 h-5 text-yellow-400" />
+                Free SEO Audit
+              </button>
+            </div>
 
             <div className="flex flex-wrap items-center justify-center lg:justify-start gap-4 mb-8">
               {[
@@ -80,6 +84,23 @@ export default function ITServicesBanner() {
                 </div>
 
                 <div className="space-y-4">
+                  <button
+                    onClick={() => setShowEstimatorModal(true)}
+                    className="relative w-full group overflow-hidden rounded-2xl p-1 transition-all hover:-translate-y-0.5 active:scale-95"
+                  >
+                    <div className="absolute inset-0 bg-gradient-to-r from-red-500 via-yellow-500 to-blue-500 opacity-70 group-hover:opacity-100 animate-[spin_4s_linear_infinite]" />
+                    <div className="relative flex items-center justify-center gap-3 bg-white px-6 py-4 rounded-xl font-black text-lg transition-all group-hover:bg-slate-50 shadow-inner">
+                      <Calculator className="w-6 h-6 text-indigo-600 group-hover:rotate-12 transition-transform" />
+                      <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-700 to-indigo-800">
+                        Instant Cost Estimator
+                      </span>
+                      <span className="absolute -top-1 -right-1 flex h-4 w-4">
+                        <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                        <span className="relative inline-flex rounded-full h-4 w-4 bg-red-500 text-[8px] font-bold text-white items-center justify-center">!</span>
+                      </span>
+                    </div>
+                  </button>
+
                   <a 
                     href="tel:9193898182" 
                     className="flex items-center justify-center gap-3 w-full bg-slate-900 text-white px-6 py-4 rounded-2xl font-bold text-lg hover:bg-slate-800 transition-all shadow-md hover:shadow-xl hover:-translate-y-0.5 active:scale-95"
@@ -177,6 +198,9 @@ export default function ITServicesBanner() {
 
       {/* SEO Audit Modal */}
       <FreeSeoAuditForm isOpen={showAuditModal} onClose={() => setShowAuditModal(false)} />
+
+      {/* Cost Estimator Modal */}
+      <CostEstimatorModal isOpen={showEstimatorModal} onClose={() => setShowEstimatorModal(false)} />
 
       <style dangerouslySetInnerHTML={{__html: `
         @keyframes wiggle {

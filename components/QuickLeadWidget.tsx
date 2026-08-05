@@ -73,7 +73,7 @@ export default function QuickLeadWidget() {
       
       {/* 10-Second Callback Form Card */}
       {isOpen && (
-        <div className="w-[310px] sm:w-[360px] bg-white rounded-2xl shadow-2xl border border-blue-100 p-5 sm:p-6 mb-2 pointer-events-auto animate-fade-in relative overflow-hidden">
+        <div className="w-[calc(100vw-2rem)] sm:w-[360px] max-w-[310px] sm:max-w-none bg-white rounded-2xl shadow-2xl border border-blue-100 p-5 sm:p-6 mb-2 pointer-events-auto animate-fade-in relative overflow-hidden">
           <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
           
           {/* Close button */}

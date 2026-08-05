@@ -92,7 +92,7 @@ export default function SocialProofPopup() {
 
   return (
     <div className="fixed bottom-4 left-4 z-[9900] animate-slide-up sm:bottom-6 sm:left-6">
-      <div className="bg-white p-3 pr-8 sm:p-4 sm:pr-10 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-100 flex items-start gap-3 w-[300px] sm:w-[350px] relative overflow-hidden group">
+      <div className="bg-white p-3 pr-8 sm:p-4 sm:pr-10 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-100 flex items-start gap-3 w-[calc(100vw-2rem)] sm:w-[350px] max-w-[300px] sm:max-w-none relative overflow-hidden group">
         
         {/* Close Button */}
         <button 

@@ -90,12 +90,12 @@ export default function ExitIntentPopup() {
         </div>
 
         {/* Right Side: Form */}
-        <div className="w-full md:w-7/12 p-6 sm:p-10 bg-slate-50 flex flex-col justify-center">
-          <div className="text-center mb-6">
-            <h3 className="text-xl font-bold text-slate-800">Or Request a Callback</h3>
-            <p className="text-sm text-slate-500">Fill the form below and we&apos;ll call you in 5 mins.</p>
+        <div className="w-full md:w-7/12 p-5 sm:p-8 md:p-10 bg-slate-50 flex flex-col justify-center">
+          <div className="text-center mb-4 sm:mb-6">
+            <h3 className="text-lg sm:text-xl md:text-2xl font-bold text-slate-800">Or Request a Callback</h3>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 sm:mt-2">Fill the form below and we&apos;ll call you in 5 mins.</p>
           </div>
-          <div className="bg-white p-2 rounded-xl shadow-sm border border-slate-100">
+          <div className="bg-white p-3 sm:p-4 md:p-6 rounded-xl sm:rounded-2xl shadow-sm border border-slate-100 overflow-y-auto max-h-[50vh] md:max-h-none">
             <ContactForm embedded />
           </div>
         </div>

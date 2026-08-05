@@ -8,8 +8,6 @@ import Reviews from '@/components/Reviews'
 import HomeJobsFeed from '@/components/HomeJobsFeed'
 import ToolsHomePromo from '@/components/tools/ToolsHomePromo'
 import AnimatedCounters from '@/components/AnimatedCounters'
-
-import VisualPriceQuiz from '@/components/VisualPriceQuiz'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -197,7 +195,6 @@ export default function Home() {
       />
       <Header />
       <Hero />
-      <VisualPriceQuiz />
       <ToolsHomePromo />
       <ITServicesBanner />
       <Announcements />

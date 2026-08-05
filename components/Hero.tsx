@@ -67,7 +67,7 @@ export default function Hero() {
             </p>
 
             {/* Star/Seal FOMO Badge (Mobile - In Flow) */}
-            <div className="flex justify-center md:hidden mb-6 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
+            <div className="flex justify-center items-center gap-6 md:hidden mb-6 animate-fade-in-up" style={{ animationDelay: '0.8s' }}>
               <div className="relative w-24 h-24 flex items-center justify-center group">
                 <div className="absolute inset-0 text-yellow-400 drop-shadow-xl animate-[spin_12s_linear_infinite]">
                   <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
@@ -83,9 +83,9 @@ export default function Hero() {
               {/* Mobile Spin Wheel Button */}
               <button 
                 onClick={() => window.dispatchEvent(new Event('openSpinWheel'))}
-                className="absolute top-[175%] right-0 z-40 bg-gradient-to-r from-pink-500 to-rose-500 text-white p-3 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.6)] hover:scale-110 transition-transform flex items-center justify-center animate-bounce"
+                className="z-40 bg-gradient-to-r from-pink-500 to-rose-500 text-white p-3.5 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.6)] hover:scale-110 transition-transform flex items-center justify-center animate-bounce"
               >
-                <Gift className="w-6 h-6" />
+                <Gift className="w-7 h-7" />
               </button>
             </div>
 
@@ -97,28 +97,21 @@ export default function Hero() {
                 <div className="absolute -inset-2 bg-yellow-500/20 rounded-full blur-xl group-hover:bg-yellow-500/40 transition-colors duration-500"></div>
 
                 {/* Spinning Golden Starburst SVG */}
-                <div className="absolute inset-0 text-yellow-400 drop-shadow-2xl animate-[spin_12s_linear_infinite] group-hover:scale-110 transition-transform duration-300">
+                <div className="absolute inset-0 text-yellow-400 drop-shadow-[0_0_15px_rgba(250,204,21,0.5)] animate-[spin_12s_linear_infinite]">
                   <svg viewBox="0 0 200 200" xmlns="http://www.w3.org/2000/svg" className="w-full h-full">
                     <path fill="currentColor" d="M100,5 119,25 147,18 156,45 182,53 176,80 196,100 176,120 182,147 156,155 147,182 119,175 100,195 81,175 53,182 44,155 18,147 24,120 4,100 24,80 18,53 44,45 53,18 81,25 Z"/>
                   </svg>
                 </div>
-                
-                {/* Inner Dark Circle */}
                 <div className="relative z-10 w-24 h-24 bg-slate-900 rounded-full border-2 border-yellow-300 flex flex-col items-center justify-center text-center shadow-[inset_0_4px_10px_rgba(0,0,0,0.5)] group-hover:scale-110 transition-transform duration-300">
                   <span className="text-yellow-400 font-black text-[10px] leading-none uppercase mb-1 tracking-widest">Only</span>
                   <span className="text-red-500 font-black text-3xl leading-none mb-1 animate-pulse drop-shadow-[0_0_8px_rgba(239,68,68,0.8)]">1</span>
-                  <span className="text-white font-bold text-[10px] leading-none uppercase tracking-wider">Slot Left</span>
-                </div>
-                
-                {/* Hover Tooltip (Optional, for more context) */}
-                <div className="absolute top-full mt-4 left-1/2 -translate-x-1/2 bg-slate-900 text-white text-xs py-1.5 px-3 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none shadow-xl border border-slate-700">
-                  We take only 5 premium projects/month
+                  <span className="text-white font-bold text-[10px] leading-none uppercase tracking-widest">Slot Left</span>
                 </div>
               </div>
               {/* Desktop Spin Wheel Button Placed right under Slot Left */}
               <button 
                 onClick={() => window.dispatchEvent(new Event('openSpinWheel'))}
-                className="absolute top-[175%] right-4 sm:right-10 z-[40] bg-gradient-to-r from-pink-500 to-rose-500 text-white p-4 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.6)] hover:scale-110 transition-transform flex items-center justify-center animate-bounce"
+                className="z-[40] bg-gradient-to-r from-pink-500 to-rose-500 text-white p-4 rounded-full shadow-[0_0_15px_rgba(236,72,153,0.6)] hover:scale-110 transition-transform flex items-center justify-center animate-bounce"
               >
                 <Gift className="w-8 h-8" />
                 <span className="absolute -top-2 -right-2 flex h-5 w-5">

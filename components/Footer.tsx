@@ -126,7 +126,7 @@ export default function Footer() {
               <FileText className="w-3.5 h-3.5 sm:w-4 sm:h-4 mr-1.5 text-blue-400 flex-shrink-0" />
               Sitemaps
             </h3>
-            <ul className="grid grid-cols-2 gap-x-2 sm:gap-x-3 gap-y-1 sm:gap-y-1.5 [&_li]:min-w-0 [&_a]:items-start [&_span:last-child]:break-words [&_span:last-child]:leading-tight">
+            <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-2 sm:gap-x-3 gap-y-1 sm:gap-y-1.5 [&_li]:min-w-0 [&_a]:items-start [&_span:last-child]:break-words [&_span:last-child]:leading-tight">
               <li>
                 <Link href="/sitemap" className="text-xs sm:text-sm text-gray-300 hover:text-blue-400 transition flex items-center py-0.5">
                   <span className="w-1 h-1 sm:w-1.5 sm:h-1.5 bg-blue-400 rounded-full mr-1.5 flex-shrink-0"></span>
