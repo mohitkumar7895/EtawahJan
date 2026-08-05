@@ -83,6 +83,25 @@ export const metadata: Metadata = {
     'urgent income certificate Etawah',
     'website maker in low budget',
     'app developer hiring process',
+
+    // 🔥 HIGH-INTENT INTERNATIONAL OFFSHORE & OUTSOURCING KEYWORDS (USA, UK, UAE, GLOBAL) 🔥
+    'outsource web development to india',
+    'hire offshore react developers india',
+    'hire offshore nextjs developers',
+    'custom web development company USA',
+    'best offshore web development agency',
+    'affordable ecommerce development UK',
+    'cheap app developers in india for USA clients',
+    'shopify experts india for global clients',
+    'white label web development agency india',
+    'remote web developers for hire UAE',
+    'B2B offshore software development India',
+    'hire dedicated software development team india',
+    'custom CRM developers USA',
+    'outsource mobile app development',
+    'low cost high quality web design agency',
+    'freelance web development agency global',
+    'best IT outsourcing company in India',
   ],
   openGraph: {
     title: 'Get More Customers! #1 Website & Software Agency | Jan Seva Kendra',
@@ -111,6 +130,11 @@ function SeoBottomBlock() {
         <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">Grow Your Business — Create a Website Today</h3>
         <p className="mb-4">
           If you are looking to <em>build a website for your business</em>, you need a digital agency that understands growth. We build fast, beautiful websites that rank on top of Google. Whether you need a simple portfolio, a complex <strong>school management system</strong>, hospital CRM, real-estate portal, or a robust <strong>e-commerce app</strong>, our team of expert React & Next.js developers delivers the best results to help you get more customers.
+        </p>
+
+        <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">🌐 Offshore Web Development & IT Outsourcing (USA, UK, UAE, Global)</h3>
+        <p className="mb-4">
+          Looking to <strong>outsource web development to India</strong>? We are a premium <strong>offshore software development agency</strong> serving clients in the <strong>USA, UK, Canada, Australia, and the UAE (Dubai)</strong>. You can <em>hire dedicated React and Next.js developers</em> at highly affordable offshore rates without compromising on Silicon Valley-level quality. We provide <strong>White Label Web Development</strong> for international agencies, custom CRM solutions, and robust B2B enterprise software globally.
         </p>
 
         <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">Local CSC & Document Services (Jan Seva Kendra Etawah)</h3>
@@ -156,10 +180,15 @@ export default function Home() {
       "@type": "LocalBusiness",
       "name": "Jan Seva Kendra IT Agency"
     },
-    "description": "Premium E-commerce and Business Website Development services to grow your business online and get 10x customers.",
+    "description": "Premium E-commerce and Business Website Development services to grow your business online and get 10x customers. Specialized in offshore web development and IT outsourcing.",
     "areaServed": [
       { "@type": "Country", "name": "India" },
-      { "@type": "State", "name": "Uttar Pradesh" }
+      { "@type": "State", "name": "Uttar Pradesh" },
+      { "@type": "Country", "name": "United States" },
+      { "@type": "Country", "name": "United Kingdom" },
+      { "@type": "Country", "name": "United Arab Emirates" },
+      { "@type": "Country", "name": "Australia" },
+      { "@type": "Country", "name": "Canada" }
     ],
     "hasOfferCatalog": {
       "@type": "OfferCatalog",
