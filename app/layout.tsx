@@ -396,6 +396,7 @@ export const metadata: Metadata = {
     'theme-color': '#1a56db',
     'msvalidate.01': 'BING_VERIFICATION_PLACEHOLDER', // Add Bing Master Tag here later
     'y_key': 'YAHOO_VERIFICATION_PLACEHOLDER',
+    'monetag': '6fdddedeb4975f2b45942428e1a854e8',
   },
 }
 
