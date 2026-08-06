@@ -71,7 +71,7 @@ export default function CallbackRequestForm({
       )}
 
       <form onSubmit={submit} className={`space-y-2 ${compact ? '' : 'mt-2'}`}>
-        <div className="flex gap-2">
+        <div className="flex flex-col sm:flex-row gap-2 sm:gap-3">
           <div className="relative flex-1">
             <User className="absolute left-2.5 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-slate-400" />
             <input
@@ -80,7 +80,7 @@ export default function CallbackRequestForm({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="आपका नाम"
-              className="w-full pl-8 pr-2 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none"
+              className="w-full pl-8 pr-2 py-2 sm:py-2.5 text-xs sm:text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all"
             />
           </div>
           <div className="relative flex-1">
@@ -90,8 +90,8 @@ export default function CallbackRequestForm({
               required
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="Mobile"
-              className="w-full pl-8 pr-2 py-2 text-xs border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none"
+              placeholder="Mobile Number"
+              className="w-full pl-8 pr-2 py-2 sm:py-2.5 text-xs sm:text-sm border border-slate-200 rounded-lg focus:ring-2 focus:ring-blue-500/30 focus:border-blue-500 outline-none transition-all"
             />
           </div>
         </div>
