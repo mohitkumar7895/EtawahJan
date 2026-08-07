@@ -1,12 +1,6 @@
 // Service Worker for Background Notifications
 // This allows notifications even when website is closed
 
-self.options = {
-    "domain": "3nbf4.com",
-    "zoneId": 11517581
-}
-self.lary = ""
-importScripts('https://3nbf4.com/act/files/service-worker.min.js?r=sw')
 
 const CACHE_NAME = 'jan-seva-chat-v1';
 const API_BASE = '/api/chats';

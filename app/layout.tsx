@@ -396,7 +396,6 @@ export const metadata: Metadata = {
     'theme-color': '#1a56db',
     'msvalidate.01': 'BING_VERIFICATION_PLACEHOLDER', // Add Bing Master Tag here later
     'y_key': 'YAHOO_VERIFICATION_PLACEHOLDER',
-    'monetag': '6fdddedeb4975f2b45942428e1a854e8',
   },
 }
 
@@ -894,9 +893,6 @@ export default function RootLayout({
           type="application/ld+json"
           dangerouslySetInnerHTML={{ __html: JSON.stringify(websiteSchema) }}
         />
-
-        {/* Monetag Ad Script */}
-        <script src="https://quge5.com/88/tag.min.js" data-zone="267555" async data-cfasync="false"></script>
       </head>
       <body className="min-h-screen bg-white text-zinc-900 antialiased relative">
         <TopOfferBanner />
