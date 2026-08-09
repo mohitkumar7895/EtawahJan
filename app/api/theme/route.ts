@@ -16,7 +16,7 @@ export async function GET() {
   }
 }
 
-export async function PUT(request: Request) {
+export async function POST(request: Request) {
   try {
     const { primaryColorName } = await request.json();
     
