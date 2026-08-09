@@ -339,7 +339,7 @@ export default function BiodataMaker() {
                   <option value="No">No (Non-Manglik)</option>
                   <option value="Yes">Yes (Manglik)</option>
                   <option value="Anshik">Anshik Manglik</option>
-                  <option value="Don't Know">Don't Know</option>
+                  <option value="Don't Know">Don&apos;t Know</option>
                 </select>
               </div>
             </div>
@@ -370,7 +370,7 @@ export default function BiodataMaker() {
             <div className="space-y-4 mb-8">
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Father's Name</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Father&apos;s Name</label>
                   <input name="fatherName" type="text" value={formData.fatherName} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-rose-500 outline-none" />
                 </div>
                 <div>
@@ -380,7 +380,7 @@ export default function BiodataMaker() {
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mother's Name</label>
+                  <label className="block text-xs font-bold text-slate-500 uppercase mb-1">Mother&apos;s Name</label>
                   <input name="motherName" type="text" value={formData.motherName} onChange={handleChange} className="w-full px-4 py-2 bg-slate-50 border border-slate-200 rounded-lg focus:ring-2 focus:ring-rose-500 outline-none" />
                 </div>
                 <div>
