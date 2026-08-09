@@ -10,6 +10,7 @@ import ExitIntentPopup from '@/components/ExitIntentPopup'
 import SocialProofPopup from '@/components/SocialProofPopup'
 import VideoBubble from '@/components/VideoBubble'
 import SpinWheelWidget from '@/components/SpinWheelWidget'
+import ThemeProvider from '@/components/ThemeProvider'
 
 // ============================================================
 // ALL 75 UP DISTRICTS COVERED — MAX SEO POWER
@@ -895,17 +896,19 @@ export default function RootLayout({
         />
       </head>
       <body className="min-h-screen bg-white text-zinc-900 antialiased relative">
-        <TopOfferBanner />
-        <SarkariTicker />
-        {children}
-        <ChatSupport />
-        <QuickLeadWidget />
-        <FloatingWhatsApp />
-        <VisitorTracker />
-        <ExitIntentPopup />
-        <SocialProofPopup />
-        <VideoBubble />
-        <SpinWheelWidget />
+        <ThemeProvider>
+          <TopOfferBanner />
+          <SarkariTicker />
+          {children}
+          <ChatSupport />
+          <QuickLeadWidget />
+          <FloatingWhatsApp />
+          <VisitorTracker />
+          <ExitIntentPopup />
+          <SocialProofPopup />
+          <VideoBubble />
+          <SpinWheelWidget />
+        </ThemeProvider>
       </body>
     </html>
   )

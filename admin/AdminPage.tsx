@@ -95,7 +95,8 @@ type AdminTab =
   | 'blogs'
   | 'jan-seva-data'
   | 'seo-sitemap'
-  | 'applications';
+  | 'applications'
+  | 'theme-settings';
 
 type DashboardSnapshot = {
   vacancies: number;
@@ -114,6 +115,8 @@ type DashboardSnapshot = {
   withdrawal: number;
 };
 
+import { Palette } from 'lucide-react';
+
 const ADMIN_NAV: { id: AdminTab; label: string; description: string; icon: LucideIcon }[] = [
   { id: 'dashboard', label: 'Dashboard', description: 'Overview & counts', icon: LayoutDashboard },
   { id: 'applications', label: 'Service Forms', description: 'User submissions & Excel', icon: FileText },
@@ -127,6 +130,7 @@ const ADMIN_NAV: { id: AdminTab; label: string; description: string; icon: Lucid
   { id: 'blogs', label: 'Blog', description: 'Posts & SEO', icon: BookOpen },
   { id: 'jan-seva-data', label: 'Jan Seva data', description: 'Registry modules', icon: Database },
   { id: 'seo-sitemap', label: 'Sitemap & SEO', description: 'Google indexing & URLs', icon: Globe },
+  { id: 'theme-settings', label: 'Theme Settings', description: 'Global colors', icon: Palette },
 ];
 
 export default function AdminPage() {
@@ -4734,6 +4738,43 @@ export default function AdminPage() {
                       </button>
                     </div>
                   </form>
+                </div>
+              </div>
+            )}
+
+            {activeTab === 'theme-settings' && (
+              <div className="bg-white dark:bg-zinc-900 rounded-lg shadow-md dark:shadow-black/20 p-4 sm:p-5 md:p-6 border border-transparent dark:border-zinc-800 transition-colors duration-200">
+                <h3 className="font-semibold text-lg md:text-xl text-gray-900 dark:text-zinc-100 mb-4 flex items-center gap-2">
+                  <Palette className="w-5 h-5 text-blue-600" /> Global Website Theme
+                </h3>
+                <p className="text-sm text-gray-600 dark:text-zinc-400 mb-6">
+                  Select a primary color for the entire website. This will instantly change buttons, links, and accents globally.
+                </p>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-4">
+                  {['blue', 'green', 'red', 'purple', 'orange', 'rose'].map((color) => (
+                    <button
+                      key={color}
+                      onClick={async () => {
+                        try {
+                          const res = await fetch('/api/theme', {
+                            method: 'PUT',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ primaryColorName: color })
+                          });
+                          if (res.ok) {
+                            alert('Theme updated successfully! Reloading...');
+                            window.location.reload();
+                          }
+                        } catch (err) {
+                          alert('Failed to update theme');
+                        }
+                      }}
+                      className="flex flex-col items-center gap-2 p-4 rounded-xl border-2 border-gray-100 dark:border-zinc-800 hover:border-blue-500 dark:hover:border-blue-500 transition-all hover:shadow-md"
+                    >
+                      <div className="w-12 h-12 rounded-full shadow-sm" style={{ backgroundColor: color === 'blue' ? '#3b82f6' : color === 'green' ? '#22c55e' : color === 'red' ? '#ef4444' : color === 'purple' ? '#a855f7' : color === 'orange' ? '#f97316' : '#f43f5e' }}></div>
+                      <span className="text-xs font-semibold capitalize text-gray-700 dark:text-zinc-300">{color}</span>
+                    </button>
+                  ))}
                 </div>
               </div>
             )}
