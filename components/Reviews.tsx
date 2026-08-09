@@ -1,6 +1,6 @@
 'use client';
 
-import { Star, Quote, ExternalLink } from 'lucide-react';
+import { Star, StarHalf, Quote, ExternalLink } from 'lucide-react';
 import React from 'react';
 
 const REVIEWS_ROW_1 = [
@@ -14,14 +14,14 @@ const REVIEWS_ROW_1 = [
   {
     name: 'Priya Patel',
     role: 'Director, Elite Public School',
-    rating: 5,
+    rating: 4,
     text: 'The Custom School ERP they developed for us is flawless. From student attendance to fee management and digital report cards, everything is now automated. Highly recommended!',
     color: 'bg-emerald-500'
   },
   {
     name: 'Amit Verma',
     role: 'CEO, Verma Enterprises',
-    rating: 5,
+    rating: 4,
     text: 'Best web development agency I have worked with. They built a corporate website for us with excellent SEO. We are now ranking on Google Page 1 for our main keywords.',
     color: 'bg-orange-500'
   },
@@ -38,21 +38,21 @@ const REVIEWS_ROW_2 = [
   {
     name: 'Sandeep Gupta',
     role: 'Owner, Gupta Electronics',
-    rating: 5,
+    rating: 3,
     text: 'They built a custom Billing and Inventory Management Software for my 3 shops. It is so easy to use, and I can track my daily sales directly from my mobile phone now.',
     color: 'bg-rose-500'
   },
   {
     name: 'Vikas Tiwari',
     role: 'Director, Tiwari Hospitals',
-    rating: 5,
+    rating: 3.5,
     text: 'Excellent Hospital CRM development. Patient appointments, doctor schedules, and billing are all integrated perfectly. Their 24/7 support is also very responsive.',
     color: 'bg-teal-500'
   },
   {
     name: 'Anjali Desai',
     role: 'Founder, FoodieExpress',
-    rating: 5,
+    rating: 4.5,
     text: 'We needed a food delivery app similar to Zomato for our local city. They built the user app, delivery boy app, and admin panel flawlessly. Great pricing too!',
     color: 'bg-indigo-500'
   },
@@ -67,27 +67,33 @@ const REVIEWS_ROW_2 = [
 
 function ReviewCard({ review }: { review: any }) {
   return (
-    <div className="w-[300px] sm:w-[350px] md:w-[400px] shrink-0 bg-white p-6 sm:p-8 rounded-3xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow">
-      <div className="flex justify-between items-start mb-6">
-        <div className="flex items-center gap-3">
-          <div className={`w-12 h-12 rounded-full ${review.color} text-white flex items-center justify-center font-black text-xl shadow-md`}>
+    <div className="w-[190px] sm:w-[280px] md:w-[320px] shrink-0 bg-white p-3 sm:p-6 rounded-xl sm:rounded-2xl border border-slate-100 shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_8px_30px_rgb(0,0,0,0.08)] transition-shadow">
+      <div className="flex justify-between items-start mb-3 sm:mb-5">
+        <div className="flex items-center gap-2">
+          <div className={`w-8 h-8 sm:w-10 sm:h-10 rounded-full ${review.color} text-white flex items-center justify-center font-black text-sm sm:text-lg shadow-md`}>
             {review.name.charAt(0)}
           </div>
           <div>
-            <h4 className="font-bold text-slate-900 leading-tight">{review.name}</h4>
-            <p className="text-xs text-slate-500 font-medium">{review.role}</p>
+            <h4 className="font-bold text-[13px] sm:text-sm text-slate-900 leading-tight truncate max-w-[90px] sm:max-w-none">{review.name}</h4>
+            <p className="text-[9px] sm:text-xs text-slate-500 font-medium truncate max-w-[90px] sm:max-w-none">{review.role}</p>
           </div>
         </div>
-        <Quote className="w-8 h-8 text-blue-100" />
+        <Quote className="w-5 h-5 sm:w-7 sm:h-7 text-blue-100 shrink-0" />
       </div>
       
-      <div className="flex items-center gap-1 mb-4">
-        {[...Array(review.rating)].map((_, i) => (
-          <Star key={i} className="w-4 h-4 fill-yellow-400 text-yellow-400" />
-        ))}
+      <div className="flex items-center gap-0.5 sm:gap-1 mb-2 sm:mb-3">
+        {[1, 2, 3, 4, 5].map((starIndex) => {
+          if (review.rating >= starIndex) {
+            return <Star key={starIndex} className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+          } else if (review.rating >= starIndex - 0.5) {
+            return <StarHalf key={starIndex} className="w-3 h-3 sm:w-4 sm:h-4 fill-yellow-400 text-yellow-400" />
+          } else {
+            return <Star key={starIndex} className="w-3 h-3 sm:w-4 sm:h-4 text-slate-200 fill-transparent" />
+          }
+        })}
       </div>
       
-      <p className="text-slate-600 text-sm sm:text-base leading-relaxed font-medium">
+      <p className="text-slate-600 text-[10px] sm:text-sm leading-relaxed sm:leading-relaxed font-medium line-clamp-4">
         &quot;{review.text}&quot;
       </p>
     </div>
@@ -110,9 +116,6 @@ export default function Reviews() {
           <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
             Don&apos;t Just Take <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">Our Word</span> For It
           </h2>
-          <p className="text-slate-600 text-lg font-medium">
-            Hear from founders, directors, and CEOs who trusted us to build their digital products and scale their businesses.
-          </p>
         </div>
       </div>
 

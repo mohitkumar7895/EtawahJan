@@ -1,6 +1,6 @@
 'use client'
 
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PhoneCall, X, CheckCircle2, Loader, Sparkles, ShieldCheck } from 'lucide-react'
 import { submitServiceApplication } from '@/lib/api'
 
@@ -12,6 +12,12 @@ export default function QuickLeadWidget() {
   const [loading, setLoading] = useState(false)
   const [success, setSuccess] = useState(false)
   const [trackingId, setTrackingId] = useState('')
+
+  useEffect(() => {
+    const handleOpen = () => setIsOpen(true);
+    window.addEventListener('openCallback', handleOpen);
+    return () => window.removeEventListener('openCallback', handleOpen);
+  }, []);
 
   const servicesList = [
     '📞 Callback Request / कॉल-बैक अनुरोध',
@@ -68,15 +74,15 @@ export default function QuickLeadWidget() {
     }
   }
 
+  if (!isOpen) return null;
+
   return (
-    <div className="fixed bottom-[160px] sm:bottom-44 right-4 sm:right-6 z-[9990] flex flex-col items-end gap-3 pointer-events-none">
-      
+    <div className="fixed inset-0 z-[9990] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 pointer-events-auto animate-fade-in">
       {/* 10-Second Callback Form Card */}
-      {isOpen && (
-        <div className="w-[calc(100vw-2rem)] sm:w-[360px] max-w-[310px] sm:max-w-none bg-white rounded-2xl shadow-2xl border border-blue-100 p-5 sm:p-6 mb-2 pointer-events-auto animate-fade-in relative overflow-hidden">
-          <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
-          
-          {/* Close button */}
+      <div className="w-full sm:w-[360px] max-w-md bg-white rounded-2xl shadow-2xl border border-blue-100 p-5 sm:p-6 relative overflow-hidden">
+        <div className="absolute top-0 left-0 right-0 h-1.5 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+        
+        {/* Close button */}
           <button 
             onClick={() => { setIsOpen(false); setSuccess(false); }}
             className="absolute top-4 right-4 bg-gray-50 hover:bg-gray-100 p-1.5 rounded-full text-gray-400 hover:text-gray-600 transition"
@@ -196,38 +202,6 @@ export default function QuickLeadWidget() {
               </button>
             </div>
           )}
-        </div>
-      )}
-
-      {/* Floating Callback Button (Red Circular Pulse) */}
-      <div className="relative pointer-events-auto flex items-center justify-center group">
-        {!isOpen && (
-          <div className="absolute inset-0 bg-red-500 rounded-full animate-ping opacity-75"></div>
-        )}
-        
-        <button
-          onClick={() => setIsOpen(!isOpen)}
-          aria-label="Request Callback"
-          className={`relative p-3.5 sm:p-4 rounded-full shadow-2xl transition-transform duration-300 transform hover:scale-110 active:scale-95 flex items-center justify-center text-white ${
-            isOpen 
-              ? 'bg-zinc-800 hover:bg-zinc-950' 
-              : 'bg-gradient-to-tr from-red-600 to-red-500 hover:from-red-500 hover:to-red-400'
-          }`}
-        >
-          {isOpen ? (
-            <X className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0" />
-          ) : (
-            <PhoneCall className="w-6 h-6 sm:w-7 sm:h-7 flex-shrink-0" />
-          )}
-        </button>
-
-        {/* Tooltip */}
-        {!isOpen && (
-          <div className="absolute right-full mr-4 bg-white text-gray-900 text-xs font-bold py-1.5 px-3 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity whitespace-nowrap pointer-events-none border border-gray-100 hidden sm:block">
-            Request Callback
-            <div className="absolute top-1/2 -right-1 -translate-y-1/2 w-2 h-2 bg-white rotate-45 border-r border-t border-gray-100"></div>
-          </div>
-        )}
       </div>
 
       <style jsx global>{`

@@ -74,13 +74,13 @@ export default function SocialProofPopup() {
       }, 5000);
     };
 
-    // Initial delay before first popup
-    const initialTimer = setTimeout(triggerPopup, 10000);
+    // Initial delay before first popup (increased to 25s to not overwhelm user on load)
+    const initialTimer = setTimeout(triggerPopup, 25000);
 
-    // Continuous interval for subsequent popups
+    // Continuous interval for subsequent popups (increased to 45s)
     const interval = setInterval(() => {
       if (!isVisible) triggerPopup();
-    }, 25000); // Check every 25s
+    }, 45000); 
 
     return () => {
       clearTimeout(initialTimer);
@@ -92,29 +92,30 @@ export default function SocialProofPopup() {
 
   return (
     <div className="fixed bottom-4 left-4 z-[9900] animate-slide-up sm:bottom-6 sm:left-6">
-      <div className="bg-white p-3 pr-8 sm:p-4 sm:pr-10 rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-100 flex items-start gap-3 w-[calc(100vw-2rem)] sm:w-[350px] max-w-[300px] sm:max-w-none relative overflow-hidden group">
+      {/* Scaled down on mobile to reduce screen clutter */}
+      <div className="bg-white p-2 pr-6 sm:p-4 sm:pr-10 rounded-xl sm:rounded-2xl shadow-[0_10px_40px_-10px_rgba(0,0,0,0.2)] border border-slate-100 flex items-start gap-2.5 sm:gap-3 w-[260px] sm:w-[350px] max-w-[calc(100vw-2rem)] sm:max-w-none relative overflow-hidden group">
         
         {/* Close Button */}
         <button 
           onClick={() => setIsVisible(false)}
-          className="absolute top-2 right-2 text-slate-300 hover:text-slate-500 transition-colors"
+          className="absolute top-1.5 right-1.5 sm:top-2 sm:right-2 text-slate-300 hover:text-slate-500 transition-colors"
         >
-          <X className="w-4 h-4" />
+          <X className="w-3.5 h-3.5 sm:w-4 sm:h-4" />
         </button>
 
         {/* Avatar */}
-        <div className="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 rounded-full flex items-center justify-center flex-shrink-0 border border-blue-100">
-          <User className="w-5 h-5 sm:w-6 sm:h-6 text-blue-600" />
+        <div className="w-8 h-8 sm:w-12 sm:h-12 bg-blue-50 rounded-full flex items-center justify-center flex-shrink-0 border border-blue-100">
+          <User className="w-4 h-4 sm:w-6 sm:h-6 text-blue-600" />
         </div>
 
         {/* Content */}
         <div>
           <div className="flex items-center gap-1 mb-0.5">
-            <span className="font-bold text-slate-900 text-sm">{notification.name}</span>
-            <span className="text-slate-500 text-xs">from {notification.city}</span>
-            <BadgeCheck className="w-3.5 h-3.5 text-blue-500 ml-1" />
+            <span className="font-bold text-slate-900 text-[11px] sm:text-sm">{notification.name}</span>
+            <span className="text-slate-500 text-[9px] sm:text-xs">from {notification.city}</span>
+            <BadgeCheck className="w-3 h-3 sm:w-3.5 sm:h-3.5 text-blue-500 ml-0.5 sm:ml-1" />
           </div>
-          <p className="text-slate-600 text-xs sm:text-sm leading-tight mb-1.5">
+          <p className="text-slate-600 text-[10px] sm:text-sm leading-tight mb-1 sm:mb-1.5 line-clamp-2">
             {notification.action}
           </p>
           <p className="text-slate-400 text-[10px] sm:text-xs font-medium">

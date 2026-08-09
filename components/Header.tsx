@@ -5,7 +5,6 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import { useState } from 'react';
-import NotificationBell from './NotificationBell';
 
 export default function Header() {
   const pathname = usePathname();
@@ -32,6 +31,10 @@ export default function Header() {
   const handleChatClick = () => {
     // Dispatch event to open chat
     window.dispatchEvent(new CustomEvent('openChat'));
+  };
+
+  const handleCallbackClick = () => {
+    window.dispatchEvent(new CustomEvent('openCallback'));
   };
 
   return (
@@ -80,8 +83,16 @@ export default function Header() {
 
           {/* Right Side - Phone, Chat & Mobile Menu */}
           <div className="flex items-center space-x-2 sm:space-x-4">
-            {/* Notification Bell */}
-            <NotificationBell />
+
+            {/* Callback Button - Desktop */}
+            <button
+              onClick={handleCallbackClick}
+              className="hidden md:flex items-center space-x-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl group"
+              aria-label="Request Callback"
+            >
+              <Phone className="w-4 h-4 group-hover:scale-110 transition animate-pulse" />
+              <span className="font-semibold text-sm">Callback</span>
+            </button>
 
             {/* Chat Button - Desktop */}
             <button
@@ -153,6 +164,16 @@ export default function Header() {
                   {link.label}
                 </Link>
               ))}
+              <button
+                onClick={() => {
+                  handleCallbackClick();
+                  setMobileMenuOpen(false);
+                }}
+                className="flex items-center justify-center space-x-2 px-4 py-3 bg-red-600 hover:bg-red-700 rounded-lg font-semibold transition mt-2 w-full"
+              >
+                <Phone className="w-5 h-5 animate-pulse" />
+                <span>Request Callback</span>
+              </button>
               <button
                 onClick={() => {
                   handleChatClick();

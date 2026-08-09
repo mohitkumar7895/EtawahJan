@@ -18,7 +18,7 @@ export default function FloatingWhatsApp() {
       href="https://wa.me/917895094129?text=Hello,%20I%20am%20interested%20in%20your%20services."
       target="_blank"
       rel="noopener noreferrer"
-      className="fixed bottom-[90px] sm:bottom-24 right-4 sm:right-6 z-[9980] flex items-center justify-center group"
+      className="fixed bottom-4 sm:bottom-6 right-4 sm:right-6 z-[9980] flex items-center justify-center group"
       aria-label="Chat on WhatsApp"
     >
       {/* Pulse Rings */}

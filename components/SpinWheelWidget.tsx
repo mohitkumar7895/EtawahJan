@@ -35,11 +35,11 @@ export default function SpinWheelWidget() {
     return () => window.removeEventListener('openSpinWheel', handleOpen);
   }, []);
 
-  // Auto-open after 15 seconds if not closed before
+  // Auto-open after 60 seconds if not closed before
   useEffect(() => {
     const hasClosed = localStorage.getItem('spinWheelClosed');
     if (!hasClosed) {
-      const timer = setTimeout(() => setIsOpen(true), 15000);
+      const timer = setTimeout(() => setIsOpen(true), 60000);
       return () => clearTimeout(timer);
     }
   }, []);
@@ -120,7 +120,7 @@ export default function SpinWheelWidget() {
                   </h2>
                   
                   {/* Wheel Container */}
-                  <div className="relative w-64 h-64 sm:w-80 sm:h-80 mx-auto lg:mx-0">
+                  <div className="relative w-64 h-64 sm:w-80 sm:h-80 lg:w-[420px] lg:h-[420px] mx-auto lg:mx-0">
                     {/* Center Pointer */}
                     <div className="absolute -top-4 left-1/2 -translate-x-1/2 z-20 text-yellow-400 drop-shadow-md">
                       <svg width="40" height="40" viewBox="0 0 24 24" fill="currentColor">
@@ -147,23 +147,23 @@ export default function SpinWheelWidget() {
                       {PRIZES.map((prize, i) => (
                         <div 
                           key={i} 
-                          className="absolute inset-0 w-full h-full text-white font-black text-sm sm:text-base flex justify-center"
+                          className="absolute inset-0 w-full h-full text-white font-black text-sm sm:text-base lg:text-lg flex justify-center"
                           style={{ transform: `rotate(${i * 60 + 30}deg)` }}
                         >
-                          <span className="pt-4 drop-shadow-md">{prize}</span>
+                          <span className="pt-5 sm:pt-6 lg:pt-10 drop-shadow-md">{prize}</span>
                         </div>
                       ))}
                       {/* Inner Center Circle */}
-                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 bg-white rounded-full border-[3px] sm:border-4 border-yellow-400 z-10 flex items-center justify-center shadow-inner">
-                        <div className="w-3 h-3 sm:w-4 sm:h-4 bg-slate-900 rounded-full"></div>
+                      <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-10 h-10 sm:w-12 sm:h-12 lg:w-16 lg:h-16 bg-white rounded-full border-[3px] sm:border-4 border-yellow-400 z-10 flex items-center justify-center shadow-inner">
+                        <div className="w-3 h-3 sm:w-4 sm:h-4 lg:w-5 lg:h-5 bg-slate-900 rounded-full"></div>
                       </div>
                     </div>
                   </div>
                 </div>
 
                 {/* Right Side: Form Card */}
-                <div className="w-full lg:w-1/2 max-w-md mx-auto w-full">
-                  <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 border border-slate-800 shadow-2xl relative overflow-hidden shadow-pink-900/20">
+                <div className="w-full lg:w-1/2 max-w-md mx-auto lg:mx-0 lg:ml-auto">
+                  <div className="bg-slate-900 rounded-3xl p-6 sm:p-8 lg:p-10 border border-slate-800 shadow-2xl relative overflow-hidden shadow-pink-900/20">
                     
                     {!prizeWon ? (
                       <div className="animate-fade-in">

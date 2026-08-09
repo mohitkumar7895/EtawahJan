@@ -696,20 +696,7 @@ export default function ChatSupport() {
         </div>
       )}
 
-      {/* Floating Chat Button */}
-      <button
-        onClick={() => {
-          setIsOpen(true);
-          setShowNotification(false);
-          if (notificationTimeoutRef.current) {
-            clearTimeout(notificationTimeoutRef.current);
-          }
-        }}
-        className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50 bg-green-600 hover:bg-green-700 text-white rounded-full p-3 sm:p-4 shadow-2xl transition-all duration-300 hover:scale-110 active:scale-95 flex items-center justify-center"
-        aria-label="Open chat support"
-      >
-        <MessageCircle className="w-5 h-5 sm:w-6 sm:h-6" />
-      </button>
+
 
       {/* Chat Modal */}
       {isOpen && (
