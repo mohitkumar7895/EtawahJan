@@ -8,6 +8,8 @@ import {
   Briefcase,
   Wallet,
   ClipboardList,
+  Landmark,
+  Heart,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -25,6 +27,45 @@ export interface DigitalTool {
 }
 
 export const DIGITAL_TOOLS: DigitalTool[] = [
+  {
+    id: 'yojana-checker',
+    title: 'Sarkari Yojana Finder (AI)',
+    subtitle: 'Check 50+ Govt Schemes',
+    description:
+      'Age, gender aur income daalkar instantly check karein PM Kisan, Ayushman aur Scholarship jaisi kin schemes mein aap eligible hain.',
+    badge: 'Trending · Hot',
+    icon: Landmark,
+    link: '/tools/yojana-checker',
+    cta: 'Check Eligibility Now',
+    accent: 'border-t-green-500',
+    iconBg: 'bg-green-50 text-green-600',
+  },
+  {
+    id: 'biodata-maker',
+    title: 'Shaadi Biodata Maker',
+    subtitle: 'Create Marriage Biodata PDF',
+    description:
+      'Apni ya apne bachho ki shadi ke liye 2 minute mein sundar Marriage Biodata banayein aur free HD PDF download karein.',
+    badge: 'Viral · New',
+    icon: Heart,
+    link: '/tools/biodata-maker',
+    cta: 'Make Biodata Free',
+    accent: 'border-t-rose-500',
+    iconBg: 'bg-rose-50 text-rose-600',
+  },
+  {
+    id: 'visiting-card-maker',
+    title: 'Business Visiting Card Maker',
+    subtitle: 'Create Free HD PDF Card',
+    description:
+      'Apne business ya dukaan ke liye 1 minute mein premium visiting card banayein aur free HD PDF print ke liye download karein.',
+    badge: 'New · Free',
+    icon: Briefcase,
+    link: '/tools/visiting-card',
+    cta: 'Make Visiting Card',
+    accent: 'border-t-indigo-500',
+    iconBg: 'bg-indigo-50 text-indigo-600',
+  },
   {
     id: 'resume-builder',
     title: 'AI Resume Builder',
