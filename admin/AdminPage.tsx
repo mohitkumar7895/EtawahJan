@@ -54,6 +54,7 @@ import {
 } from '@/lib/admin-form-styles';
 import { resolveAnnouncementMedia, videoMimeTypeForUrl } from '@/lib/announcementMedia';
 import { getVacancies, createVacancy, updateVacancy, deleteVacancy, type Vacancy, getAdmins, createAdmin, deleteAdmin, type Admin, getAllChats, getChat, sendMessage, uploadChatFile, deleteChat, type Chat, getAllPayments, type Payment, getVisitors, type Visitor, type VisitorStats, getGovernmentLinks, createGovernmentLink, updateGovernmentLink, deleteGovernmentLink, type GovernmentLink, createNotification, getAnnouncements, createAnnouncement, updateAnnouncement, deleteAnnouncement, uploadAnnouncementMedia, type Announcement, getBlogs, getBlog, createBlog, updateBlog, deleteBlog, uploadBlogImage, type Blog, getSitemapData, type SitemapPayload, type SitemapUrl, getCustomSitemapLinks, createCustomSitemapLink, updateCustomSitemapLink, deleteCustomSitemapLink, type CustomSitemapLink, getAdminApplications, updateAdminApplication, type ServiceApplication } from '@/lib/api';
+import { getPortfolioProjects, createPortfolioProject, updatePortfolioProject, deletePortfolioProject, type PortfolioProject } from '@/lib/portfolioApi';
 import { getElectricityPage, getEdistrictPage, getWithdrawalPage } from '@/lib/janSevaApi';
 import DashboardCharts from '@/components/DashboardCharts';
 
@@ -96,7 +97,8 @@ type AdminTab =
   | 'jan-seva-data'
   | 'seo-sitemap'
   | 'applications'
-  | 'theme-settings';
+  | 'theme-settings'
+  | 'portfolio';
 
 type DashboardSnapshot = {
   vacancies: number;
@@ -131,6 +133,7 @@ const ADMIN_NAV: { id: AdminTab; label: string; description: string; icon: Lucid
   { id: 'jan-seva-data', label: 'Jan Seva data', description: 'Registry modules', icon: Database },
   { id: 'seo-sitemap', label: 'Sitemap & SEO', description: 'Google indexing & URLs', icon: Globe },
   { id: 'theme-settings', label: 'Theme Settings', description: 'Global colors', icon: Palette },
+  { id: 'portfolio', label: 'Portfolio Projects', description: 'Our work showcase', icon: ImageIcon },
 ];
 
 export default function AdminPage() {
@@ -242,6 +245,23 @@ export default function AdminPage() {
   const [editingBlogSlug, setEditingBlogSlug] = useState<string | null>(null);
   const [blogImageFile, setBlogImageFile] = useState<File | null>(null);
   const [blogImagePreview, setBlogImagePreview] = useState<string>('');
+
+
+  // Portfolio state
+  const [portfolioProjects, setPortfolioProjects] = useState<PortfolioProject[]>([]);
+  const [portfolioForm, setPortfolioForm] = useState({
+    title: '',
+    description: '',
+    category: 'Project',
+    photoUrl: '',
+    videoUrl: '',
+    liveUrl: '',
+    isActive: true,
+  });
+  const [editingPortfolioId, setEditingPortfolioId] = useState<string | null>(null);
+  const [portfolioPhotoFile, setPortfolioPhotoFile] = useState<File | null>(null);
+  const [portfolioVideoFile, setPortfolioVideoFile] = useState<File | null>(null);
+  const [portfolioMediaBusy, setPortfolioMediaBusy] = useState(false);
 
   // Sitemap & SEO state
   const [sitemapData, setSitemapData] = useState<SitemapPayload | null>(null);
@@ -1123,6 +1143,102 @@ export default function AdminPage() {
       console.error('Error loading blogs:', err);
       setBlogs([]);
     }
+  };
+
+
+  const loadPortfolioFromAPI = async () => {
+    try {
+      const data = await getPortfolioProjects();
+      setPortfolioProjects(data);
+    } catch (err: any) {
+      setError(err.message || 'Failed to load portfolio projects');
+    }
+  };
+
+  const handleCreatePortfolio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      setPortfolioMediaBusy(true);
+      setError(null);
+      let photoUrl = portfolioForm.photoUrl;
+      let videoUrl = portfolioForm.videoUrl;
+
+      if (portfolioPhotoFile) {
+        const { fileUrl } = await uploadAnnouncementMedia(portfolioPhotoFile);
+        photoUrl = fileUrl;
+      }
+      if (portfolioVideoFile) {
+        const { fileUrl } = await uploadAnnouncementMedia(portfolioVideoFile);
+        videoUrl = fileUrl;
+      }
+
+      await createPortfolioProject({ ...portfolioForm, photoUrl, videoUrl });
+      
+      setPortfolioForm({ title: '', description: '', category: 'Project', photoUrl: '', videoUrl: '', liveUrl: '', isActive: true });
+      setPortfolioPhotoFile(null);
+      setPortfolioVideoFile(null);
+      loadPortfolioFromAPI();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setPortfolioMediaBusy(false);
+    }
+  };
+
+  const handleUpdatePortfolio = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPortfolioId) return;
+    try {
+      setPortfolioMediaBusy(true);
+      setError(null);
+      let photoUrl = portfolioForm.photoUrl;
+      let videoUrl = portfolioForm.videoUrl;
+
+      if (portfolioPhotoFile) {
+        const { fileUrl } = await uploadAnnouncementMedia(portfolioPhotoFile);
+        photoUrl = fileUrl;
+      }
+      if (portfolioVideoFile) {
+        const { fileUrl } = await uploadAnnouncementMedia(portfolioVideoFile);
+        videoUrl = fileUrl;
+      }
+
+      await updatePortfolioProject(editingPortfolioId, { ...portfolioForm, photoUrl, videoUrl });
+      
+      setEditingPortfolioId(null);
+      setPortfolioForm({ title: '', description: '', category: 'Project', photoUrl: '', videoUrl: '', liveUrl: '', isActive: true });
+      setPortfolioPhotoFile(null);
+      setPortfolioVideoFile(null);
+      loadPortfolioFromAPI();
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setPortfolioMediaBusy(false);
+    }
+  };
+
+  const handleDeletePortfolio = async (id: string) => {
+    if (!confirm('Are you sure you want to delete this project?')) return;
+    try {
+      await deletePortfolioProject(id);
+      loadPortfolioFromAPI();
+    } catch (err: any) {
+      setError(err.message);
+    }
+  };
+
+  const handleEditPortfolioClick = (project: PortfolioProject) => {
+    setEditingPortfolioId(project._id);
+    setPortfolioForm({
+      title: project.title,
+      description: project.description,
+      category: project.category,
+      photoUrl: project.photoUrl,
+      videoUrl: project.videoUrl,
+      liveUrl: project.liveUrl,
+      isActive: project.isActive,
+    });
+    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   const loadSitemapFromAPI = async () => {
@@ -4031,6 +4147,172 @@ export default function AdminPage() {
               </div>
             )}
 
+            {activeTab === 'portfolio' && (
+              <div className="space-y-6">
+                <div className="flex items-center justify-between">
+                  <h2 className="text-xl font-bold text-slate-800">Portfolio Projects</h2>
+                </div>
+                
+                <CardContainer>
+                  <h3 className="text-lg font-bold text-slate-800 mb-4 pb-3 border-b border-slate-100 flex items-center gap-2">
+                    <ImageIcon className="w-5 h-5 text-blue-500" />
+                    {editingPortfolioId ? 'Edit Project' : 'Add New Project'}
+                  </h3>
+                  <form onSubmit={editingPortfolioId ? handleUpdatePortfolio : handleCreatePortfolio} className="space-y-5">
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+                      <InputField
+                        label="Title"
+                        value={portfolioForm.title}
+                        onChange={(e) => setPortfolioForm({ ...portfolioForm, title: e.target.value })}
+                        required
+                        placeholder="Project Title"
+                      />
+                      <InputField
+                        label="Category"
+                        value={portfolioForm.category}
+                        onChange={(e) => setPortfolioForm({ ...portfolioForm, category: e.target.value })}
+                        required
+                        placeholder="e.g. E-Commerce"
+                      />
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-semibold text-slate-700">Photo Image</label>
+                        <input
+                          type="file"
+                          accept="image/*"
+                          onChange={(e) => setPortfolioPhotoFile(e.target.files?.[0] || null)}
+                          className={adminFileInputClass}
+                        />
+                        {(portfolioForm.photoUrl && !portfolioPhotoFile) && (
+                          <span className="text-xs text-blue-600 truncate">Current: {portfolioForm.photoUrl}</span>
+                        )}
+                      </div>
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-semibold text-slate-700">Video File (Optional)</label>
+                        <input
+                          type="file"
+                          accept="video/*"
+                          onChange={(e) => setPortfolioVideoFile(e.target.files?.[0] || null)}
+                          className={adminFileInputClass}
+                        />
+                        {(portfolioForm.videoUrl && !portfolioVideoFile) && (
+                          <span className="text-xs text-blue-600 truncate">Current: {portfolioForm.videoUrl}</span>
+                        )}
+                      </div>
+                      <InputField
+                        label="Live URL"
+                        value={portfolioForm.liveUrl}
+                        onChange={(e) => setPortfolioForm({ ...portfolioForm, liveUrl: e.target.value })}
+                        placeholder="Link to live project"
+                      />
+                      <div className="flex flex-col gap-1.5">
+                        <label className="text-sm font-semibold text-slate-700">Status</label>
+                        <select
+                          className={adminSelectClass}
+                          value={portfolioForm.isActive ? 'active' : 'inactive'}
+                          onChange={(e) => setPortfolioForm({ ...portfolioForm, isActive: e.target.value === 'active' })}
+                        >
+                          <option value="active">Active</option>
+                          <option value="inactive">Inactive</option>
+                        </select>
+                      </div>
+                    </div>
+                    <TextAreaField
+                      label="Description"
+                      value={portfolioForm.description}
+                      onChange={(e) => setPortfolioForm({ ...portfolioForm, description: e.target.value })}
+                      required
+                      placeholder="Short description of the project"
+                      rows={3}
+                    />
+                    
+                    <div className="flex items-center gap-3 pt-2">
+                      <button type="submit" disabled={portfolioMediaBusy} className={`${adminPrimaryButtonClass} ${portfolioMediaBusy ? "opacity-50 cursor-not-allowed" : ""}`}>
+                        {editingPortfolioId ? (
+                          portfolioMediaBusy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Uploading...</> : <><Edit className="w-4 h-4 mr-2" /> Update Project</>
+                        ) : (
+                          portfolioMediaBusy ? <><Loader2 className="w-4 h-4 mr-2 animate-spin" /> Uploading...</> : <><Plus className="w-4 h-4 mr-2" /> Add Project</>
+                        )}
+                      </button>
+                      {editingPortfolioId && (
+                        <button
+                          type="button"
+                          onClick={() => {
+                            setEditingPortfolioId(null);
+                            setPortfolioForm({ title: '', description: '', category: 'Project', photoUrl: '', videoUrl: '', liveUrl: '', isActive: true });
+                          }}
+                          className={adminSecondaryButtonClass}
+                        >
+                          Cancel
+                        </button>
+                      )}
+                    </div>
+                  </form>
+                </CardContainer>
+
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                  {portfolioProjects.map((project) => (
+                    <div key={project._id} className="bg-white rounded-xl shadow-sm border border-slate-200 overflow-hidden group">
+                      {project.photoUrl ? (
+                        <div className="h-40 overflow-hidden relative bg-slate-100">
+                          <img src={project.photoUrl} alt={project.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500" />
+                          {!project.isActive && (
+                            <div className="absolute top-2 right-2 bg-rose-500 text-white text-xs font-bold px-2 py-1 rounded-md">
+                              Inactive
+                            </div>
+                          )}
+                        </div>
+                      ) : (
+                        <div className="h-40 bg-slate-50 flex items-center justify-center border-b border-slate-100 relative">
+                          <Briefcase className="w-10 h-10 text-slate-300" />
+                          {!project.isActive && (
+                            <div className="absolute top-2 right-2 bg-rose-500 text-white text-xs font-bold px-2 py-1 rounded-md">
+                              Inactive
+                            </div>
+                          )}
+                        </div>
+                      )}
+                      
+                      <div className="p-5">
+                        <div className="flex items-center gap-2 mb-2">
+                          <span className="text-xs font-bold uppercase tracking-wider text-slate-400">
+                            {project.category}
+                          </span>
+                        </div>
+                        <h4 className="text-lg font-bold text-slate-900 mb-2">{project.title}</h4>
+                        <p className="text-slate-600 text-sm mb-4 line-clamp-2">{project.description}</p>
+                        
+                        <div className="flex items-center gap-3 text-xs font-medium text-slate-500 mb-5">
+                          {project.videoUrl && <span className="flex items-center gap-1"><Video className="w-3.5 h-3.5" /> Video</span>}
+                          {project.liveUrl && <span className="flex items-center gap-1"><Link2 className="w-3.5 h-3.5" /> Link</span>}
+                        </div>
+                        
+                        <div className="flex items-center gap-2 pt-4 border-t border-slate-100">
+                          <button
+                            onClick={() => handleEditPortfolioClick(project)}
+                            className="flex-1 inline-flex justify-center items-center gap-1.5 px-3 py-2 bg-slate-50 hover:bg-slate-100 text-slate-700 font-medium rounded-lg text-sm transition-colors border border-slate-200"
+                          >
+                            <Edit className="w-3.5 h-3.5" /> Edit
+                          </button>
+                          <button
+                            onClick={() => handleDeletePortfolio(project._id)}
+                            className="flex-1 inline-flex justify-center items-center gap-1.5 px-3 py-2 bg-rose-50 hover:bg-rose-100 text-rose-600 font-medium rounded-lg text-sm transition-colors border border-rose-100"
+                          >
+                            <Trash2 className="w-3.5 h-3.5" /> Delete
+                          </button>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  {portfolioProjects.length === 0 && (
+                    <div className="col-span-full py-12 text-center bg-white border border-slate-200 border-dashed rounded-xl">
+                      <ImageIcon className="w-12 h-12 text-slate-300 mx-auto mb-3" />
+                      <p className="text-slate-500 font-medium">No projects added yet.</p>
+                      <p className="text-slate-400 text-sm mt-1">Add your first project using the form above.</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            )}
             {activeTab === 'jan-seva-data' && <JanSevaDataModule />}
 
             {activeTab === 'seo-sitemap' && (

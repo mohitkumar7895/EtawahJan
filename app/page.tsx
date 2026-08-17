@@ -7,6 +7,7 @@ import Announcements from '@/components/Announcements'
 import Reviews from '@/components/Reviews'
 import HomeJobsFeed from '@/components/HomeJobsFeed'
 import ToolsHomePromo from '@/components/tools/ToolsHomePromo'
+import PortfolioSection from '@/components/PortfolioSection'
 import type { Metadata } from 'next'
 
 export const metadata: Metadata = {
@@ -241,6 +242,7 @@ export default function Home() {
       <Hero />
       <ToolsHomePromo />
       <ITServicesBanner />
+      <PortfolioSection />
       <Announcements />
       <Services />
       <HomeJobsFeed />

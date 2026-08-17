@@ -1,8 +1,10 @@
 'use client';
-import { ExternalLink, ShoppingCart, Activity, GraduationCap, Building2, ChevronRight, ArrowRight } from 'lucide-react';
+import { ExternalLink, Play, ShoppingCart, Activity, GraduationCap, Building2, ChevronRight, ArrowRight, Video, Link2, Briefcase } from 'lucide-react';
 import Link from 'next/link';
+import { useEffect, useState } from 'react';
 
-const PORTFOLIO_ITEMS = [
+// Fallback items if database is empty
+const FALLBACK_ITEMS = [
   {
     title: 'E-Commerce App',
     category: 'Online Store',
@@ -11,6 +13,9 @@ const PORTFOLIO_ITEMS = [
     bg: 'bg-orange-500/10',
     text: 'text-orange-500',
     description: 'Fully functional online store with Razorpay integration and admin panel.',
+    liveUrl: '#',
+    videoUrl: '#',
+    photoUrl: '',
   },
   {
     title: 'Hospital CRM',
@@ -20,6 +25,9 @@ const PORTFOLIO_ITEMS = [
     bg: 'bg-blue-500/10',
     text: 'text-blue-500',
     description: 'Patient management, appointment booking, and automated billing software.',
+    liveUrl: '#',
+    videoUrl: '',
+    photoUrl: '',
   },
   {
     title: 'School ERP',
@@ -29,6 +37,9 @@ const PORTFOLIO_ITEMS = [
     bg: 'bg-indigo-500/10',
     text: 'text-indigo-500',
     description: 'Student portal, attendance tracking, and digital report cards generation.',
+    liveUrl: '#',
+    videoUrl: '#',
+    photoUrl: '',
   },
   {
     title: 'Corporate Website',
@@ -38,10 +49,47 @@ const PORTFOLIO_ITEMS = [
     bg: 'bg-emerald-500/10',
     text: 'text-emerald-500',
     description: 'High-converting lead generation website with SEO optimized structure.',
+    liveUrl: '#',
+    videoUrl: '',
+    photoUrl: '',
   },
 ];
 
+interface Project {
+  _id: string;
+  title: string;
+  category: string;
+  description: string;
+  photoUrl: string;
+  videoUrl: string;
+  liveUrl: string;
+}
+
 export default function PortfolioSection() {
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    async function fetchProjects() {
+      try {
+        const res = await fetch('/api/portfolio');
+        if (res.ok) {
+          const data = await res.json();
+          // Filter only active ones, assuming API returns all if not filtered, but we filter on frontend just in case
+          const activeProjects = data.filter((p: any) => p.isActive);
+          setProjects(activeProjects);
+        }
+      } catch (error) {
+        console.error('Failed to fetch projects', error);
+      } finally {
+        setLoading(false);
+      }
+    }
+    fetchProjects();
+  }, []);
+
+  const displayItems = projects.length > 0 ? projects : FALLBACK_ITEMS;
+
   return (
     <section className="py-20 sm:py-28 bg-slate-50 relative overflow-hidden">
       {/* Background Decor */}
@@ -66,43 +114,101 @@ export default function PortfolioSection() {
           </p>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 sm:gap-8">
-          {PORTFOLIO_ITEMS.map((item, index) => (
-            <div 
-              key={index}
-              className="group bg-white rounded-3xl p-6 sm:p-8 shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-300 border border-slate-100 flex flex-col relative overflow-hidden"
-            >
-              {/* Top Gradient Line */}
-              <div className={`absolute top-0 left-0 w-full h-1.5 bg-gradient-to-r ${item.gradient} transform origin-left scale-x-0 group-hover:scale-x-100 transition-transform duration-500`}></div>
-              
-              <div className="flex items-start justify-between mb-6">
-                <div className={`w-14 h-14 rounded-2xl ${item.bg} flex items-center justify-center transition-transform group-hover:scale-110 duration-300`}>
-                  <item.icon className={`w-7 h-7 ${item.text}`} strokeWidth={2} />
+        {loading ? (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {[1, 2, 3].map((i) => (
+              <div key={i} className="bg-white rounded-3xl h-[400px] animate-pulse border border-slate-100 shadow-sm p-6 flex flex-col">
+                <div className="w-full h-48 bg-slate-200 rounded-2xl mb-4"></div>
+                <div className="w-24 h-4 bg-slate-200 rounded-full mb-3"></div>
+                <div className="w-3/4 h-6 bg-slate-200 rounded-full mb-2"></div>
+                <div className="w-full h-4 bg-slate-200 rounded-full mb-2"></div>
+                <div className="w-2/3 h-4 bg-slate-200 rounded-full mt-auto"></div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
+            {displayItems.map((item: any, index) => (
+              <div 
+                key={item._id || index}
+                className="group bg-white rounded-3xl shadow-sm hover:shadow-2xl hover:-translate-y-2 transition-all duration-500 border border-slate-100 flex flex-col relative overflow-hidden"
+              >
+                {/* Photo Header */}
+                <div className="h-56 w-full relative overflow-hidden bg-slate-100 border-b border-slate-100">
+                  {item.photoUrl ? (
+                    <img 
+                      src={item.photoUrl} 
+                      alt={item.title} 
+                      className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
+                    />
+                  ) : (
+                    <div className={`w-full h-full bg-gradient-to-br ${item.gradient || 'from-blue-500 to-indigo-500'} opacity-10 flex items-center justify-center`}>
+                      {item.icon ? (
+                        <item.icon className={`w-16 h-16 ${item.text || 'text-blue-500'} opacity-50`} />
+                      ) : (
+                        <Briefcase className="w-16 h-16 text-slate-300" />
+                      )}
+                    </div>
+                  )}
+                  
+                  {/* Overlay for actions on hover */}
+                  <div className="absolute inset-0 bg-slate-900/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-3 backdrop-blur-sm">
+                    {item.liveUrl && (
+                      <a 
+                        href={item.liveUrl} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="w-12 h-12 rounded-full bg-white text-slate-900 flex items-center justify-center hover:bg-blue-600 hover:text-white transition-colors shadow-lg transform translate-y-4 group-hover:translate-y-0 duration-300 delay-75"
+                        title="View Live Site"
+                      >
+                        <ExternalLink className="w-5 h-5" />
+                      </a>
+                    )}
+                    {item.videoUrl && (
+                      <a 
+                        href={item.videoUrl} 
+                        target="_blank" 
+                        rel="noreferrer"
+                        className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 transition-colors shadow-lg transform translate-y-4 group-hover:translate-y-0 duration-300 delay-150"
+                        title="Watch Video"
+                      >
+                        <Play className="w-5 h-5 ml-1" />
+                      </a>
+                    )}
+                  </div>
                 </div>
-                <div className="w-8 h-8 rounded-full border border-slate-200 flex items-center justify-center text-slate-400 group-hover:bg-slate-900 group-hover:text-white group-hover:border-slate-900 transition-colors">
-                  <ExternalLink className="w-3.5 h-3.5" />
+                
+                <div className="p-6 sm:p-8 flex flex-col flex-grow">
+                  <div className="mb-3">
+                    <span className="text-xs font-bold uppercase tracking-wider text-blue-600 bg-blue-50 px-3 py-1 rounded-full mb-3 inline-block">
+                      {item.category}
+                    </span>
+                    <h3 className="text-2xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
+                      {item.title}
+                    </h3>
+                  </div>
+                  
+                  <p className="text-slate-600 mt-2 mb-6 flex-grow leading-relaxed line-clamp-3">
+                    {item.description}
+                  </p>
+                  
+                  <div className="mt-auto pt-4 border-t border-slate-100 flex flex-wrap gap-2 text-sm font-semibold">
+                    {item.liveUrl && (
+                      <a href={item.liveUrl} target="_blank" rel="noreferrer" className="flex items-center text-slate-700 hover:text-blue-600 transition-colors bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-blue-200">
+                        <Link2 className="w-4 h-4 mr-1.5" /> Live Link
+                      </a>
+                    )}
+                    {item.videoUrl && (
+                      <a href={item.videoUrl} target="_blank" rel="noreferrer" className="flex items-center text-slate-700 hover:text-rose-600 transition-colors bg-slate-50 px-3 py-1.5 rounded-lg border border-slate-200 hover:border-rose-200">
+                        <Video className="w-4 h-4 mr-1.5" /> Watch Video
+                      </a>
+                    )}
+                  </div>
                 </div>
               </div>
-              
-              <div className="mb-2">
-                <span className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-1 block">
-                  {item.category}
-                </span>
-                <h3 className="text-xl font-bold text-slate-900 group-hover:text-blue-600 transition-colors">
-                  {item.title}
-                </h3>
-              </div>
-              
-              <p className="text-sm text-slate-500 mt-2 mb-6 flex-grow leading-relaxed">
-                {item.description}
-              </p>
-              
-              <div className="mt-auto pt-4 border-t border-slate-100 flex items-center text-sm font-bold text-slate-700 group-hover:text-blue-600 transition-colors">
-                View Details <ChevronRight className="w-4 h-4 ml-1 group-hover:translate-x-1 transition-transform" />
-              </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )}
 
         <div className="mt-16 text-center">
           <Link
