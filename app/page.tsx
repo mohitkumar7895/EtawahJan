@@ -113,10 +113,32 @@ export const metadata: Metadata = {
     'digital marketing agency in Etawah',
     'lead generation services India',
     'social media marketing agency UP',
+
+    // 🔥 PREMIUM QUALITY & LATEST PROJECT PORTFOLIO KEYWORDS 🔥
+    'premium quality website developers',
+    'high quality software development',
+    'latest IT projects 2024',
+    'top quality app developers',
+    'award winning website design agency',
+    'best software development company with portfolio',
+    'view latest software projects',
+    'premium UI UX design agency',
+    'hire top rated web developers',
+    'world class software solutions',
+    'best IT agency for premium projects',
+    'custom high end web applications',
+    'scalable enterprise software architecture',
+    'No. 1 website developer near me',
+    'top 10 software companies in UP',
+    'best custom web design agency',
+    'luxury website design services',
+    'high performance web apps',
+    'fastest website loading speed optimization',
+    'secure and robust software developers',
   ],
   openGraph: {
-    title: 'Get More Customers! #1 Website & Software Agency | Jan Seva Kendra',
-    description: 'Stop losing customers. We build websites, e-commerce, apps, and software to grow your business 10x. Call/WhatsApp 7895094129 for a free demo.',
+    title: 'Premium Web & Software Development Agency | High Quality IT Solutions',
+    description: 'We build world-class, premium quality websites, apps, and enterprise software. Explore our latest high-performance projects. Guaranteed top-rated IT services to scale your business 10x.',
     type: 'website',
     url: 'https://www.jan-seva.site/',
     images: ['https://www.jan-seva.site/jan-seva-logo-1.png'],
@@ -133,9 +155,9 @@ function SeoBottomBlock() {
   return (
     <section className="bg-slate-50 py-12 mt-8">
       <div className="container mx-auto px-4 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-7xl">
-        <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-3">#1 Website Development & IT Services Company in India</h2>
+        <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-3">#1 Premium Website Development & World-Class IT Services Company</h2>
         <p className="mb-4">
-          Welcome to Jan Seva Kendra IT Solutions, your trusted partner for premium, affordable <strong>Website Development</strong>, <strong>Mobile App Development</strong>, and <strong>Custom Software Solutions</strong>. We specialize in building responsive, SEO-optimized business websites, e-commerce stores, and billing software for small and medium businesses across all 780+ cities in India (including UP, Etawah, Agra, Lucknow, Kanpur, and Noida). We also serve international clients globally in the USA, UK, UAE, Canada, Australia, and Russia.
+          Welcome to Jan Seva Kendra IT Solutions, your trusted partner for <strong>Premium Quality Website Development</strong>, <strong>High-Performance Mobile Apps</strong>, and <strong>Custom Software Solutions</strong>. We specialize in building fast, secure, and visually stunning digital products. If you are looking for top-rated, latest Next-Gen IT solutions, explore our massive portfolio of recently delivered enterprise websites, e-commerce stores, and high-end billing software used by top businesses across 780+ cities in India and globally (USA, UK, UAE, Australia).
         </p>
 
         <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">Grow Your Business — Create a Website Today</h3>
@@ -168,11 +190,29 @@ function SeoBottomBlock() {
           Looking to take your business to the next level? We are the ultimate <strong>B2B Software Solutions & Digital Marketing Agency</strong>. Whether you need a <strong>lead generation website design</strong>, an <strong>affordable app development company</strong> for a local shop, or a <strong>white-label offshore web development team</strong> for your international agency, we deliver results. Our dedicated <strong>React, Node.js, and Next.js developers</strong> build scalable architectures. We guarantee low-cost, high-quality deliverables to get you <em>unlimited clients</em>, improve your Google rankings, and automate your workflow with our premium ERP and POS billing systems.
         </p>
 
+        <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">🎮 Game Development & Advanced Mobile Apps</h3>
+        <p className="mb-4">
+          Are you looking to build the next big hit? We are expert <strong>game developers in India</strong> specializing in Unity, Ludo games, fantasy cricket apps, and interactive educational games. We also build high-performance native and cross-platform <strong>mobile apps (Flutter, React Native)</strong> for grocery delivery, food delivery (like Zomato/Swiggy clones), and e-commerce stores. Get custom software that scales to millions of users.
+        </p>
+
+        <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">🏢 Enterprise Custom Software & SaaS Platforms</h3>
+        <p className="mb-4">
+          Stop relying on manual paperwork! We build end-to-end <strong>custom enterprise software</strong>. Need a custom SaaS product, real-estate portal, matrimonial website, or a powerful <strong>B2B multi-vendor marketplace</strong>? We got you covered. We create high-end billing software, GST invoicing apps, and Inventory Management Systems that streamline your business operations instantly.
+        </p>
+
         <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-100 mt-6">
           <p className="font-bold text-slate-800 text-sm sm:text-base text-center">
             🚀 Ready to grow? Contact us today via WhatsApp at <a href="https://wa.me/917895094129" className="text-blue-600 hover:underline">7895094129</a> for a free quote on website development, or visit our office at Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP!
           </p>
         </div>
+      </div>
+
+      {/* Hidden Massive SEO Keywords Block for Search Engines Only */}
+      <div className="sr-only">
+        <h1>Best Website Development Company in India | Premium Quality Custom Software Developers | Top-Rated Mobile App Development Agency</h1>
+        <p>Hire the best web developers in India for premium quality website design. We specialize in custom software development, high-performance school management systems, hospital ERP, advanced billing POS software, and scalable inventory management. Get a highly skilled team of React, Next.js, Node.js, MERN stack, and Flutter developers. We deliver world-class, luxury website designs for startups and enterprises. Check out our latest IT projects and software portfolios. Cheap e-commerce website development for small businesses alongside premium B2B portal development, SaaS product building, and multi-vendor marketplaces.</p>
+        <p>Game development company in India building Unity games, Ludo apps, and fantasy sports apps with the latest technologies. We provide top-tier digital marketing, Google Ads management, Facebook ads, and advanced local SEO services to ensure you rank #1 on Google and get unlimited clients. Top rated software company in UP, Etawah.</p>
+        <p>Outsource premium web development to India. Offshore software development agency for USA, UK, UAE, Canada, and Australia clients demanding high quality and fast delivery. White label web design services. Hire dedicated developers on a monthly basis. Real estate website developers, matrimonial portal development, grocery delivery app makers, restaurant billing software creators. Latest robust software architecture. Jan Seva Kendra Bharthana Etawah CSC center online services.</p>
       </div>
     </section>
   )

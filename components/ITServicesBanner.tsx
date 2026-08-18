@@ -36,9 +36,9 @@ export default function ITServicesBanner() {
               <span>Premium Digital Services</span>
             </div>
             
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-6 leading-tight tracking-tight">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-6 leading-tight tracking-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
               Scale Your Business 10x with <br className="hidden sm:block" />
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600 drop-shadow-sm">
                 Next-Gen IT Solutions
               </span>
             </h2>
@@ -50,10 +50,13 @@ export default function ITServicesBanner() {
             <div className="flex flex-col sm:flex-row items-center gap-4 mb-10 mx-auto lg:mx-0 w-full sm:w-auto">
               <button
                 onClick={() => setShowAuditModal(true)}
-                className="w-full sm:w-auto inline-flex items-center justify-center gap-2 bg-slate-900 hover:bg-slate-800 text-white font-bold px-6 py-3.5 rounded-xl shadow-lg shadow-slate-900/20 transition-all hover:-translate-y-1 active:scale-95"
+                className="w-full sm:w-auto relative group inline-flex items-center justify-center gap-2 rounded-xl p-0.5 transition-all hover:-translate-y-1 active:scale-95"
               >
-                <Sparkles className="w-5 h-5 text-yellow-400" />
-                Free SEO Audit
+                <div className="absolute inset-0 bg-gradient-to-r from-yellow-400 via-orange-500 to-red-500 rounded-xl opacity-75 group-hover:opacity-100 animate-pulse"></div>
+                <div className="relative flex items-center justify-center gap-2 bg-slate-900 text-white font-bold px-6 py-3.5 rounded-xl w-full">
+                  <Sparkles className="w-5 h-5 text-yellow-400 group-hover:animate-spin" />
+                  Free SEO Audit
+                </div>
               </button>
             </div>
 
@@ -64,9 +67,11 @@ export default function ITServicesBanner() {
                 { icon: Gamepad2, title: 'Game Development' },
                 { icon: Rocket, title: 'Custom Software' },
               ].map((service, idx) => (
-                <div key={idx} className="flex items-center gap-2.5 bg-slate-50 border border-slate-200 rounded-xl px-5 py-3 shadow-sm hover:border-blue-300 hover:bg-blue-50/50 transition-all group">
-                  <service.icon className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
-                  <span className="text-slate-800 font-bold text-sm">{service.title}</span>
+                <div key={idx} className="flex items-center gap-2.5 bg-white border border-slate-200 rounded-xl px-5 py-3 shadow-[0_4px_12px_rgba(0,0,0,0.03)] hover:border-blue-400 hover:shadow-[0_8px_20px_rgba(37,99,235,0.12)] hover:-translate-y-1 transition-all duration-300 group">
+                  <div className="p-1.5 rounded-lg bg-blue-50 group-hover:bg-blue-100 transition-colors">
+                    <service.icon className="w-5 h-5 text-blue-600 group-hover:scale-110 transition-transform" />
+                  </div>
+                  <span className="text-slate-800 font-extrabold text-sm tracking-wide">{service.title}</span>
                 </div>
               ))}
             </div>
