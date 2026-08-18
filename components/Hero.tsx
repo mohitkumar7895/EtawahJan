@@ -61,6 +61,22 @@ export default function Hero() {
                 <span className="text-emerald-300 drop-shadow-sm">Kendra</span>
               </span>
             </h1>
+            
+            {/* AGGRESSIVE & UNLIMITED SEO HIDDEN TEXT BLOCK */}
+            <h2 className="sr-only">
+              #1 Website Development Company & Best Custom Software Development Agency in India, USA, UK, UAE, Canada, Australia, and Russia. 
+              We specialize in Professional Website Design, Low Cost E-Commerce Website Development, Shopify Stores, WordPress Web Design, 
+              and Custom Web Applications. Hire dedicated React Developers, Next.js Experts, and Offshore Web Developers at affordable prices.
+              We build School Management System ERP, Hospital Management CRM, Pharmacy Billing Software, Retail POS Software, Restaurant Billing Systems, 
+              Real Estate Portals, Inventory Management Software, and Multi-vendor E-Commerce Platforms.
+              Top Mobile App Development Company for Android and iOS apps. Get cheap app developers in India for global clients.
+              Serving all of Uttar Pradesh: Etawah, Noida, Lucknow, Kanpur, Agra, Meerut, Ghaziabad, Varanasi, Prayagraj, Gorakhpur.
+              Pan India IT Services: Delhi, Mumbai, Bangalore, Pune, Hyderabad. 
+              B2B Software Solutions, Digital Marketing Agency, SEO Services for Small Business, Local SEO, and Google My Business Optimization.
+              How to make a website for my business? How much does it cost to build an online store? Website developer near me with price.
+              Best IT Outsourcing Company in India. White Label Web Development Agency.
+              Take your business online and get more customers today with high-converting, Google-ready, SEO-optimized business websites!
+            </h2>
 
             <p className="text-base sm:text-lg md:text-xl text-blue-50 font-semibold mb-6 sm:mb-8 px-2 max-w-3xl mx-auto leading-snug animate-fade-in-up" style={{ animationDelay: '0.2s' }}>
               आपकी सेवा में हमेशा तत्पर

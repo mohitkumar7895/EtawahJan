@@ -1,5 +1,5 @@
 'use client';
-import { ExternalLink, Play, ShoppingCart, Activity, GraduationCap, Building2, ChevronRight, ArrowRight, Video, Link2, Briefcase } from 'lucide-react';
+import { ExternalLink, Play, ShoppingCart, Activity, GraduationCap, Building2, ChevronRight, ArrowRight, Video, Link2, Briefcase, X } from 'lucide-react';
 import Link from 'next/link';
 import { useEffect, useState } from 'react';
 
@@ -137,14 +137,24 @@ export default function PortfolioSection({ hideHeader = false }: { hideHeader?: 
               >
                 {/* Photo Header */}
                 <div className="h-60 w-full relative overflow-hidden bg-slate-50">
-                  {item.photoUrl ? (
+                  {item.videoUrl && item.videoUrl !== '#' ? (
+                    <video
+                      className="w-full h-full object-contain bg-slate-900"
+                      controls
+                      playsInline
+                      preload="metadata"
+                      poster={item.photoUrl || undefined}
+                    >
+                      <source src={item.videoUrl} />
+                    </video>
+                  ) : item.photoUrl ? (
                     <>
                       <img 
                         src={item.photoUrl} 
                         alt={item.title} 
                         className="w-full h-full object-cover transform group-hover:scale-110 transition-transform duration-700 ease-out"
                       />
-                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
+                      <div className="absolute inset-0 bg-gradient-to-t from-slate-900/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none"></div>
                     </>
                   ) : (
                     <div className={`w-full h-full bg-gradient-to-br ${item.gradient || 'from-indigo-500 via-purple-500 to-pink-500'} flex items-center justify-center relative overflow-hidden`}>
@@ -159,37 +169,28 @@ export default function PortfolioSection({ hideHeader = false }: { hideHeader?: 
                   )}
                   
                   {/* Category Badge Floating on Image */}
-                  <div className="absolute top-5 left-5 z-20">
-                    <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest bg-white/90 backdrop-blur-md text-slate-800 shadow-sm border border-white/20">
+                  <div className="absolute top-5 left-5 z-20 pointer-events-none">
+                    <span className="inline-flex items-center px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest bg-white/90 backdrop-blur-md text-slate-800 shadow-sm border border-white/20 pointer-events-auto">
                       {item.category || 'Project'}
                     </span>
                   </div>
 
-                  {/* Overlay for actions on hover */}
-                  <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-4 z-20">
-                    {item.liveUrl && item.liveUrl !== '#' && (
-                      <a 
-                        href={item.liveUrl} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="w-12 h-12 rounded-full bg-white text-slate-900 flex items-center justify-center hover:bg-blue-600 hover:text-white hover:scale-110 transition-all shadow-xl transform translate-y-4 group-hover:translate-y-0 duration-300"
-                        title="View Live Site"
-                      >
-                        <ExternalLink className="w-5 h-5" />
-                      </a>
-                    )}
-                    {item.videoUrl && item.videoUrl !== '#' && (
-                      <a 
-                        href={item.videoUrl} 
-                        target="_blank" 
-                        rel="noreferrer"
-                        className="w-12 h-12 rounded-full bg-blue-600 text-white flex items-center justify-center hover:bg-blue-700 hover:scale-110 transition-all shadow-xl transform translate-y-4 group-hover:translate-y-0 duration-300 delay-75"
-                        title="Watch Video"
-                      >
-                        <Play className="w-5 h-5 ml-1" />
-                      </a>
-                    )}
-                  </div>
+                  {/* Overlay for actions on hover (Only show if not a video, otherwise it blocks video controls) */}
+                  {(!item.videoUrl || item.videoUrl === '#') && (
+                    <div className="absolute inset-0 bg-slate-900/50 backdrop-blur-[2px] opacity-0 group-hover:opacity-100 transition-all duration-300 flex items-center justify-center gap-4 z-20 pointer-events-none group-hover:pointer-events-auto">
+                      {item.liveUrl && item.liveUrl !== '#' && (
+                        <a 
+                          href={item.liveUrl} 
+                          target="_blank" 
+                          rel="noreferrer"
+                          className="w-12 h-12 rounded-full bg-white text-slate-900 flex items-center justify-center hover:bg-blue-600 hover:text-white hover:scale-110 transition-all shadow-xl transform translate-y-4 group-hover:translate-y-0 duration-300"
+                          title="View Live Site"
+                        >
+                          <ExternalLink className="w-5 h-5" />
+                        </a>
+                      )}
+                    </div>
+                  )}
                 </div>
                 
                 <div className="p-6 sm:p-8 flex flex-col flex-grow bg-white">
@@ -216,12 +217,7 @@ export default function PortfolioSection({ hideHeader = false }: { hideHeader?: 
                       </span>
                     )}
                     
-                    {item.videoUrl && item.videoUrl !== '#' && (
-                      <a href={item.videoUrl} target="_blank" rel="noreferrer" className="flex-1 inline-flex items-center justify-center px-4 py-2.5 bg-slate-50 hover:bg-rose-50 text-slate-700 hover:text-rose-700 text-sm font-semibold rounded-xl border border-slate-200 hover:border-rose-200 transition-all group/btn">
-                        <Video className="w-4 h-4 mr-2 text-slate-400 group-hover/btn:text-rose-500" />
-                        Watch Video
-                      </a>
-                    )}
+                    {/* Watch Video button removed from here because video is directly playable above */}
                   </div>
                 </div>
               </div>

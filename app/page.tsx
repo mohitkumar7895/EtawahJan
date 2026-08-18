@@ -158,6 +158,16 @@ function SeoBottomBlock() {
           Apart from premium IT services, we operate as a highly trusted <strong>CSC Center in Etawah</strong> (Bharthana). We provide urgent PAN Card applications, Income Certificates (Aay Praman Patra), Caste Certificates, Birth Certificates, Ration Card corrections, e-Shram cards, and Ayushman Cards on the exact same day.
         </p>
 
+        <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">💻 Custom Software, CRM & SaaS Application Developers</h3>
+        <p className="mb-4">
+          We are not just a website agency. We are expert <strong>SaaS and CRM application developers</strong>. If you need a fully customized <strong>school management ERP, hospital billing software, real estate portal, inventory management system, or multi-vendor e-commerce platform</strong>, our expert team provides low-cost, high-performance solutions globally. We help startups and small businesses scale rapidly.
+        </p>
+
+        <h3 className="text-md sm:text-lg font-semibold text-slate-700 mb-2">🔥 Unlimited Business Growth with Top-Rated Web & App Development</h3>
+        <p className="mb-4">
+          Looking to take your business to the next level? We are the ultimate <strong>B2B Software Solutions & Digital Marketing Agency</strong>. Whether you need a <strong>lead generation website design</strong>, an <strong>affordable app development company</strong> for a local shop, or a <strong>white-label offshore web development team</strong> for your international agency, we deliver results. Our dedicated <strong>React, Node.js, and Next.js developers</strong> build scalable architectures. We guarantee low-cost, high-quality deliverables to get you <em>unlimited clients</em>, improve your Google rankings, and automate your workflow with our premium ERP and POS billing systems.
+        </p>
+
         <div className="bg-white p-4 rounded-lg shadow-sm border border-slate-100 mt-6">
           <p className="font-bold text-slate-800 text-sm sm:text-base text-center">
             🚀 Ready to grow? Contact us today via WhatsApp at <a href="https://wa.me/917895094129" className="text-blue-600 hover:underline">7895094129</a> for a free quote on website development, or visit our office at Mandi Trihaa, Bidhuna Road, Bharthana, Etawah, UP!
