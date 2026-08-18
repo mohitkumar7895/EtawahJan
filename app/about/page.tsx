@@ -1,7 +1,7 @@
 import Header from '@/components/Header'
 import Footer from '@/components/Footer'
 import Image from 'next/image'
-import { CheckCircle, Clock, Shield, Users, Award, Target, Phone, Linkedin } from 'lucide-react';
+import { CheckCircle, Clock, Shield, Users, Award, Target, Phone, Linkedin, ExternalLink } from 'lucide-react';
 import type { Metadata } from 'next'
 
 const team = [
@@ -254,6 +254,58 @@ export default function AboutPage() {
                   </p>
                 </div>
               </div>
+
+                <div className="mb-12 sm:mb-16 md:mb-20">
+                  <div className="bg-gradient-to-br from-slate-900 via-blue-950 to-slate-900 rounded-[2rem] shadow-2xl p-6 sm:p-8 md:p-12 lg:p-16 border border-slate-800/60 relative overflow-hidden group">
+                    {/* Background decorations */}
+                    <div className="absolute top-0 right-0 w-[500px] h-[500px] bg-blue-500/10 rounded-full blur-3xl -mr-48 -mt-48 pointer-events-none transition-transform duration-1000 group-hover:scale-110"></div>
+                    <div className="absolute bottom-0 left-0 w-[500px] h-[500px] bg-purple-500/10 rounded-full blur-3xl -ml-48 -mb-48 pointer-events-none transition-transform duration-1000 group-hover:scale-110"></div>
+
+                    <div className="relative z-10 flex flex-col lg:flex-row items-center gap-10 lg:gap-16">
+                      <div className="w-full lg:w-[45%] flex flex-col items-center lg:items-start text-center lg:text-left">
+                        <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-500/10 border border-blue-400/20 mb-6 backdrop-blur-md">
+                          <span className="w-2 h-2 rounded-full bg-blue-400 animate-pulse"></span>
+                          <span className="text-xs sm:text-sm font-bold uppercase tracking-widest text-blue-300">
+                            Digital Portfolio
+                          </span>
+                        </div>
+                        <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-white mb-6 leading-[1.15] tracking-tight">
+                          Explore My <br className="hidden lg:block" />
+                          <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400">
+                            Software Work
+                          </span>
+                        </h2>
+                        <p className="text-base sm:text-lg text-slate-300 leading-relaxed mb-8 max-w-xl font-medium">
+                          Hi, I'm Mohit Porwal. I specialize in building modern, fast, and scalable web applications. Watch the showcase video to see my recent projects, or visit my interactive portfolio to learn more about my expertise.
+                        </p>
+                        <a 
+                          href="https://mohitkumar-nextjs-portfolio-website-seven.vercel.app/" 
+                          target="_blank" 
+                          rel="noopener noreferrer"
+                          className="inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-blue-600 to-indigo-600 px-8 py-4 text-base sm:text-lg font-bold text-white shadow-[0_0_20px_rgba(37,99,235,0.3)] hover:shadow-[0_0_30px_rgba(37,99,235,0.5)] hover:scale-105 active:scale-95 transition-all duration-300 border border-blue-400/30 group/btn"
+                        >
+                          Visit Live Portfolio
+                          <ExternalLink className="w-5 h-5 group-hover/btn:rotate-12 transition-transform duration-300" />
+                        </a>
+                      </div>
+                      
+                      <div className="w-full lg:w-[55%]">
+                        <div className="relative rounded-3xl overflow-hidden shadow-2xl ring-4 ring-white/5 bg-slate-900 aspect-video group/video transform lg:-rotate-2 hover:rotate-0 transition-transform duration-500">
+                          <video 
+                            src="/Portfolio.mp4" 
+                            className="w-full h-full object-cover opacity-90 group-hover/video:opacity-100 transition-opacity duration-500" 
+                            controls 
+                            playsInline 
+                            preload="metadata"
+                            poster="/mohit-csc.png"
+                          ></video>
+                          {/* Animated border glow */}
+                          <div className="absolute inset-0 rounded-3xl border border-blue-400/0 group-hover/video:border-blue-400/30 transition-colors duration-500 pointer-events-none"></div>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-5 md:gap-6 mb-8 sm:mb-10 md:mb-12">
                 {features.map(({ icon: Icon, iconBg, title, description }) => (

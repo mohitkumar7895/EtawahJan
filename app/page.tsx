@@ -252,7 +252,7 @@ export default function Home() {
       <Hero />
       <ToolsHomePromo />
       <ITServicesBanner />
-      <PortfolioSection />
+      <PortfolioSection limit={6} />
       <Announcements />
       <Services />
       <HomeJobsFeed />

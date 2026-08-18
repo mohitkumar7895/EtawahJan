@@ -65,7 +65,7 @@ interface Project {
   liveUrl: string;
 }
 
-export default function PortfolioSection({ hideHeader = false }: { hideHeader?: boolean } = {}) {
+export default function PortfolioSection({ hideHeader = false, limit }: { hideHeader?: boolean; limit?: number } = {}) {
   const [projects, setProjects] = useState<Project[]>([]);
   const [loading, setLoading] = useState(true);
 
@@ -89,6 +89,7 @@ export default function PortfolioSection({ hideHeader = false }: { hideHeader?: 
   }, []);
 
   const displayItems = projects.length > 0 ? projects : FALLBACK_ITEMS;
+  const limitedItems = limit ? displayItems.slice(-limit).reverse() : displayItems;
 
   return (
     <section className="py-20 sm:py-28 bg-slate-50 relative overflow-hidden">
@@ -97,22 +98,40 @@ export default function PortfolioSection({ hideHeader = false }: { hideHeader?: 
       
       <div className="container mx-auto px-4 max-w-7xl relative z-10">
         {!hideHeader && (
-          <div className="text-center max-w-3xl mx-auto mb-16 sm:mb-20">
-            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-white text-blue-700 font-bold text-xs uppercase tracking-widest mb-6 shadow-sm border border-blue-100">
-              <span className="w-2 h-2 rounded-full bg-blue-600 animate-pulse"></span>
-              Our Work & Expertise
+          <div className="text-center max-w-4xl mx-auto mb-16 sm:mb-20">
+            <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-50/80 backdrop-blur-sm text-blue-700 font-bold text-xs uppercase tracking-widest mb-6 shadow-sm border border-blue-200/50">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-blue-400 opacity-75"></span>
+                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-blue-600"></span>
+              </span>
+              Our Digital Portfolio
             </div>
             
-            <h2 className="text-3xl sm:text-4xl md:text-5xl font-black text-slate-900 mb-6 leading-tight">
-              Built for Growth. <br className="hidden sm:block"/>
-              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-indigo-600">
-                Designed to Convert.
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-slate-900 mb-6 leading-tight tracking-tight" style={{ fontFamily: 'Georgia, "Times New Roman", serif' }}>
+              Showcasing Our <br className="hidden sm:block"/>
+              <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 via-indigo-600 to-violet-600">
+                Latest Projects
               </span>
             </h2>
             
-            <p className="text-base sm:text-lg text-slate-600 font-medium">
-              Take a look at some of the high-quality digital solutions we build to help businesses scale and dominate their market.
+            <p className="text-base sm:text-lg md:text-xl text-slate-600 font-medium max-w-2xl mx-auto mb-8 leading-relaxed">
+              Take a look at some of the premium websites, apps, and custom software we have recently delivered. 
+              <strong> Loved our work? Let's build yours today!</strong>
             </p>
+
+            <div className="flex justify-center">
+              <a 
+                href="https://wa.me/917895094129?text=Hello,%20I%20want%20to%20get%20a%20website%20built." 
+                target="_blank"
+                rel="noreferrer"
+                className="group inline-flex items-center gap-2.5 rounded-2xl bg-slate-900 px-6 sm:px-8 py-3.5 sm:py-4 text-sm sm:text-base font-bold text-white shadow-xl hover:bg-blue-600 hover:shadow-blue-500/30 hover:-translate-y-1 active:scale-95 transition-all duration-300"
+              >
+                <div className="bg-green-500 p-1.5 rounded-full flex items-center justify-center group-hover:bg-white/20 transition-colors shadow-sm">
+                  <svg className="w-4 h-4 sm:w-5 sm:h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51a12.8 12.8 0 0 0-.57-.01c-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 0 1-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 0 1-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 0 1 2.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0 0 12.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 0 0 5.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 0 0-3.48-8.413Z"/></svg>
+                </div>
+                <span>Call / WhatsApp: <span className="text-blue-300 group-hover:text-white transition-colors">7895094129</span></span>
+              </a>
+            </div>
           </div>
         )}
 
@@ -130,7 +149,7 @@ export default function PortfolioSection({ hideHeader = false }: { hideHeader?: 
           </div>
         ) : (
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 sm:gap-8">
-            {displayItems.map((item: any, index) => (
+            {limitedItems.map((item: any, index) => (
               <div 
                 key={item._id || index}
                 className="group bg-white rounded-[2rem] shadow-[0_8px_30px_rgb(0,0,0,0.04)] hover:shadow-[0_20px_40px_rgb(0,0,0,0.12)] hover:-translate-y-2 transition-all duration-500 border border-slate-100 flex flex-col relative overflow-hidden"
