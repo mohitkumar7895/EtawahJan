@@ -276,7 +276,7 @@ export default function AboutPage() {
                           </span>
                         </h2>
                         <p className="text-base sm:text-lg text-slate-300 leading-relaxed mb-8 max-w-xl font-medium">
-                          Hi, I'm Mohit Porwal. I specialize in building modern, fast, and scalable web applications. Watch the showcase video to see my recent projects, or visit my interactive portfolio to learn more about my expertise.
+                          Hi, I&apos;m Mohit Porwal. I specialize in building modern, fast, and scalable web applications. Watch the showcase video to see my recent projects, or visit my interactive portfolio to learn more about my expertise.
                         </p>
                         <a 
                           href="https://mohitkumar-nextjs-portfolio-website-seven.vercel.app/" 

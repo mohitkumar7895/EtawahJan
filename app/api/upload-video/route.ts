@@ -41,12 +41,32 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const { url } = await uploadBufferToImageKit({
-      buffer,
-      originalFileName: file.name || 'video.mp4',
-      folder: '/announcements/videos',
-      mimeType: inferred.mime,
-    });
+    let url: string;
+    try {
+      const result = await uploadBufferToImageKit({
+        buffer,
+        originalFileName: file.name || 'video.mp4',
+        folder: '/announcements/videos',
+        mimeType: inferred.mime,
+      });
+      url = result.url;
+    } catch (ikError: any) {
+      console.warn('⚠️ ImageKit upload failed or not configured. Saving video locally instead.', ikError.message || ikError);
+      
+      // Local fallback
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'videos');
+      await fs.mkdir(uploadDir, { recursive: true });
+      
+      const safeName = (file.name || 'video.mp4').replace(/[^a-zA-Z0-9.\-_]/g, '_');
+      const uniqueName = `${Date.now()}-${Math.floor(Math.random() * 1000)}-${safeName}`;
+      const filePath = path.join(uploadDir, uniqueName);
+      
+      await fs.writeFile(filePath, buffer);
+      url = `/uploads/videos/${uniqueName}`;
+    }
 
     return NextResponse.json(
       {

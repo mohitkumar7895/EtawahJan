@@ -50,12 +50,31 @@ export async function POST(request: NextRequest) {
     const bytes = await file.arrayBuffer();
     const buffer = Buffer.from(bytes);
 
-    const { url } = await uploadBufferToImageKit({
-      buffer,
-      originalFileName: file.name || 'image.jpg',
-      folder: '/announcements/images',
-      mimeType: inferred.mime,
-    });
+    let url: string;
+    try {
+      const result = await uploadBufferToImageKit({
+        buffer,
+        originalFileName: file.name || 'image.jpg',
+        folder: '/announcements/images',
+        mimeType: inferred.mime,
+      });
+      url = result.url;
+    } catch (ikError: any) {
+      console.warn('⚠️ ImageKit upload failed. Saving image locally instead.', ikError.message || ikError);
+      
+      const fs = await import('fs/promises');
+      const path = await import('path');
+      
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'images');
+      await fs.mkdir(uploadDir, { recursive: true });
+      
+      const safeName = (file.name || 'image.jpg').replace(/[^a-zA-Z0-9.\-_]/g, '_');
+      const uniqueName = `${Date.now()}-${Math.floor(Math.random() * 1000)}-${safeName}`;
+      const filePath = path.join(uploadDir, uniqueName);
+      
+      await fs.writeFile(filePath, buffer);
+      url = `/uploads/images/${uniqueName}`;
+    }
 
     return NextResponse.json(
       {

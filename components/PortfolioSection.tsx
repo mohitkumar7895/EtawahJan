@@ -116,7 +116,7 @@ export default function PortfolioSection({ hideHeader = false, limit }: { hideHe
             
             <p className="text-base sm:text-lg md:text-xl text-slate-600 font-medium max-w-2xl mx-auto mb-8 leading-relaxed">
               Take a look at some of the premium websites, apps, and custom software we have recently delivered. 
-              <strong> Loved our work? Let's build yours today!</strong>
+              <strong> Loved our work? Let&apos;s build yours today!</strong>
             </p>
 
             <div className="flex justify-center">
