@@ -102,7 +102,7 @@ function ReviewCard({ review }: { review: any }) {
 
 export default function Reviews() {
   return (
-    <section className="py-20 sm:py-28 bg-slate-50 relative overflow-hidden border-y border-slate-200">
+    <section className="py-20 sm:py-28 bg-slate-50 relative overflow-hidden">
       
       {/* Background Decor */}
       <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] bg-blue-100/50 rounded-full blur-[120px] pointer-events-none"></div>

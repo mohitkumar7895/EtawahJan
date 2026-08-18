@@ -10,7 +10,7 @@ const TOP_TOOLS = [
 
 export default function ToolsHomePromo() {
   return (
-    <section className="bg-white border-y border-slate-100 py-12 sm:py-16 relative overflow-hidden">
+    <section className="bg-white py-12 sm:py-16 relative overflow-hidden">
       {/* Subtle compact background effect */}
       <div className="absolute inset-0 bg-blue-50/30 pointer-events-none"></div>
       <div className="absolute top-0 right-0 w-[400px] h-[400px] bg-blue-400/10 rounded-full blur-3xl pointer-events-none"></div>

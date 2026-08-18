@@ -21,7 +21,7 @@ export default function ITServicesBanner() {
   }, [showModal]);
   
   return (
-    <section className="w-full bg-white relative overflow-hidden py-16 md:py-24 border-y border-slate-200">
+    <section className="w-full bg-white relative overflow-hidden py-16 md:py-24">
       {/* Premium Light Background Effects */}
       <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-blue-100/70 rounded-full blur-3xl translate-x-1/4 -translate-y-1/4 mix-blend-multiply pointer-events-none"></div>
       <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-indigo-100/70 rounded-full blur-3xl -translate-x-1/4 translate-y-1/4 mix-blend-multiply pointer-events-none"></div>

@@ -131,7 +131,7 @@ export const metadata: Metadata = {
 
 function SeoBottomBlock() {
   return (
-    <section className="bg-slate-50 py-12 border-t border-slate-200 mt-8">
+    <section className="bg-slate-50 py-12 mt-8">
       <div className="container mx-auto px-4 text-xs sm:text-sm text-slate-600 leading-relaxed max-w-7xl">
         <h2 className="text-lg sm:text-xl font-bold text-slate-800 mb-3">#1 Website Development & IT Services Company in India</h2>
         <p className="mb-4">

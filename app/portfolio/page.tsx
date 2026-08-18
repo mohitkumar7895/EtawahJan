@@ -14,7 +14,7 @@ export default function PortfolioPage() {
       <Header />
       
       {/* Portfolio Header */}
-      <div className="bg-slate-50 pt-20 pb-10 border-b border-slate-200">
+      <div className="bg-slate-50 pt-20 pb-10">
         <div className="container mx-auto px-4 text-center">
           <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-blue-100 text-blue-700 font-bold text-xs uppercase tracking-widest mb-6 shadow-sm">
             Our Work & Expertise
@@ -29,7 +29,7 @@ export default function PortfolioPage() {
       </div>
 
       {/* The Actual Portfolio Component */}
-      <PortfolioSection />
+      <PortfolioSection hideHeader={true} />
       
       <Footer />
     </>
