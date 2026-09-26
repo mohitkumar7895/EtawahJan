@@ -21,11 +21,11 @@ export default function Header() {
     { path: '/', label: 'Home' },
     { path: '/about', label: 'About' },
     { path: '/services', label: 'Services' },
-    { path: '/digital-services', label: 'Digital Work' },
+    { path: '/digital-services', label: 'Digital' },
     { path: '/portfolio', label: 'Portfolio' },
     { path: '/tools', label: 'Tools' },
     { path: '/vacancies', label: 'Vacancies' },
-    { path: '/announcements', label: 'Announcements' },
+    { path: '/announcements', label: 'Updates' },
     { path: '/contact', label: 'Contact' },
   ];
 
@@ -53,25 +53,25 @@ export default function Header() {
                 alt="Jan Seva Kendra Logo" 
                 width={80}
                 height={80}
-                className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-20 lg:h-20 object-contain"
+                className="w-10 h-10 sm:w-12 sm:h-12 md:w-14 md:h-14 lg:w-14 xl:w-16 lg:h-14 xl:h-16 object-contain"
                 priority
               />
             </div>
             <div className="min-w-0">
-              <h1 className="text-base sm:text-lg md:text-xl lg:text-2xl font-bold tracking-tight truncate">
+              <h1 className="text-base sm:text-lg md:text-xl lg:text-lg xl:text-xl font-bold tracking-tight truncate">
                  Jan Seva Kendra
               </h1>
-              <p className="text-xs sm:text-sm text-blue-100 hidden sm:block">सेवा ही धर्म है</p>
+              <p className="text-xs text-blue-100 hidden sm:block">सेवा ही धर्म है</p>
             </div>
           </Link>
 
           {/* Desktop Navigation */}
-          <nav className="hidden lg:flex items-center space-x-1">
+          <nav className="hidden lg:flex items-center space-x-0.5 xl:space-x-1">
             {navLinks.map((link) => (
               <Link
                 key={link.path}
                 href={link.path}
-                className={`px-4 py-2 rounded-lg font-medium transition-all duration-200 ${
+                className={`px-2 xl:px-3 py-1.5 text-[13px] xl:text-sm rounded-lg font-medium transition-all duration-200 ${
                   isActive(link.path)
                     ? 'bg-white/20 text-white shadow-md'
                     : 'text-blue-100 hover:bg-white/10 hover:text-white'
@@ -83,26 +83,26 @@ export default function Header() {
           </nav>
 
           {/* Right Side - Phone, Chat & Mobile Menu */}
-          <div className="flex items-center space-x-2 sm:space-x-4">
+          <div className="flex items-center space-x-2 lg:space-x-2 xl:space-x-4">
 
             {/* Callback Button - Desktop */}
             <button
               onClick={handleCallbackClick}
-              className="hidden md:flex items-center space-x-2 bg-red-600 hover:bg-red-700 px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl group"
+              className="hidden md:flex items-center space-x-1.5 xl:space-x-2 bg-red-600 hover:bg-red-700 px-3 py-1.5 xl:px-4 xl:py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl group"
               aria-label="Request Callback"
             >
-              <Phone className="w-4 h-4 group-hover:scale-110 transition animate-pulse" />
-              <span className="font-semibold text-sm">Callback</span>
+              <Phone className="w-3.5 h-3.5 xl:w-4 xl:h-4 group-hover:scale-110 transition animate-pulse" />
+              <span className="font-semibold text-[13px] xl:text-sm">Callback</span>
             </button>
 
             {/* Chat Button - Desktop */}
             <button
               onClick={handleChatClick}
-              className="hidden md:flex items-center space-x-2 bg-green-600 hover:bg-green-700 px-4 py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl group"
+              className="hidden md:flex items-center space-x-1.5 xl:space-x-2 bg-green-600 hover:bg-green-700 px-3 py-1.5 xl:px-4 xl:py-2 rounded-lg transition-all duration-200 shadow-lg hover:shadow-xl group"
               aria-label="Open Chat Support"
             >
-              <MessageCircle className="w-4 h-4 group-hover:scale-110 transition" />
-              <span className="font-semibold text-sm">Chat</span>
+              <MessageCircle className="w-3.5 h-3.5 xl:w-4 xl:h-4 group-hover:scale-110 transition" />
+              <span className="font-semibold text-[13px] xl:text-sm">Chat</span>
             </button>
 
             {/* Chat Button - Mobile */}
@@ -117,10 +117,10 @@ export default function Header() {
             {/* Phone Number - Desktop */}
             <a 
               href="tel:9193898182" 
-              className="hidden md:flex items-center space-x-2 bg-white/10 hover:bg-white/20 px-4 py-2 rounded-lg transition group"
+              className="hidden md:flex items-center space-x-1.5 xl:space-x-2 bg-white/10 hover:bg-white/20 px-3 py-1.5 xl:px-4 xl:py-2 rounded-lg transition group"
             >
-              <Phone className="w-4 h-4 group-hover:scale-110 transition" />
-              <span className="font-semibold text-sm">9193898182</span>
+              <Phone className="w-3.5 h-3.5 xl:w-4 xl:h-4 group-hover:scale-110 transition" />
+              <span className="font-semibold text-[13px] xl:text-sm">9193898182</span>
             </a>
 
             {/* Call Button - Mobile */}
